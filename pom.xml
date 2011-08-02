@@ -7,7 +7,7 @@
   <version>2.0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Liquibase Parent Configuration</name>
+  <name>Liquibase Parent</name>
   <description>Liquibase is a tool for managing and executing database changes.</description>
   <url>http://www.liquibase.org</url>
 
@@ -66,9 +66,7 @@
   <modules>
     <module>liquibase-core</module>
     <module>liquibase-maven-plugin</module>
-    <module>samples/liquibase-ext-change</module>
-    <module>samples/liquibase-ext-changewithnestedtags</module>
-    <module>samples/liquibase-ext-sqlgenerator</module>
+    <module>samples</module>
     <module>liquibase-integration-tests</module>
   </modules>
 
