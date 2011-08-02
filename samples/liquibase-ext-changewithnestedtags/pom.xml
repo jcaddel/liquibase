@@ -4,7 +4,7 @@
   <artifactId>liquibase-ext-changewithnestedtags</artifactId>
   <name>Liquibase Extension - Nested Tags</name>
   <parent>
-    <groupId>org.liquibase.samples</groupId>
+    <groupId>org.kuali.db.liquibase</groupId>
     <artifactId>liquibase-samples</artifactId>
     <version>2.0.2-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
