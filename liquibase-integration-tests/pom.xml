@@ -49,19 +49,19 @@
     </dependency>
     <!-- sample extensions -->
     <dependency>
-      <groupId>org.kuali.db.liquibase.samples</groupId>
+      <groupId>org.kuali.db.liquibase</groupId>
       <artifactId>liquibase-ext-change</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.kuali.db.liquibase.samples</groupId>
+      <groupId>org.kuali.db.liquibase</groupId>
       <artifactId>liquibase-ext-changewithnestedtags</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.kuali.db.liquibase.samples</groupId>
+      <groupId>org.kuali.db.liquibase</groupId>
       <artifactId>liquibase-ext-sqlgenerator</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
