@@ -90,8 +90,8 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
         return new SqlStatement[] { new CreateIndexStatement(getIndexName(),
                 getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName(), getTableName(),
-                        this.isUnique(), getAssociatedWith(), columns.toArray(new String[getColumns().size()]))
-        .setTablespace(getTablespace()) };
+                this.isUnique(), getAssociatedWith(), columns.toArray(new String[getColumns().size()]))
+                .setTablespace(getTablespace()) };
     }
 
     @Override

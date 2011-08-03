@@ -96,7 +96,7 @@ public class SQLiteDatabase extends AbstractDatabase {
 
     public String getTrigger(String table, String column) {
         return "CREATE TRIGGER insert_" + table + "_timeEnter AFTER  INSERT ON " + table + " BEGIN" + " UPDATE "
-        + table + " SET " + column + " = DATETIME('NOW')" + " WHERE rowid = new.rowid END ";
+                + table + " SET " + column + " = DATETIME('NOW')" + " WHERE rowid = new.rowid END ";
     }
 
     @Override
@@ -167,7 +167,7 @@ public class SQLiteDatabase extends AbstractDatabase {
         for (Index index_config : newIndices) {
             statements.add(new CreateIndexStatement(index_config.getName(), schemaName, tableName, index_config
                     .isUnique(), index_config.getAssociatedWithAsString(), index_config.getColumns().toArray(
-                            new String[index_config.getColumns().size()])));
+                    new String[index_config.getColumns().size()])));
         }
 
         return statements;
