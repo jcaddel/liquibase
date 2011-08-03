@@ -20,7 +20,7 @@
       <artifactId>maven-project</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.liquibase</groupId>
+      <groupId>org.kuali.db.liquibase</groupId>
       <artifactId>liquibase-core</artifactId>
       <version>${project.version}</version>
     </dependency>
