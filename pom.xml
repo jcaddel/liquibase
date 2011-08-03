@@ -27,9 +27,9 @@
     <url>http://liquibase.jira.com/browse/CORE</url>
   </issueManagement>
   <scm>
-    <url>https://github.com/jcaddel/liquibase</url>
-    <connection>scm:git:git://github.com:jcaddel/liquibase.git</connection>
-    <developerConnection>scm:git:git://github.com:jcaddel/liquibase.git</developerConnection>
+    <connection>scm:git:git@github.com:jcaddel/liquibase.git</connection>
+    <url>scm:git:git@github.com:jcaddel/liquibase.git</url>
+    <developerConnection>scm:git:git@github.com:jcaddel/liquibase.git</developerConnection>
   </scm>
   <developers>
     <developer>
