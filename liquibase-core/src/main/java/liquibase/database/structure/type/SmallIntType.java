@@ -9,7 +9,7 @@ public class SmallIntType extends DataType {
     }
 
     public SmallIntType(String dataTypeName) {
-        super(dataTypeName,0,1);
+        super(dataTypeName, 0, 1);
     }
 
     @Override

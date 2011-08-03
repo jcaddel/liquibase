@@ -30,13 +30,9 @@ public class Table implements DatabaseObject, Comparable<Table> {
 
     public DatabaseObject[] getContainingObjects() {
         if (getSchema() == null) {
-            return new DatabaseObject[] {
-                    getDatabase()
-            };
+            return new DatabaseObject[] { getDatabase() };
         } else {
-            return new DatabaseObject[] {
-                    new Schema(getSchema())
-            };
+            return new DatabaseObject[] { new Schema(getSchema()) };
         }
 
     }
@@ -61,11 +57,12 @@ public class Table implements DatabaseObject, Comparable<Table> {
         return columns;
     }
 
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         Table that = (Table) o;
 
@@ -78,20 +75,17 @@ public class Table implements DatabaseObject, Comparable<Table> {
         return name.toUpperCase().hashCode();
     }
 
-
     public int compareTo(Table o) {
         return this.getName().compareToIgnoreCase(o.getName());
     }
 
-
     @Override
     public String toString() {
-    	return getName();
+        return getName();
     }
 
     /**
-     * Returns the column object for the given columnName.  If the column does not exist in this table,
-     * return null.
+     * Returns the column object for the given columnName. If the column does not exist in this table, return null.
      */
     public Column getColumn(String columnName) {
         for (Column column : getColumns()) {
@@ -102,21 +96,22 @@ public class Table implements DatabaseObject, Comparable<Table> {
         return null;
     }
 
-	/**
-	 * @return Returns the schema.
-	 */
-	public String getSchema () {
-		return schema;
-	}
+    /**
+     * @return Returns the schema.
+     */
+    public String getSchema() {
+        return schema;
+    }
 
-	/**
-	 * @param schema The schema to set.
-	 */
-	public Table setSchema (String schema) {
-		this.schema = schema;
+    /**
+     * @param schema
+     *            The schema to set.
+     */
+    public Table setSchema(String schema) {
+        this.schema = schema;
 
         return this;
-	}
+    }
 
     public String getRawCatalogName() {
         return rawCatalogName;

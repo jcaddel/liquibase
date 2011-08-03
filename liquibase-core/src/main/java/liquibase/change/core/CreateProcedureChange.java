@@ -39,10 +39,8 @@ public class CreateProcedureChange extends AbstractChange {
         } else if (database instanceof DB2Database) {
             endDelimiter = "";
         }
-        
-        return new SqlStatement[] {
-                new RawSqlStatement(getProcedureBody(), endDelimiter),
-        };
+
+        return new SqlStatement[] { new RawSqlStatement(getProcedureBody(), endDelimiter), };
     }
 
     public String getConfirmationMessage() {

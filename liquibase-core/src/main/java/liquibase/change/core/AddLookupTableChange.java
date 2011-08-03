@@ -18,8 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Extracts data from an existing column to create a lookup table.
- * A foreign key is created between the old column and the new lookup table.
+ * Extracts data from an existing column to create a lookup table. A foreign key is created between the old column and
+ * the new lookup table.
  */
 public class AddLookupTableChange extends AbstractChange {
 
@@ -60,7 +60,6 @@ public class AddLookupTableChange extends AbstractChange {
     public void setExistingColumnName(String existingColumnName) {
         this.existingColumnName = existingColumnName;
     }
-
 
     public String getNewTableSchemaName() {
         return newTableSchemaName;
@@ -121,33 +120,56 @@ public class AddLookupTableChange extends AbstractChange {
         dropTable.setSchemaName(getNewTableSchemaName());
         dropTable.setTableName(getNewTableName());
 
-        return new Change[]{
-                dropFK,
-                dropTable,
-        };
+        return new Change[] { dropFK, dropTable, };
     }
 
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
-        String newTableSchemaName = getNewTableSchemaName() == null?database.getDefaultSchemaName():getNewTableSchemaName();
-        String existingTableSchemaName = getExistingTableSchemaName() == null?database.getDefaultSchemaName():getExistingTableSchemaName();
+        String newTableSchemaName = getNewTableSchemaName() == null ? database.getDefaultSchemaName()
+                : getNewTableSchemaName();
+        String existingTableSchemaName = getExistingTableSchemaName() == null ? database.getDefaultSchemaName()
+                : getExistingTableSchemaName();
 
-        SqlStatement[] createTablesSQL = {new RawSqlStatement("CREATE TABLE " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL")};
+        SqlStatement[] createTablesSQL = { new RawSqlStatement("CREATE TABLE "
+                + database.escapeTableName(newTableSchemaName, getNewTableName()) + " AS SELECT DISTINCT "
+                + getExistingColumnName() + " AS " + getNewColumnName() + " FROM "
+                + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE "
+                + getExistingColumnName() + " IS NOT NULL") };
         if (database instanceof MSSQLDatabase) {
-            createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " FROM " + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),};
+            createTablesSQL = new SqlStatement[] { new RawSqlStatement("SELECT DISTINCT " + getExistingColumnName()
+                    + " AS " + getNewColumnName() + " INTO "
+                    + database.escapeTableName(newTableSchemaName, getNewTableName()) + " FROM "
+                    + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE "
+                    + getExistingColumnName() + " IS NOT NULL"), };
         } else if (database instanceof SybaseASADatabase) {
-            createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " FROM " + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),};
+            createTablesSQL = new SqlStatement[] { new RawSqlStatement("SELECT DISTINCT " + getExistingColumnName()
+                    + " AS " + getNewColumnName() + " INTO "
+                    + database.escapeTableName(newTableSchemaName, getNewTableName()) + " FROM "
+                    + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE "
+                    + getExistingColumnName() + " IS NOT NULL"), };
         } else if (database instanceof DB2Database) {
-            createTablesSQL = new SqlStatement[]{
-                    new RawSqlStatement("CREATE TABLE " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " AS (SELECT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + ") WITH NO DATA"),
-                    new RawSqlStatement("INSERT INTO " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " SELECT DISTINCT " + getExistingColumnName() + " FROM " + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),
-            };
+            createTablesSQL = new SqlStatement[] {
+                    new RawSqlStatement("CREATE TABLE "
+                            + database.escapeTableName(newTableSchemaName, getNewTableName()) + " AS (SELECT "
+                            + getExistingColumnName() + " AS " + getNewColumnName() + " FROM "
+                            + database.escapeTableName(existingTableSchemaName, getExistingTableName())
+                            + ") WITH NO DATA"),
+                    new RawSqlStatement("INSERT INTO "
+                            + database.escapeTableName(newTableSchemaName, getNewTableName()) + " SELECT DISTINCT "
+                            + getExistingColumnName() + " FROM "
+                            + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE "
+                            + getExistingColumnName() + " IS NOT NULL"), };
         } else if (database instanceof InformixDatabase) {
             createTablesSQL = new SqlStatement[] {
-                    new RawSqlStatement("CREATE TABLE " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " ( "  + getNewColumnName() + " " + getNewColumnDataType() + " )"),
-                    new RawSqlStatement("INSERT INTO " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " ( "  + getNewColumnName() + " ) SELECT DISTINCT "  + getExistingColumnName() + " FROM " + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),
-            };
+                    new RawSqlStatement("CREATE TABLE "
+                            + database.escapeTableName(newTableSchemaName, getNewTableName()) + " ( "
+                            + getNewColumnName() + " " + getNewColumnDataType() + " )"),
+                    new RawSqlStatement("INSERT INTO "
+                            + database.escapeTableName(newTableSchemaName, getNewTableName()) + " ( "
+                            + getNewColumnName() + " ) SELECT DISTINCT " + getExistingColumnName() + " FROM "
+                            + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE "
+                            + getExistingColumnName() + " IS NOT NULL"), };
         }
 
         statements.addAll(Arrays.asList(createTablesSQL));
@@ -190,6 +212,6 @@ public class AddLookupTableChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Lookup table added for "+getExistingTableName()+"."+getExistingColumnName();
+        return "Lookup table added for " + getExistingTableName() + "." + getExistingColumnName();
     }
 }

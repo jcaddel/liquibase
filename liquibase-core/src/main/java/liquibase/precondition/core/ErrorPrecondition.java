@@ -8,13 +8,11 @@ public class ErrorPrecondition {
     private Precondition precondition;
     private DatabaseChangeLog changeLog;
 
-
     public ErrorPrecondition(Throwable exception, DatabaseChangeLog changeLog, Precondition precondition) {
         this.cause = exception;
         this.changeLog = changeLog;
         this.precondition = precondition;
     }
-
 
     public Throwable getCause() {
         return cause;
@@ -23,7 +21,6 @@ public class ErrorPrecondition {
     public Precondition getPrecondition() {
         return precondition;
     }
-
 
     @Override
     public String toString() {
@@ -36,7 +33,7 @@ public class ErrorPrecondition {
         if (changeLog == null) {
             return causeMessage;
         } else {
-            return changeLog.toString()+" : "+ causeMessage;
+            return changeLog.toString() + " : " + causeMessage;
         }
     }
 }

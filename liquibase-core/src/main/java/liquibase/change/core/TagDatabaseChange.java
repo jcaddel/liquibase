@@ -24,13 +24,11 @@ public class TagDatabaseChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[] {
-                new TagDatabaseStatement(tag)
-        };
+        return new SqlStatement[] { new TagDatabaseStatement(tag) };
     }
 
     public String getConfirmationMessage() {
-        return "Tag '"+tag+"' applied to database";
+        return "Tag '" + tag + "' applied to database";
     }
 
     @Override

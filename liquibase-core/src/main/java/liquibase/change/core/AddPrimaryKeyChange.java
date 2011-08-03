@@ -64,7 +64,6 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
-
     public String getTablespace() {
         return tablespace;
     }
@@ -75,25 +74,20 @@ public class AddPrimaryKeyChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) {
 
-
         String schemaName = getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName();
 
-        AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(schemaName, getTableName(), getColumnNames(), getConstraintName());
+        AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(schemaName, getTableName(), getColumnNames(),
+                getConstraintName());
         statement.setTablespace(getTablespace());
 
         if (database instanceof DB2Database) {
-            return new SqlStatement[]{
-                    statement,
-                    new ReorganizeTableStatement(schemaName, getTableName())
-            };
-//todo        } else if (database instanceof SQLiteDatabase) {
-//            // return special statements for SQLite databases
-//            return generateStatementsForSQLiteDatabase(database);
+            return new SqlStatement[] { statement, new ReorganizeTableStatement(schemaName, getTableName()) };
+            // todo } else if (database instanceof SQLiteDatabase) {
+            // // return special statements for SQLite databases
+            // return generateStatementsForSQLiteDatabase(database);
         }
 
-        return new SqlStatement[]{
-                statement
-        };
+        return new SqlStatement[] { statement };
     }
 
     private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
@@ -130,9 +124,8 @@ public class AddPrimaryKeyChange extends AbstractChange {
 
         try {
             // alter table
-            statements.addAll(SQLiteDatabase.getAlterTableStatements(
-                    rename_alter_visitor,
-                    database, getSchemaName(), getTableName()));
+            statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database, getSchemaName(),
+                    getTableName()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -147,9 +140,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         inverse.setTableName(getTableName());
         inverse.setConstraintName(getConstraintName());
 
-        return new Change[]{
-                inverse,
-        };
+        return new Change[] { inverse, };
     }
 
     public String getConfirmationMessage() {

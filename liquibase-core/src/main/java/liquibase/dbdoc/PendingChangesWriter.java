@@ -22,12 +22,14 @@ public class PendingChangesWriter extends HTMLWriter {
     }
 
     @Override
-    protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun) throws IOException, DatabaseHistoryException, DatabaseException {
+    protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun)
+            throws IOException, DatabaseHistoryException, DatabaseException {
         writeCustomHTML(fileWriter, object, ranChanges, database);
         writeChanges("Pending Changes", fileWriter, changesToRun);
     }
 
     @Override
-    protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {
+    protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database)
+            throws IOException {
     }
 }

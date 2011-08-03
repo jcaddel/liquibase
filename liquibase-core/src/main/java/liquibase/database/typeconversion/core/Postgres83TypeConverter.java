@@ -8,16 +8,17 @@ public class Postgres83TypeConverter extends PostgresTypeConverter {
 
     @Override
     public int getPriority() {
-        return super.getPriority()+1;
+        return super.getPriority() + 1;
     }
 
     @Override
     public boolean supports(Database database) {
-        if (database==null || database.getConnection() == null) {
+        if (database == null || database.getConnection() == null) {
             return false;
         }
         try {
-            return super.supports(database) && (database.getDatabaseMajorVersion() * 10 + database.getDatabaseMinorVersion() >= 83);
+            return super.supports(database)
+                    && (database.getDatabaseMajorVersion() * 10 + database.getDatabaseMinorVersion() >= 83);
         } catch (DatabaseException e) {
             return false;
         }

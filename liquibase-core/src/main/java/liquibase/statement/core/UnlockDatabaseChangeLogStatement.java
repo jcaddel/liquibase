@@ -4,4 +4,3 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class UnlockDatabaseChangeLogStatement extends AbstractSqlStatement {
 }
-

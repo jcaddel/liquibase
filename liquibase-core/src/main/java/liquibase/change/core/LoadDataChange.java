@@ -15,7 +15,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class LoadDataChange extends AbstractChange implements ChangeWithColumns {
 
     private String schemaName;
@@ -23,19 +22,16 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
     private String file;
     private String encoding = null;
     private String separator = liquibase.util.csv.opencsv.CSVReader.DEFAULT_SEPARATOR + "";
-	private String quotchar = liquibase.util.csv.opencsv.CSVReader.DEFAULT_QUOTE_CHARACTER + "";
-
+    private String quotchar = liquibase.util.csv.opencsv.CSVReader.DEFAULT_QUOTE_CHARACTER + "";
 
     private List<LoadDataColumnConfig> columns = new ArrayList<LoadDataColumnConfig>();
-
 
     public LoadDataChange() {
         super("loadData", "Load Data", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
-    protected LoadDataChange(String changeName, String changeDescription)
-    {
-        super(changeName,changeDescription,ChangeMetaData.PRIORITY_DEFAULT);
+    protected LoadDataChange(String changeName, String changeDescription) {
+        super(changeName, changeDescription, ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {
@@ -71,23 +67,23 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
     }
 
     public String getSeparator() {
-		return separator;
-	}
+        return separator;
+    }
 
-	public void setSeparator(String separator) {
-		this.separator = separator;
-	}
+    public void setSeparator(String separator) {
+        this.separator = separator;
+    }
 
-	public String getQuotchar() {
-		return quotchar;
-	}
+    public String getQuotchar() {
+        return quotchar;
+    }
 
-	public void setQuotchar(String quotchar) {
-		this.quotchar = quotchar;
-	}
+    public void setQuotchar(String quotchar) {
+        this.quotchar = quotchar;
+    }
 
-	public void addColumn(ColumnConfig column) {
-      	columns.add((LoadDataColumnConfig) column);
+    public void addColumn(ColumnConfig column) {
+        columns.add((LoadDataColumnConfig) column);
     }
 
     public List<ColumnConfig> getColumns() {
@@ -101,7 +97,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
 
             String[] headers = reader.readNext();
             if (headers == null) {
-                throw new UnexpectedLiquibaseException("Data file "+getFile()+" was empty");
+                throw new UnexpectedLiquibaseException("Data file " + getFile() + " was empty");
             }
 
             List<SqlStatement> statements = new ArrayList<SqlStatement>();
@@ -112,13 +108,14 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
                 lineNumber++;
 
                 if (line.length == 0 || (line.length == 1 && StringUtils.trimToNull(line[0]) == null)) {
-                    continue; //nothing on this line
+                    continue; // nothing on this line
                 }
                 InsertStatement insertStatement = this.createStatement(getSchemaName(), getTableName());
-                for (int i=0; i<headers.length; i++) {
+                for (int i = 0; i < headers.length; i++) {
                     String columnName = null;
-                    if( i >= line.length ) {
-                      throw new UnexpectedLiquibaseException("CSV Line " + lineNumber + " has only " + (i-1) + " columns, the header has " + headers.length);
+                    if (i >= line.length) {
+                        throw new UnexpectedLiquibaseException("CSV Line " + lineNumber + " has only " + (i - 1)
+                                + " columns, the header has " + headers.length);
                     }
 
                     Object value = line[i];
@@ -135,14 +132,16 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
                                 valueConfig.setValueBoolean(Boolean.parseBoolean(value.toString().toLowerCase()));
                             } else if (columnConfig.getType().equalsIgnoreCase("NUMERIC")) {
                                 valueConfig.setValueNumeric(value.toString());
-                            } else if (columnConfig.getType().toLowerCase().contains("date") ||columnConfig.getType().toLowerCase().contains("time")) {
+                            } else if (columnConfig.getType().toLowerCase().contains("date")
+                                    || columnConfig.getType().toLowerCase().contains("time")) {
                                 valueConfig.setValueDate(value.toString());
                             } else if (columnConfig.getType().equalsIgnoreCase("STRING")) {
                                 valueConfig.setValue(value.toString());
                             } else if (columnConfig.getType().equalsIgnoreCase("COMPUTED")) {
                                 valueConfig.setValue(value.toString());
                             } else {
-                                throw new UnexpectedLiquibaseException("loadData type of "+columnConfig.getType()+" is not supported.  Please use BOOLEAN, NUMERIC, DATE, STRING, or COMPUTED");
+                                throw new UnexpectedLiquibaseException("loadData type of " + columnConfig.getType()
+                                        + " is not supported.  Please use BOOLEAN, NUMERIC, DATE, STRING, or COMPUTED");
                             }
                             value = valueConfig.getValueObject();
                         }
@@ -151,7 +150,6 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
                     if (columnName == null) {
                         columnName = headers[i];
                     }
-
 
                     insertStatement.addColumnValue(columnName, value);
                 }
@@ -162,24 +160,24 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-			if (null != reader) {
-				try {
-					reader.close();
-				} catch (IOException e) {
-					;
-				}
-			}
-		}
+            if (null != reader) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    ;
+                }
+            }
+        }
     }
 
     protected CSVReader getCSVReader() throws IOException {
         ResourceAccessor opener = getResourceAccessor();
         if (opener == null) {
-            throw new UnexpectedLiquibaseException("No file opener specified for "+getFile());
+            throw new UnexpectedLiquibaseException("No file opener specified for " + getFile());
         }
         InputStream stream = opener.getResourceAsStream(getFile());
         if (stream == null) {
-            throw new UnexpectedLiquibaseException("Data file "+getFile()+" was not found");
+            throw new UnexpectedLiquibaseException("Data file " + getFile() + " was not found");
         }
 
         InputStreamReader streamReader;
@@ -190,20 +188,20 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
         }
 
         char quotchar;
-        if (0 == this.quotchar.length() ) {
-        	// hope this is impossible to have a field surrounded with non ascii char 0x01
-        	quotchar = '\1';
+        if (0 == this.quotchar.length()) {
+            // hope this is impossible to have a field surrounded with non ascii char 0x01
+            quotchar = '\1';
         } else {
-        	quotchar = this.quotchar.charAt(0);
+            quotchar = this.quotchar.charAt(0);
         }
 
-        CSVReader reader = new CSVReader(streamReader, separator.charAt(0), quotchar );
+        CSVReader reader = new CSVReader(streamReader, separator.charAt(0), quotchar);
 
         return reader;
     }
 
-    protected InsertStatement createStatement(String schemaName, String tableName){
-        return new InsertStatement(schemaName,tableName);
+    protected InsertStatement createStatement(String schemaName, String tableName) {
+        return new InsertStatement(schemaName, tableName);
     }
 
     protected ColumnConfig getColumnConfig(int index, String header) {
@@ -223,7 +221,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
     }
 
     public String getConfirmationMessage() {
-        return "Data loaded from "+getFile()+" into "+getTableName();
+        return "Data loaded from " + getFile() + " into " + getTableName();
     }
 
     @Override

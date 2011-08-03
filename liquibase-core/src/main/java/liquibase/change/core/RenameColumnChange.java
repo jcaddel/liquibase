@@ -30,7 +30,6 @@ public class RenameColumnChange extends AbstractChange {
         super("renameColumn", "Rename Column", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
-
     public String getSchemaName() {
         return schemaName;
     }
@@ -72,61 +71,59 @@ public class RenameColumnChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) {
-//todo    	if (database instanceof SQLiteDatabase) {
-//    		// return special statements for SQLite databases
-//    		return generateStatementsForSQLiteDatabase(database);
-//        }
+        // todo if (database instanceof SQLiteDatabase) {
+        // // return special statements for SQLite databases
+        // return generateStatementsForSQLiteDatabase(database);
+        // }
 
-    	return new SqlStatement[] { new RenameColumnStatement(
-    			getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), 
-    			getTableName(), getOldColumnName(), getNewColumnName(), 
-    			getColumnDataType())
-        };
+        return new SqlStatement[] { new RenameColumnStatement(getSchemaName() == null ? database.getDefaultSchemaName()
+                : getSchemaName(), getTableName(), getOldColumnName(), getNewColumnName(), getColumnDataType()) };
     }
-    
+
     private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
-    	
-    	// SQLite does not support this ALTER TABLE operation until now.
-		// For more information see: http://www.sqlite.org/omitted.html.
-		// This is a small work around...
-    
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
-    	
-    	// define alter table logic
-		AlterTableVisitor rename_alter_visitor = 
-		new AlterTableVisitor() {
-			public ColumnConfig[] getColumnsToAdd() {
-				return new ColumnConfig[0];
-			}
-			public boolean copyThisColumn(ColumnConfig column) {
-				return true;
-			}
-			public boolean createThisColumn(ColumnConfig column) {
-				if (column.getName().equals(getOldColumnName())) {
-					column.setName(getNewColumnName());
-				}
-				return true;
-			}
-			public boolean createThisIndex(Index index) {
-				if (index.getColumns().contains(getOldColumnName())) {
-					index.getColumns().remove(getOldColumnName());
-					index.getColumns().add(getNewColumnName());
-				}
-				return true;
-			}
-		};
-    		
-    	try {
-    		// alter table
-			statements.addAll(SQLiteDatabase.getAlterTableStatements(
-					rename_alter_visitor,
-					database,getSchemaName(),getTableName()));
-		} catch (Exception e) {
-			System.err.println(e);
-			e.printStackTrace();
-		}
-    	
-    	return statements.toArray(new SqlStatement[statements.size()]);
+
+        // SQLite does not support this ALTER TABLE operation until now.
+        // For more information see: http://www.sqlite.org/omitted.html.
+        // This is a small work around...
+
+        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+
+        // define alter table logic
+        AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
+            public ColumnConfig[] getColumnsToAdd() {
+                return new ColumnConfig[0];
+            }
+
+            public boolean copyThisColumn(ColumnConfig column) {
+                return true;
+            }
+
+            public boolean createThisColumn(ColumnConfig column) {
+                if (column.getName().equals(getOldColumnName())) {
+                    column.setName(getNewColumnName());
+                }
+                return true;
+            }
+
+            public boolean createThisIndex(Index index) {
+                if (index.getColumns().contains(getOldColumnName())) {
+                    index.getColumns().remove(getOldColumnName());
+                    index.getColumns().add(getNewColumnName());
+                }
+                return true;
+            }
+        };
+
+        try {
+            // alter table
+            statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database, getSchemaName(),
+                    getTableName()));
+        } catch (Exception e) {
+            System.err.println(e);
+            e.printStackTrace();
+        }
+
+        return statements.toArray(new SqlStatement[statements.size()]);
     }
 
     @Override
@@ -138,13 +135,11 @@ public class RenameColumnChange extends AbstractChange {
         inverse.setNewColumnName(getOldColumnName());
         inverse.setColumnDataType(getColumnDataType());
 
-        return new Change[]{
-                inverse
-        };
+        return new Change[] { inverse };
     }
 
     public String getConfirmationMessage() {
-        return "Column "+tableName+"."+ oldColumnName + " renamed to " + newColumnName;
+        return "Column " + tableName + "." + oldColumnName + " renamed to " + newColumnName;
     }
 
 }

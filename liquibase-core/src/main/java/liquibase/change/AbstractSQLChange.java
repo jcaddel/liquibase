@@ -15,7 +15,7 @@ import java.util.List;
  * Implements the necessary logic to choose how it should be parsed to generate the statements.
  * 
  * @author <a href="mailto:csuml@yahoo.co.uk">Paul Keeble</a>
- *
+ * 
  */
 public abstract class AbstractSQLChange extends AbstractChange {
 
@@ -26,8 +26,8 @@ public abstract class AbstractSQLChange extends AbstractChange {
 
     protected AbstractSQLChange(String tagName, String changeName, int priority) {
         super(tagName, changeName, priority);
-        stripComments= false;
-        splitStatements =true;
+        stripComments = false;
+        splitStatements = true;
     }
 
     @Override
@@ -36,7 +36,8 @@ public abstract class AbstractSQLChange extends AbstractChange {
     }
 
     /**
-     * @param stripComments true if comments should be stripped out, otherwise false
+     * @param stripComments
+     *            true if comments should be stripped out, otherwise false
      */
     public void setStripComments(Boolean stripComments) {
         this.stripComments = stripComments;
@@ -51,15 +52,16 @@ public abstract class AbstractSQLChange extends AbstractChange {
     }
 
     /**
-     * If set to true then the sql will be split around any ; and \ngo\n entries in the sql and
-     * each line provided as a separate statement.
+     * If set to true then the sql will be split around any ; and \ngo\n entries in the sql and each line provided as a
+     * separate statement.
      * 
-     * @param splitStatements set true if the SQL should be split, otherwise false
+     * @param splitStatements
+     *            set true if the SQL should be split, otherwise false
      */
     public void setSplitStatements(Boolean splitStatements) {
         this.splitStatements = splitStatements;
     }
-    
+
     /**
      * 
      * @return true if a multi-line file will be split, otherwise false
@@ -76,7 +78,7 @@ public abstract class AbstractSQLChange extends AbstractChange {
      * The raw SQL to use for this change.
      */
     public void setSql(String sql) {
-       this.sql = StringUtils.trimToNull(sql);
+        this.sql = StringUtils.trimToNull(sql);
     }
 
     public String getEndDelimiter() {
@@ -88,13 +90,12 @@ public abstract class AbstractSQLChange extends AbstractChange {
     }
 
     /**
-     * Generates one or more statements depending on how the SQL should be parsed.
-     * If split statements is set to true then the SQL is split on the ; and go\n entries
-     * found in the sql text and each is made a separate statement.
-     *
-     * If stripping comments is true then any comments after -- on a line and any comments
-     * between /* and \*\/ will be stripped before the splitting is executed.
-     *
+     * Generates one or more statements depending on how the SQL should be parsed. If split statements is set to true
+     * then the SQL is split on the ; and go\n entries found in the sql text and each is made a separate statement.
+     * 
+     * If stripping comments is true then any comments after -- on a line and any comments between /* and \*\/ will be
+     * stripped before the splitting is executed.
+     * 
      * The end result is one or more SQL statements split in the way the user requested
      */
     public SqlStatement[] generateStatements(Database database) {
@@ -106,10 +107,11 @@ public abstract class AbstractSQLChange extends AbstractChange {
         }
 
         String processedSQL = getSql().replaceAll("\r\n", "\n").replaceAll("\r", "\n");
-        for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStrippingComments(), isSplittingStatements(), getEndDelimiter())) {
+        for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStrippingComments(),
+                isSplittingStatements(), getEndDelimiter())) {
             if (database instanceof MSSQLDatabase) {
-                 statement = statement.replaceAll("\n", "\r\n");
-             }
+                statement = statement.replaceAll("\n", "\r\n");
+            }
 
             returnStatements.add(new RawSqlStatement(statement, getEndDelimiter()));
         }

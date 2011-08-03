@@ -46,7 +46,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         return PRIORITY_DEFAULT + 5;
     }
 
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters,
+            ResourceAccessor resourceAccessor) throws ChangeLogParseException {
 
         DatabaseChangeLog changeLog = new DatabaseChangeLog();
         changeLog.setPhysicalFilePath(physicalChangeLogLocation);
@@ -54,7 +55,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         BufferedReader reader = null;
 
         try {
-            reader = new BufferedReader(new InputStreamReader(openChangeLogFile(physicalChangeLogLocation, resourceAccessor)));
+            reader = new BufferedReader(new InputStreamReader(openChangeLogFile(physicalChangeLogLocation,
+                    resourceAccessor)));
             StringBuffer currentSql = new StringBuffer();
             StringBuffer currentRollbackSql = new StringBuffer();
 
@@ -87,14 +89,14 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         change.setSql(finalCurrentSql);
 
                         if (StringUtils.trimToNull(currentRollbackSql.toString()) != null) {
-                        	try {
-                        		if (currentRollbackSql.toString().trim().toLowerCase().matches("^not required.*")) {
-                        			changeSet.addRollbackChange(new EmptyChange());
-                        		} else {
-                        			RawSQLChange rollbackChange = new RawSQLChange();
-                        			rollbackChange.setSql(currentRollbackSql.toString());
-                        			changeSet.addRollbackChange(rollbackChange);
-                        		}
+                            try {
+                                if (currentRollbackSql.toString().trim().toLowerCase().matches("^not required.*")) {
+                                    changeSet.addRollbackChange(new EmptyChange());
+                                } else {
+                                    RawSQLChange rollbackChange = new RawSQLChange();
+                                    rollbackChange.setSql(currentRollbackSql.toString());
+                                    changeSet.addRollbackChange(rollbackChange);
+                                }
                             } catch (UnsupportedChangeException e) {
                                 throw new RuntimeException(e);
                             }
@@ -123,7 +125,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     String context = parseString(contextPatternMatcher);
                     String dbms = parseString(dbmsPatternMatcher);
 
-                    changeSet = new ChangeSet(changeSetPatternMatcher.group(2), changeSetPatternMatcher.group(1), runAlways, runOnChange, physicalChangeLogLocation, context, dbms, runInTransaction);
+                    changeSet = new ChangeSet(changeSetPatternMatcher.group(2), changeSetPatternMatcher.group(1),
+                            runAlways, runOnChange, physicalChangeLogLocation, context, dbms, runInTransaction);
                     changeSet.setFailOnError(failOnError);
                     changeLog.addChangeSet(changeSet);
 
@@ -175,7 +178,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             if (reader != null) {
                 try {
                     reader.close();
-                } catch (IOException ignore) { }
+                } catch (IOException ignore) {
+                }
             }
         }
 
@@ -190,19 +194,22 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         return endDelimiter;
     }
 
-    private boolean parseBoolean(Matcher matcher, ChangeSet changeSet, boolean defaultValue) throws ChangeLogParseException {
+    private boolean parseBoolean(Matcher matcher, ChangeSet changeSet, boolean defaultValue)
+            throws ChangeLogParseException {
         boolean stripComments = defaultValue;
         if (matcher.matches()) {
             try {
                 stripComments = Boolean.parseBoolean(matcher.group(1));
             } catch (Exception e) {
-                throw new ChangeLogParseException("Cannot parse "+changeSet+" "+matcher.toString().replaceAll("\\.*","")+" as a boolean");
+                throw new ChangeLogParseException("Cannot parse " + changeSet + " "
+                        + matcher.toString().replaceAll("\\.*", "") + " as a boolean");
             }
         }
         return stripComments;
     }
 
-    protected InputStream openChangeLogFile(String physicalChangeLogLocation, ResourceAccessor resourceAccessor) throws IOException {
+    protected InputStream openChangeLogFile(String physicalChangeLogLocation, ResourceAccessor resourceAccessor)
+            throws IOException {
         return resourceAccessor.getResourceAsStream(physicalChangeLogLocation);
     }
 }

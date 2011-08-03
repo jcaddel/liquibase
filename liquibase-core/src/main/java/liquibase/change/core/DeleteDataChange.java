@@ -13,7 +13,7 @@ public class DeleteDataChange extends AbstractChange {
     private String schemaName;
     private String tableName;
 
-    @TextNode(nodeName="where")
+    @TextNode(nodeName = "where")
     private String whereClause;
 
     public DeleteDataChange() {
@@ -46,13 +46,12 @@ public class DeleteDataChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) {
 
-        DeleteStatement statement = new DeleteStatement(getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName(), getTableName());
+        DeleteStatement statement = new DeleteStatement(getSchemaName() == null ? database.getDefaultSchemaName()
+                : getSchemaName(), getTableName());
 
         statement.setWhereClause(whereClause);
 
-        return new SqlStatement[]{
-                statement
-        };
+        return new SqlStatement[] { statement };
     }
 
     public String getConfirmationMessage() {

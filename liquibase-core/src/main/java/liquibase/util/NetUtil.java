@@ -9,7 +9,8 @@ import java.util.Enumeration;
 public class NetUtil {
 
     /**
-     * Smarter way to get localhost than InetAddress.getLocalHost.  See http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4665037
+     * Smarter way to get localhost than InetAddress.getLocalHost. See
+     * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4665037
      */
     public static InetAddress getLocalHost() throws UnknownHostException, SocketException {
         // Windows Vista returns the IPv6 InetAddress using this method, which is not
@@ -20,7 +21,7 @@ public class NetUtil {
         if (osName != null && osName.toLowerCase().contains("windows")) {
             return InetAddress.getLocalHost();
         }
-      
+
         InetAddress lch = null;
         Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
 
@@ -32,7 +33,8 @@ public class NetUtil {
                 break;
             }
             lch = ie.nextElement();
-            if (!lch.isLoopbackAddress()) break;
+            if (!lch.isLoopbackAddress())
+                break;
         }
         return lch;
     }

@@ -34,9 +34,9 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 /**
- * AbstractDatabase is extended by all supported databases as a facade to the underlying database.
- * The physical connection can be retrieved from the AbstractDatabase implementation, as well as any
- * database-specific characteristics such as the datatype for "boolean" fields.
+ * AbstractDatabase is extended by all supported databases as a facade to the underlying database. The physical
+ * connection can be retrieved from the AbstractDatabase implementation, as well as any database-specific
+ * characteristics such as the datatype for "boolean" fields.
  */
 public abstract class AbstractDatabase implements Database {
 
@@ -45,16 +45,20 @@ public abstract class AbstractDatabase implements Database {
 
     protected String currentDateTimeFunction;
 
-	// List of Database native functions.
-	protected List<DatabaseFunction> databaseFunctions = new ArrayList<DatabaseFunction>();
+    // List of Database native functions.
+    protected List<DatabaseFunction> databaseFunctions = new ArrayList<DatabaseFunction>();
 
     private List<RanChangeSet> ranChangeSetList;
 
-    private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+",
+            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private String databaseChangeLogTableName = System.getProperty("liquibase.databaseChangeLogTableName") == null ? "DatabaseChangeLog".toUpperCase() : System.getProperty("liquibase.databaseChangeLogTableName");
-    private String databaseChangeLogLockTableName = System.getProperty("liquibase.databaseChangeLogLockTableName") == null ? "DatabaseChangeLogLock".toUpperCase() : System.getProperty("liquibase.databaseChangeLogLockTableName");
-    private String liquibaseSchemaName = System.getProperty("liquibase.schemaName") == null ? null : System.getProperty("liquibase.schemaName");
+    private String databaseChangeLogTableName = System.getProperty("liquibase.databaseChangeLogTableName") == null ? "DatabaseChangeLog"
+            .toUpperCase() : System.getProperty("liquibase.databaseChangeLogTableName");
+    private String databaseChangeLogLockTableName = System.getProperty("liquibase.databaseChangeLogLockTableName") == null ? "DatabaseChangeLogLock"
+            .toUpperCase() : System.getProperty("liquibase.databaseChangeLogLockTableName");
+    private String liquibaseSchemaName = System.getProperty("liquibase.schemaName") == null ? null : System
+            .getProperty("liquibase.schemaName");
 
     private Integer lastChangeSetSequenceValue;
 
@@ -84,7 +88,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public void setConnection(DatabaseConnection conn) {
-        LogFactory.getLogger().debug("Connected to "+conn.getConnectionUserName()+"@"+conn.getURL());
+        LogFactory.getLogger().debug("Connected to " + conn.getConnectionUserName() + "@" + conn.getURL());
         this.connection = conn;
         try {
             connection.setAutoCommit(getAutoCommitMode());
@@ -121,7 +125,6 @@ public abstract class AbstractDatabase implements Database {
             throw new RuntimeException("Cannot get database name");
         }
     }
-
 
     public String getDatabaseProductVersion() throws DatabaseException {
         if (connection == null) {
@@ -204,34 +207,29 @@ public abstract class AbstractDatabase implements Database {
     /**
      * Return a date literal with the same value as a string formatted using ISO 8601.
      * <p/>
-     * Note: many databases accept date literals in ISO8601 format with the 'T' replaced with
-     * a space. Only databases which do not accept these strings should need to override this
-     * method.
+     * Note: many databases accept date literals in ISO8601 format with the 'T' replaced with a space. Only databases
+     * which do not accept these strings should need to override this method.
      * <p/>
-     * Implementation restriction:
-     * Currently, only the following subsets of ISO8601 are supported:
-     * yyyy-MM-dd
-     * hh:mm:ss
+     * Implementation restriction: Currently, only the following subsets of ISO8601 are supported: yyyy-MM-dd hh:mm:ss
      * yyyy-MM-ddThh:mm:ss
      */
     public String getDateLiteral(String isoDate) {
         if (isDateOnly(isoDate) || isTimeOnly(isoDate)) {
             return "'" + isoDate + "'";
         } else if (isDateTime(isoDate)) {
-//            StringBuffer val = new StringBuffer();
-//            val.append("'");
-//            val.append(isoDate.substring(0, 10));
-//            val.append(" ");
-////noinspection MagicNumber
-//            val.append(isoDate.substring(11));
-//            val.append("'");
-//            return val.toString();
+            // StringBuffer val = new StringBuffer();
+            // val.append("'");
+            // val.append(isoDate.substring(0, 10));
+            // val.append(" ");
+            // //noinspection MagicNumber
+            // val.append(isoDate.substring(11));
+            // val.append("'");
+            // return val.toString();
             return "'" + isoDate.replace('T', ' ') + "'";
         } else {
             return "BAD_DATE_FORMAT:" + isoDate;
         }
     }
-
 
     public String getDateTimeLiteral(java.sql.Timestamp date) {
         return getDateLiteral(new ISODateFormat().format(date).replaceFirst("^'", "").replaceFirst("'$", ""));
@@ -287,7 +285,6 @@ public abstract class AbstractDatabase implements Database {
         return isoDate.length() == "hh:mm:ss".length();
     }
 
-
     /**
      * Returns database-specific line comment string.
      */
@@ -314,7 +311,7 @@ public abstract class AbstractDatabase implements Database {
         return returnString.toString().replaceFirst(" \\|\\| $", "");
     }
 
-// ------- DATABASECHANGELOG / DATABASECHANGELOGLOCK METHODS ---- //
+    // ------- DATABASECHANGELOG / DATABASECHANGELOGLOCK METHODS ---- //
 
     /**
      * @see liquibase.database.Database#getDatabaseChangeLogTableName()
@@ -345,16 +342,18 @@ public abstract class AbstractDatabase implements Database {
     }
 
     /**
-     * This method will check the database ChangeLog table used to keep track of
-     * the changes in the file. If the table does not exist it will create one
-     * otherwise it will not do anything besides outputting a log message.
+     * This method will check the database ChangeLog table used to keep track of the changes in the file. If the table
+     * does not exist it will create one otherwise it will not do anything besides outputting a log message.
+     * 
      * @param updateExistingNullChecksums
      * @param contexts
      */
-    public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, String... contexts) throws DatabaseException {
+    public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog,
+            String... contexts) throws DatabaseException {
         Executor executor = ExecutorService.getInstance().getExecutor(this);
 
-        Table changeLogTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getDatabaseChangeLogTable(this);
+        Table changeLogTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this)
+                .getDatabaseChangeLogTable(this);
 
         List<SqlStatement> statementsToExecute = new ArrayList<SqlStatement>();
 
@@ -371,65 +370,87 @@ public abstract class AbstractDatabase implements Database {
 
             if (!hasDescription) {
                 executor.comment("Adding missing databasechangelog.description column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "DESCRIPTION", "VARCHAR(255)", null));
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(),
+                        getDatabaseChangeLogTableName(), "DESCRIPTION", "VARCHAR(255)", null));
             }
             if (!hasTag) {
                 executor.comment("Adding missing databasechangelog.tag column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "TAG", "VARCHAR(255)", null));
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(),
+                        getDatabaseChangeLogTableName(), "TAG", "VARCHAR(255)", null));
             }
             if (!hasComments) {
                 executor.comment("Adding missing databasechangelog.comments column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "COMMENTS", "VARCHAR(255)", null));
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(),
+                        getDatabaseChangeLogTableName(), "COMMENTS", "VARCHAR(255)", null));
             }
             if (!hasLiquibase) {
                 executor.comment("Adding missing databasechangelog.liquibase column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(255)", null));
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(),
+                        getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(255)", null));
             }
             if (!hasOrderExecuted) {
                 executor.comment("Adding missing databasechangelog.orderexecuted column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "INT", null));
-                statementsToExecute.add(new UpdateStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("ORDEREXECUTED", -1));
-                statementsToExecute.add(new SetNullableStatement(getLiquibaseSchemaName(),  getDatabaseChangeLogTableName(), "ORDEREXECUTED", "INT", false));
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(),
+                        getDatabaseChangeLogTableName(), "ORDEREXECUTED", "INT", null));
+                statementsToExecute.add(new UpdateStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName())
+                        .addNewColumnValue("ORDEREXECUTED", -1));
+                statementsToExecute.add(new SetNullableStatement(getLiquibaseSchemaName(),
+                        getDatabaseChangeLogTableName(), "ORDEREXECUTED", "INT", false));
             }
             if (checksumNotRightSize) {
                 executor.comment("Modifying size of databasechangelog.md5sum column");
 
-                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "MD5SUM", "VARCHAR(35)"));
+                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseSchemaName(),
+                        getDatabaseChangeLogTableName(), "MD5SUM", "VARCHAR(35)"));
             }
             if (liquibaseColumnNotRightSize) {
                 executor.comment("Modifying size of databasechangelog.liquibase column");
 
-                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(20)"));
+                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseSchemaName(),
+                        getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(20)"));
             }
             if (!hasExecTypeColumn) {
                 executor.comment("Adding missing databasechangelog.exectype column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", null));
-                statementsToExecute.add(new UpdateStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("EXECTYPE", "EXECUTED"));
-                statementsToExecute.add(new SetNullableStatement(getLiquibaseSchemaName(),  getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", false));
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(),
+                        getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", null));
+                statementsToExecute.add(new UpdateStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName())
+                        .addNewColumnValue("EXECTYPE", "EXECUTED"));
+                statementsToExecute.add(new SetNullableStatement(getLiquibaseSchemaName(),
+                        getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", false));
             }
 
-            List<Map> md5sumRS = ExecutorService.getInstance().getExecutor(this).queryForList(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(), "MD5SUM"));
+            List<Map> md5sumRS = ExecutorService
+                    .getInstance()
+                    .getExecutor(this)
+                    .queryForList(
+                            new SelectFromDatabaseChangeLogStatement(
+                                    new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(), "MD5SUM"));
             if (md5sumRS.size() > 0) {
                 String md5sum = md5sumRS.get(0).get("MD5SUM").toString();
                 if (!md5sum.startsWith(CheckSum.getCurrentVersion() + ":")) {
                     executor.comment("DatabaseChangeLog checksums are an incompatible version.  Setting them to null so they will be updated on next database update");
-                    statementsToExecute.add(new RawSqlStatement("UPDATE " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " SET MD5SUM=null"));
+                    statementsToExecute.add(new RawSqlStatement("UPDATE "
+                            + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName())
+                            + " SET MD5SUM=null"));
                 }
             }
-
 
         } else if (!changeLogCreateAttempted) {
             executor.comment("Create Database Change Log Table");
             SqlStatement createTableStatement = new CreateDatabaseChangeLogTableStatement();
             if (!canCreateChangeLogTable()) {
-                throw new DatabaseException("Cannot create " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " table for your database.\n\n" +
-                        "Please construct it manually using the following SQL as a base and re-run Liquibase:\n\n" +
-                        createTableStatement);
+                throw new DatabaseException("Cannot create "
+                        + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName())
+                        + " table for your database.\n\n"
+                        + "Please construct it manually using the following SQL as a base and re-run Liquibase:\n\n"
+                        + createTableStatement);
             }
             // If there is no table in the database for recording change history create one.
             statementsToExecute.add(createTableStatement);
-            LogFactory.getLogger().info("Creating database history table with name: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()));
-//                }
+            LogFactory.getLogger().info(
+                    "Creating database history table with name: "
+                            + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()));
+            // }
         }
 
         for (SqlStatement sql : statementsToExecute) {
@@ -438,11 +459,14 @@ public abstract class AbstractDatabase implements Database {
         }
 
         if (updateExistingNullChecksums) {
-            for (RanChangeSet ranChangeSet  : this.getRanChangeSetList()) {
+            for (RanChangeSet ranChangeSet : this.getRanChangeSetList()) {
                 if (ranChangeSet.getLastCheckSum() == null) {
                     ChangeSet changeSet = databaseChangeLog.getChangeSet(ranChangeSet);
-                    if (changeSet != null && new ContextChangeSetFilter(contexts).accepts(changeSet) && new DbmsChangeSetFilter(this).accepts(changeSet)) {
-                        LogFactory.getLogger().info("Updating null or out of date checksum on changeSet "+changeSet+" to correct value");
+                    if (changeSet != null && new ContextChangeSetFilter(contexts).accepts(changeSet)
+                            && new DbmsChangeSetFilter(this).accepts(changeSet)) {
+                        LogFactory.getLogger()
+                                .info("Updating null or out of date checksum on changeSet " + changeSet
+                                        + " to correct value");
                         executor.execute(new UpdateChangeSetChecksumStatement(changeSet));
                     }
                 }
@@ -451,7 +475,6 @@ public abstract class AbstractDatabase implements Database {
             this.ranChangeSetList = null;
         }
     }
-
 
     protected boolean canCreateChangeLogTable() throws DatabaseException {
         return true;
@@ -467,7 +490,8 @@ public abstract class AbstractDatabase implements Database {
         if (hasDatabaseChangeLogTable) {
             return true;
         }
-        boolean hasTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).hasDatabaseChangeLogTable(this);
+        boolean hasTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this)
+                .hasDatabaseChangeLogTable(this);
         if (canCacheLiquibaseTableInfo) {
             hasDatabaseChangeLogTable = hasTable;
         }
@@ -478,7 +502,8 @@ public abstract class AbstractDatabase implements Database {
         if (canCacheLiquibaseTableInfo && hasDatabaseChangeLogLockTable) {
             return true;
         }
-        boolean hasTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).hasDatabaseChangeLogLockTable(this);
+        boolean hasTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this)
+                .hasDatabaseChangeLogLockTable(this);
         if (canCacheLiquibaseTableInfo) {
             hasDatabaseChangeLogLockTable = hasTable;
         }
@@ -486,13 +511,13 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public String getLiquibaseSchemaName() {
-        return liquibaseSchemaName == null ? getDefaultSchemaName(): liquibaseSchemaName;
+        return liquibaseSchemaName == null ? getDefaultSchemaName() : liquibaseSchemaName;
     }
 
     /**
-     * This method will check the database ChangeLogLock table used to keep track of
-     * if a machine is updating the database. If the table does not exist it will create one
-     * otherwise it will not do anything besides outputting a log message.
+     * This method will check the database ChangeLogLock table used to keep track of if a machine is updating the
+     * database. If the table does not exist it will create one otherwise it will not do anything besides outputting a
+     * log message.
      */
     public void checkDatabaseChangeLogLockTable() throws DatabaseException {
 
@@ -502,7 +527,9 @@ public abstract class AbstractDatabase implements Database {
             executor.comment("Create Database Lock Table");
             executor.execute(new CreateDatabaseChangeLogLockTableStatement());
             this.commit();
-            LogFactory.getLogger().debug("Created database lock table with name: " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogLockTableName()));
+            LogFactory.getLogger().debug(
+                    "Created database lock table with name: "
+                            + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogLockTableName()));
             this.hasDatabaseChangeLogLockTable = true;
         }
     }
@@ -511,16 +538,17 @@ public abstract class AbstractDatabase implements Database {
         return false;
     }
 
-// ------- DATABASE OBJECT DROPPING METHODS ---- //
+    // ------- DATABASE OBJECT DROPPING METHODS ---- //
 
     /**
      * Drops all objects owned by the connected user.
-     *
+     * 
      * @param schema
      */
     public void dropDatabaseObjects(String schema) throws DatabaseException {
         try {
-            DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(this, schema, new HashSet<DiffStatusListener>());
+            DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(this, schema,
+                    new HashSet<DiffStatusListener>());
 
             List<Change> dropChanges = new ArrayList<Change>();
 
@@ -543,14 +571,14 @@ public abstract class AbstractDatabase implements Database {
                 }
             }
 
-//            for (Index index : snapshotGenerator.getIndexes()) {
-//                DropIndexChange dropChange = new DropIndexChange();
-//                dropChange.setIndexName(index.getName());
-//                dropChange.setSchemaName(schema);
-//                dropChange.setTableName(index.getTableName());
-//
-//                dropChanges.add(dropChange);
-//            }
+            // for (Index index : snapshotGenerator.getIndexes()) {
+            // DropIndexChange dropChange = new DropIndexChange();
+            // dropChange.setIndexName(index.getName());
+            // dropChange.setSchemaName(schema);
+            // dropChange.setTableName(index.getTableName());
+            //
+            // dropChanges.add(dropChange);
+            // }
 
             for (Table table : snapshot.getTables()) {
                 DropTableChange dropChange = new DropTableChange();
@@ -572,7 +600,6 @@ public abstract class AbstractDatabase implements Database {
                     dropChanges.add(dropChange);
                 }
             }
-
 
             if (snapshot.hasDatabaseChangeLogTable()) {
                 dropChanges.add(new AnonymousChange(new ClearDatabaseChangeLogTableStatement(schema)));
@@ -597,13 +624,8 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean supportsDropTableCascadeConstraints() {
-         return (this instanceof DerbyDatabase
-                 || this instanceof DB2Database
-                 || this instanceof MSSQLDatabase
-                 || this instanceof FirebirdDatabase
-                 || this instanceof SQLiteDatabase
-                 || this instanceof SybaseDatabase
-                 || this instanceof SybaseASADatabase);
+        return (this instanceof DerbyDatabase || this instanceof DB2Database || this instanceof MSSQLDatabase
+                || this instanceof FirebirdDatabase || this instanceof SQLiteDatabase || this instanceof SybaseDatabase || this instanceof SybaseASADatabase);
     }
 
     public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
@@ -627,10 +649,11 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean isLiquibaseTable(String tableName) {
-        return tableName.equalsIgnoreCase(this.getDatabaseChangeLogTableName()) || tableName.equalsIgnoreCase(this.getDatabaseChangeLogLockTableName());
+        return tableName.equalsIgnoreCase(this.getDatabaseChangeLogTableName())
+                || tableName.equalsIgnoreCase(this.getDatabaseChangeLogLockTableName());
     }
 
-// ------- DATABASE TAGGING METHODS ---- //
+    // ------- DATABASE TAGGING METHODS ---- //
 
     /**
      * Tags the database changelog with the given string.
@@ -638,13 +661,16 @@ public abstract class AbstractDatabase implements Database {
     public void tag(String tagString) throws DatabaseException {
         Executor executor = ExecutorService.getInstance().getExecutor(this);
         try {
-            int totalRows = ExecutorService.getInstance().getExecutor(this).queryForInt(new SelectFromDatabaseChangeLogStatement("COUNT(*)"));
+            int totalRows = ExecutorService.getInstance().getExecutor(this)
+                    .queryForInt(new SelectFromDatabaseChangeLogStatement("COUNT(*)"));
             if (totalRows == 0) {
-                ChangeSet emptyChangeSet = new ChangeSet(String.valueOf(new Date().getTime()), "liquibase", false, false, "liquibase-internal", null, null);
+                ChangeSet emptyChangeSet = new ChangeSet(String.valueOf(new Date().getTime()), "liquibase", false,
+                        false, "liquibase-internal", null, null);
                 this.markChangeSetExecStatus(emptyChangeSet, ChangeSet.ExecType.EXECUTED);
             }
 
-//            Timestamp lastExecutedDate = (Timestamp) this.getExecutor().queryForObject(createChangeToTagSQL(), Timestamp.class);
+            // Timestamp lastExecutedDate = (Timestamp) this.getExecutor().queryForObject(createChangeToTagSQL(),
+            // Timestamp.class);
             executor.execute(new TagDatabaseStatement(tagString));
             this.commit();
 
@@ -655,7 +681,12 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean doesTagExist(String tag) throws DatabaseException {
-        int count = ExecutorService.getInstance().getExecutor(this).queryForInt(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByTag("tag"), "COUNT(*)"));
+        int count = ExecutorService
+                .getInstance()
+                .getExecutor(this)
+                .queryForInt(
+                        new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByTag("tag"),
+                                "COUNT(*)"));
         return count > 0;
     }
 
@@ -665,9 +696,9 @@ public abstract class AbstractDatabase implements Database {
             return getTypeName() + " Database";
         }
 
-        return getConnection().getConnectionUserName() + " @ " + getConnection().getURL() + (getDefaultSchemaName() == null ? "" : " (Default Schema: " + getDefaultSchemaName() + ")");
+        return getConnection().getConnectionUserName() + " @ " + getConnection().getURL()
+                + (getDefaultSchemaName() == null ? "" : " (Default Schema: " + getDefaultSchemaName() + ")");
     }
-
 
     public boolean shouldQuoteValue(String value) {
         return true;
@@ -677,7 +708,8 @@ public abstract class AbstractDatabase implements Database {
         if (schemaName == null) {
             schemaName = convertRequestedSchemaToSchema(null);
         }
-        String definition = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schemaName, viewName), String.class);
+        String definition = (String) ExecutorService.getInstance().getExecutor(this)
+                .queryForObject(new GetViewDefinitionStatement(schemaName, viewName), String.class);
         if (definition == null) {
             return null;
         }
@@ -728,7 +760,7 @@ public abstract class AbstractDatabase implements Database {
         if (columnName.contains("(")) {
             return columnName;
         }
-        
+
         if (schemaName == null) {
             schemaName = getDefaultSchemaName();
         }
@@ -799,7 +831,17 @@ public abstract class AbstractDatabase implements Database {
             if (foundRan.getLastCheckSum() == null) {
                 try {
                     LogFactory.getLogger().info("Updating NULL md5sum for " + changeSet.toString());
-                    ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("UPDATE " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " SET MD5SUM='" + changeSet.generateCheckSum().toString() + "' WHERE ID='" + changeSet.getId() + "' AND AUTHOR='" + changeSet.getAuthor() + "' AND FILENAME='" + changeSet.getFilePath() + "'"));
+                    ExecutorService
+                            .getInstance()
+                            .getExecutor(this)
+                            .execute(
+                                    new RawSqlStatement(
+                                            "UPDATE "
+                                                    + escapeTableName(getLiquibaseSchemaName(),
+                                                            getDatabaseChangeLogTableName()) + " SET MD5SUM='"
+                                                    + changeSet.generateCheckSum().toString() + "' WHERE ID='"
+                                                    + changeSet.getId() + "' AND AUTHOR='" + changeSet.getAuthor()
+                                                    + "' AND FILENAME='" + changeSet.getFilePath() + "'"));
 
                     this.commit();
                 } catch (DatabaseException e) {
@@ -815,7 +857,7 @@ public abstract class AbstractDatabase implements Database {
                         return ChangeSet.RunStatus.RUN_AGAIN;
                     } else {
                         return ChangeSet.RunStatus.INVALID_MD5SUM;
-//                        throw new DatabaseHistoryException("MD5 Check for " + changeSet.toString() + " failed");
+                        // throw new DatabaseHistoryException("MD5 Check for " + changeSet.toString() + " failed");
                     }
                 }
             }
@@ -849,7 +891,9 @@ public abstract class AbstractDatabase implements Database {
         ranChangeSetList = new ArrayList<RanChangeSet>();
         if (hasDatabaseChangeLogTable()) {
             LogFactory.getLogger().info("Reading from " + databaseChangeLogTableName);
-            SqlStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "TAG", "EXECTYPE").setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
+            SqlStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM",
+                    "DATEEXECUTED", "ORDEREXECUTED", "TAG", "EXECTYPE").setOrderBy("DATEEXECUTED ASC",
+                    "ORDEREXECUTED ASC");
             List<Map> results = ExecutorService.getInstance().getExecutor(this).queryForList(select);
             for (Map rs : results) {
                 String fileName = rs.get("FILENAME").toString();
@@ -860,10 +904,11 @@ public abstract class AbstractDatabase implements Database {
                 String tag = rs.get("TAG") == null ? null : rs.get("TAG").toString();
                 String execType = rs.get("EXECTYPE") == null ? null : rs.get("EXECTYPE").toString();
                 try {
-                    RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag, ChangeSet.ExecType.valueOf(execType));
+                    RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum),
+                            dateExecuted, tag, ChangeSet.ExecType.valueOf(execType));
                     ranChangeSetList.add(ranChangeSet);
                 } catch (IllegalArgumentException e) {
-                    LogFactory.getLogger().severe("Unknown EXECTYPE from database: "+execType);
+                    LogFactory.getLogger().severe("Unknown EXECTYPE from database: " + execType);
                     throw e;
                 }
             }
@@ -881,11 +926,10 @@ public abstract class AbstractDatabase implements Database {
     }
 
     /**
-     * After the change set has been ran against the database this method will update the change log table
-     * with the information.
+     * After the change set has been ran against the database this method will update the change log table with the
+     * information.
      */
     public void markChangeSetExecStatus(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException {
-
 
         ExecutorService.getInstance().getExecutor(this).execute(new MarkChangeSetRanStatement(changeSet, execType));
         commit();
@@ -925,8 +969,10 @@ public abstract class AbstractDatabase implements Database {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         AbstractDatabase that = (AbstractDatabase) o;
 
@@ -979,9 +1025,9 @@ public abstract class AbstractDatabase implements Database {
 
     /**
      * Default implementation, just look for "local" IPs
-     *
+     * 
      * @throws liquibase.exception.DatabaseException
-     *
+     * 
      */
     public boolean isLocalDatabase() throws DatabaseException {
         DatabaseConnection connection = getConnection();
@@ -992,7 +1038,8 @@ public abstract class AbstractDatabase implements Database {
         return (url.contains("localhost")) || (url.contains("127.0.0.1"));
     }
 
-    public void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException {
+    public void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors)
+            throws LiquibaseException, UnsupportedChangeException {
         SqlStatement[] statements = change.generateStatements(this);
 
         execute(statements, sqlVisitors);
@@ -1000,9 +1047,11 @@ public abstract class AbstractDatabase implements Database {
 
     /*
      * Executes the statements passed as argument to a target {@link Database}
-     *
+     * 
      * @param statements an array containing the SQL statements to be issued
+     * 
      * @param database the target {@link Database}
+     * 
      * @throws DatabaseException if there were problems issuing the statements
      */
     public void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException {
@@ -1015,17 +1064,19 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-
-    public void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, StatementNotSupportedOnDatabaseException, LiquibaseException {
+    public void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException,
+            UnsupportedChangeException, StatementNotSupportedOnDatabaseException, LiquibaseException {
         SqlStatement[] statements = change.generateStatements(this);
         for (SqlStatement statement : statements) {
             for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, this)) {
-                writer.append(sql.toSql()).append(sql.getEndDelimiter()).append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
+                writer.append(sql.toSql()).append(sql.getEndDelimiter()).append(StreamUtil.getLineSeparator())
+                        .append(StreamUtil.getLineSeparator());
             }
         }
     }
 
-    public void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException, RollbackImpossibleException {
+    public void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException,
+            UnsupportedChangeException, RollbackImpossibleException {
         SqlStatement[] statements = change.generateRollbackStatements(this);
         List<SqlVisitor> rollbackVisitors = new ArrayList<SqlVisitor>();
         if (sqlVisitors != null) {
@@ -1038,7 +1089,9 @@ public abstract class AbstractDatabase implements Database {
         execute(statements, rollbackVisitors);
     }
 
-    public void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
+    public void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException,
+            UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException,
+            LiquibaseException {
         SqlStatement[] statements = change.generateRollbackStatements(this);
         for (SqlStatement statement : statements) {
             for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, this)) {
@@ -1052,7 +1105,8 @@ public abstract class AbstractDatabase implements Database {
             if (getConnection() == null) {
                 lastChangeSetSequenceValue = 0;
             } else {
-                lastChangeSetSequenceValue = ExecutorService.getInstance().getExecutor(this).queryForInt(new GetNextChangeSetSequenceValueStatement());
+                lastChangeSetSequenceValue = ExecutorService.getInstance().getExecutor(this)
+                        .queryForInt(new GetNextChangeSetSequenceValueStatement());
             }
         }
 
@@ -1063,9 +1117,9 @@ public abstract class AbstractDatabase implements Database {
         return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getTable(schemaName, tableName, this);
     }
 
-	public List<DatabaseFunction> getDatabaseFunctions() {
-		return databaseFunctions;
-	}
+    public List<DatabaseFunction> getDatabaseFunctions() {
+        return databaseFunctions;
+    }
 
     public void reset() {
         this.ranChangeSetList = null;

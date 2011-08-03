@@ -12,7 +12,8 @@ import liquibase.statement.core.DropTableStatement;
 
 public class DropTableGenerator extends AbstractSqlGenerator<DropTableStatement> {
 
-    public ValidationErrors validate(DropTableStatement dropTableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DropTableStatement dropTableStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropTableStatement.getTableName());
         return validationErrors;
@@ -20,7 +21,8 @@ public class DropTableGenerator extends AbstractSqlGenerator<DropTableStatement>
 
     public Sql[] generateSql(DropTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("DROP TABLE ").append(database.escapeTableName(statement.getSchemaName(), statement.getTableName()));
+        buffer.append("DROP TABLE ").append(
+                database.escapeTableName(statement.getSchemaName(), statement.getTableName()));
         if (statement.isCascadeConstraints()) {
             if (database.supportsDropTableCascadeConstraints()) {
                 LogFactory.getLogger().warning("Database does not support drop with cascade");
@@ -31,8 +33,6 @@ public class DropTableGenerator extends AbstractSqlGenerator<DropTableStatement>
             }
         }
 
-        return new Sql[]{
-                new UnparsedSql(buffer.toString())
-        };
+        return new Sql[] { new UnparsedSql(buffer.toString()) };
     }
 }

@@ -16,12 +16,10 @@ public class MySQLDatabase extends AbstractDatabase {
         return "mysql";
     }
 
-
-//todo: handle    @Override
-//    public String getConnectionUsername() throws DatabaseException {
-//        return super.getConnection().getConnectionUserName().replaceAll("\\@.*", "");
-//    }
-
+    // todo: handle @Override
+    // public String getConnectionUsername() throws DatabaseException {
+    // return super.getConnection().getConnectionUserName().replaceAll("\\@.*", "");
+    // }
 
     public int getPriority() {
         return PRIORITY_DEFAULT;
@@ -38,7 +36,6 @@ public class MySQLDatabase extends AbstractDatabase {
         return null;
     }
 
-
     @Override
     public boolean supportsSequences() {
         return false;
@@ -52,7 +49,7 @@ public class MySQLDatabase extends AbstractDatabase {
         if (currentDateTimeFunction != null) {
             return currentDateTimeFunction;
         }
-        
+
         return "NOW()";
     }
 
@@ -62,7 +59,7 @@ public class MySQLDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String getConcatSql(String ... values) {
+    public String getConcatSql(String... values) {
         StringBuffer returnString = new StringBuffer();
         returnString.append("CONCAT_WS(");
         for (String value : values) {
@@ -76,11 +73,10 @@ public class MySQLDatabase extends AbstractDatabase {
         return false;
     }
 
-
     @Override
     protected String getDefaultDatabaseSchemaName() throws DatabaseException {
-//        return super.getDefaultDatabaseSchemaName().replaceFirst("\\@.*","");
-            return getConnection().getCatalog();
+        // return super.getDefaultDatabaseSchemaName().replaceFirst("\\@.*","");
+        return getConnection().getCatalog();
     }
 
     @Override
@@ -98,7 +94,7 @@ public class MySQLDatabase extends AbstractDatabase {
 
     @Override
     public String escapeDatabaseObject(String objectName) {
-        return "`"+objectName+"`";
+        return "`" + objectName + "`";
     }
 
     @Override
@@ -106,7 +102,6 @@ public class MySQLDatabase extends AbstractDatabase {
         return escapeDatabaseObject(indexName);
     }
 
-    
     @Override
     public boolean supportsForeignKeyDisable() {
         return true;
@@ -114,7 +109,8 @@ public class MySQLDatabase extends AbstractDatabase {
 
     @Override
     public boolean disableForeignKeyChecks() throws DatabaseException {
-        boolean enabled = ExecutorService.getInstance().getExecutor(this).queryForInt(new RawSqlStatement("SELECT @@FOREIGN_KEY_CHECKS")) == 1;
+        boolean enabled = ExecutorService.getInstance().getExecutor(this)
+                .queryForInt(new RawSqlStatement("SELECT @@FOREIGN_KEY_CHECKS")) == 1;
         ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=0"));
         return enabled;
     }

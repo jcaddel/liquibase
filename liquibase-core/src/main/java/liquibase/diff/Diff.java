@@ -11,434 +11,412 @@ import java.util.*;
 
 public class Diff {
 
-	private Database referenceDatabase;
-	private Database targetDatabase;
+    private Database referenceDatabase;
+    private Database targetDatabase;
 
-	private DatabaseSnapshot referenceSnapshot;
-	private DatabaseSnapshot targetSnapshot;
+    private DatabaseSnapshot referenceSnapshot;
+    private DatabaseSnapshot targetSnapshot;
 
-	private Set<DiffStatusListener> statusListeners = new HashSet<DiffStatusListener>();
+    private Set<DiffStatusListener> statusListeners = new HashSet<DiffStatusListener>();
 
-	private boolean diffTables = true;
-	private boolean diffColumns = true;
-	private boolean diffViews = true;
-	private boolean diffPrimaryKeys = true;
-	private boolean diffUniqueConstraints = true;
-	private boolean diffIndexes = true;
-	private boolean diffForeignKeys = true;
-	private boolean diffSequences = true;
-	private boolean diffData = false;
+    private boolean diffTables = true;
+    private boolean diffColumns = true;
+    private boolean diffViews = true;
+    private boolean diffPrimaryKeys = true;
+    private boolean diffUniqueConstraints = true;
+    private boolean diffIndexes = true;
+    private boolean diffForeignKeys = true;
+    private boolean diffSequences = true;
+    private boolean diffData = false;
 
-	public Diff(Database referenceDatabase, Database targetDatabase) {
-		this.referenceDatabase = referenceDatabase;
+    public Diff(Database referenceDatabase, Database targetDatabase) {
+        this.referenceDatabase = referenceDatabase;
 
-		this.targetDatabase = targetDatabase;
-	}
+        this.targetDatabase = targetDatabase;
+    }
 
-	public Diff(Database originalDatabase, String schema)
-			throws DatabaseException {
-		targetDatabase = null;
+    public Diff(Database originalDatabase, String schema) throws DatabaseException {
+        targetDatabase = null;
 
-		referenceDatabase = originalDatabase;
-		referenceDatabase.setDefaultSchemaName(schema);
-	}
+        referenceDatabase = originalDatabase;
+        referenceDatabase.setDefaultSchemaName(schema);
+    }
 
-	public Diff(DatabaseSnapshot referenceSnapshot,
-			DatabaseSnapshot targetDatabaseSnapshot) {
-		this.referenceSnapshot = referenceSnapshot;
+    public Diff(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot targetDatabaseSnapshot) {
+        this.referenceSnapshot = referenceSnapshot;
 
-		this.targetSnapshot = targetDatabaseSnapshot;
-	}
+        this.targetSnapshot = targetDatabaseSnapshot;
+    }
 
-	public void addStatusListener(DiffStatusListener listener) {
-		statusListeners.add(listener);
-	}
+    public void addStatusListener(DiffStatusListener listener) {
+        statusListeners.add(listener);
+    }
 
-	public void removeStatusListener(DiffStatusListener listener) {
-		statusListeners.remove(listener);
-	}
+    public void removeStatusListener(DiffStatusListener listener) {
+        statusListeners.remove(listener);
+    }
 
-	public DiffResult compare() throws DatabaseException {
-		if (referenceSnapshot == null) {
-			referenceSnapshot = DatabaseSnapshotGeneratorFactory.getInstance()
-					.createSnapshot(referenceDatabase, null, statusListeners);
-		}
+    public DiffResult compare() throws DatabaseException {
+        if (referenceSnapshot == null) {
+            referenceSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase, null,
+                    statusListeners);
+        }
 
-		if (targetSnapshot == null) {
-			if (targetDatabase == null) {
-				targetSnapshot = new DatabaseSnapshot(referenceDatabase, null);
-			} else {
-				targetSnapshot = DatabaseSnapshotGeneratorFactory.getInstance()
-						.createSnapshot(targetDatabase, null, statusListeners);
-			}
-		}
+        if (targetSnapshot == null) {
+            if (targetDatabase == null) {
+                targetSnapshot = new DatabaseSnapshot(referenceDatabase, null);
+            } else {
+                targetSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(targetDatabase, null,
+                        statusListeners);
+            }
+        }
 
-		DiffResult diffResult = new DiffResult(referenceSnapshot,
-				targetSnapshot);
-		checkVersionInfo(diffResult);
-		if (shouldDiffTables()) {
-			checkTables(diffResult);
-		}
-		if (shouldDiffViews()) {
-			checkViews(diffResult);
-		}
-		if (shouldDiffColumns()) {
-			checkColumns(diffResult);
-		}
-		if (shouldDiffForeignKeys()) {
-			checkForeignKeys(diffResult);
-		}
-		if (shouldDiffPrimaryKeys()) {
-			checkPrimaryKeys(diffResult);
-		}
-		if (shouldDiffUniqueConstraints()) {
-			checkUniqueConstraints(diffResult);
-		}
-		if (shouldDiffIndexes()) {
-			checkIndexes(diffResult);
-		}
-		if (shouldDiffSequences()) {
-			checkSequences(diffResult);
-		}
-		diffResult.setDiffData(shouldDiffData());
+        DiffResult diffResult = new DiffResult(referenceSnapshot, targetSnapshot);
+        checkVersionInfo(diffResult);
+        if (shouldDiffTables()) {
+            checkTables(diffResult);
+        }
+        if (shouldDiffViews()) {
+            checkViews(diffResult);
+        }
+        if (shouldDiffColumns()) {
+            checkColumns(diffResult);
+        }
+        if (shouldDiffForeignKeys()) {
+            checkForeignKeys(diffResult);
+        }
+        if (shouldDiffPrimaryKeys()) {
+            checkPrimaryKeys(diffResult);
+        }
+        if (shouldDiffUniqueConstraints()) {
+            checkUniqueConstraints(diffResult);
+        }
+        if (shouldDiffIndexes()) {
+            checkIndexes(diffResult);
+        }
+        if (shouldDiffSequences()) {
+            checkSequences(diffResult);
+        }
+        diffResult.setDiffData(shouldDiffData());
 
-        // Hack:  Sometimes Indexes or Unique Constraints with multiple columns get added twice (1 for each column),
-		// so we're combining them back to a single Index or Unique Constraint here.
-		removeDuplicateIndexes( diffResult.getMissingIndexes() );
-		removeDuplicateIndexes( diffResult.getUnexpectedIndexes() );
-		removeDuplicateUniqueConstraints( diffResult.getMissingUniqueConstraints() );
-		removeDuplicateUniqueConstraints( diffResult.getUnexpectedUniqueConstraints() );
-        
-		return diffResult;
-	}
+        // Hack: Sometimes Indexes or Unique Constraints with multiple columns get added twice (1 for each column),
+        // so we're combining them back to a single Index or Unique Constraint here.
+        removeDuplicateIndexes(diffResult.getMissingIndexes());
+        removeDuplicateIndexes(diffResult.getUnexpectedIndexes());
+        removeDuplicateUniqueConstraints(diffResult.getMissingUniqueConstraints());
+        removeDuplicateUniqueConstraints(diffResult.getUnexpectedUniqueConstraints());
 
-	public void setDiffTypes(String diffTypes) {
-		if (StringUtils.trimToNull(diffTypes) != null) {
-			Set<String> types = new HashSet<String>(Arrays.asList(diffTypes.toLowerCase().split("\\s*,\\s*")));
-            
-			diffTables = types.contains("tables");
-			diffColumns = types.contains("columns");
-			diffViews = types.contains("views");
-			diffPrimaryKeys = types.contains("primaryKeys".toLowerCase());
-			diffUniqueConstraints = types.contains("uniqueConstraints".toLowerCase());
-			diffIndexes = types.contains("indexes");
-			diffForeignKeys = types.contains("foreignKeys".toLowerCase());
-			diffSequences = types.contains("sequences");
-			diffData = types.contains("data");
-		}
-	}
+        return diffResult;
+    }
 
-	public boolean shouldDiffTables() {
-		return diffTables;
-	}
+    public void setDiffTypes(String diffTypes) {
+        if (StringUtils.trimToNull(diffTypes) != null) {
+            Set<String> types = new HashSet<String>(Arrays.asList(diffTypes.toLowerCase().split("\\s*,\\s*")));
 
-	public void setDiffTables(boolean diffTables) {
-		this.diffTables = diffTables;
-	}
+            diffTables = types.contains("tables");
+            diffColumns = types.contains("columns");
+            diffViews = types.contains("views");
+            diffPrimaryKeys = types.contains("primaryKeys".toLowerCase());
+            diffUniqueConstraints = types.contains("uniqueConstraints".toLowerCase());
+            diffIndexes = types.contains("indexes");
+            diffForeignKeys = types.contains("foreignKeys".toLowerCase());
+            diffSequences = types.contains("sequences");
+            diffData = types.contains("data");
+        }
+    }
 
-	public boolean shouldDiffColumns() {
-		return diffColumns;
-	}
+    public boolean shouldDiffTables() {
+        return diffTables;
+    }
 
-	public void setDiffColumns(boolean diffColumns) {
-		this.diffColumns = diffColumns;
-	}
+    public void setDiffTables(boolean diffTables) {
+        this.diffTables = diffTables;
+    }
 
-	public boolean shouldDiffViews() {
-		return diffViews;
-	}
+    public boolean shouldDiffColumns() {
+        return diffColumns;
+    }
 
-	public void setDiffViews(boolean diffViews) {
-		this.diffViews = diffViews;
-	}
+    public void setDiffColumns(boolean diffColumns) {
+        this.diffColumns = diffColumns;
+    }
 
-	public boolean shouldDiffPrimaryKeys() {
-		return diffPrimaryKeys;
-	}
+    public boolean shouldDiffViews() {
+        return diffViews;
+    }
 
-	public void setDiffPrimaryKeys(boolean diffPrimaryKeys) {
-		this.diffPrimaryKeys = diffPrimaryKeys;
-	}
+    public void setDiffViews(boolean diffViews) {
+        this.diffViews = diffViews;
+    }
 
-	public boolean shouldDiffIndexes() {
-		return diffIndexes;
-	}
+    public boolean shouldDiffPrimaryKeys() {
+        return diffPrimaryKeys;
+    }
 
-	public void setDiffIndexes(boolean diffIndexes) {
-		this.diffIndexes = diffIndexes;
-	}
+    public void setDiffPrimaryKeys(boolean diffPrimaryKeys) {
+        this.diffPrimaryKeys = diffPrimaryKeys;
+    }
 
-	public boolean shouldDiffForeignKeys() {
-		return diffForeignKeys;
-	}
+    public boolean shouldDiffIndexes() {
+        return diffIndexes;
+    }
 
-	public void setDiffForeignKeys(boolean diffForeignKeys) {
-		this.diffForeignKeys = diffForeignKeys;
-	}
+    public void setDiffIndexes(boolean diffIndexes) {
+        this.diffIndexes = diffIndexes;
+    }
 
-	public boolean shouldDiffSequences() {
-		return diffSequences;
-	}
+    public boolean shouldDiffForeignKeys() {
+        return diffForeignKeys;
+    }
 
-	public void setDiffSequences(boolean diffSequences) {
-		this.diffSequences = diffSequences;
-	}
+    public void setDiffForeignKeys(boolean diffForeignKeys) {
+        this.diffForeignKeys = diffForeignKeys;
+    }
 
-	public boolean shouldDiffData() {
-		return diffData;
-	}
+    public boolean shouldDiffSequences() {
+        return diffSequences;
+    }
 
-	public void setDiffData(boolean diffData) {
-		this.diffData = diffData;
-	}
+    public void setDiffSequences(boolean diffSequences) {
+        this.diffSequences = diffSequences;
+    }
 
-	public boolean shouldDiffUniqueConstraints() {
-		return this.diffUniqueConstraints;
-	}
+    public boolean shouldDiffData() {
+        return diffData;
+    }
 
-	public void setDiffUniqueConstraints(boolean diffUniqueConstraints) {
-		this.diffUniqueConstraints = diffUniqueConstraints;
-	}
+    public void setDiffData(boolean diffData) {
+        this.diffData = diffData;
+    }
 
-	private void checkVersionInfo(DiffResult diffResult)
-			throws DatabaseException {
+    public boolean shouldDiffUniqueConstraints() {
+        return this.diffUniqueConstraints;
+    }
 
-		if (targetDatabase != null) {
-			diffResult.setProductName(new DiffComparison(referenceDatabase
-					.getDatabaseProductName(), targetDatabase
-					.getDatabaseProductName()));
-			diffResult.setProductVersion(new DiffComparison(referenceDatabase
-					.getDatabaseProductVersion(), targetDatabase
-					.getDatabaseProductVersion()));
-		}
+    public void setDiffUniqueConstraints(boolean diffUniqueConstraints) {
+        this.diffUniqueConstraints = diffUniqueConstraints;
+    }
 
-	}
+    private void checkVersionInfo(DiffResult diffResult) throws DatabaseException {
 
-	private void checkTables(DiffResult diffResult) {
-		for (Table baseTable : referenceSnapshot.getTables()) {
-			if (!targetSnapshot.getTables().contains(baseTable)) {
-				diffResult.addMissingTable(baseTable);
-			}
-		}
+        if (targetDatabase != null) {
+            diffResult.setProductName(new DiffComparison(referenceDatabase.getDatabaseProductName(), targetDatabase
+                    .getDatabaseProductName()));
+            diffResult.setProductVersion(new DiffComparison(referenceDatabase.getDatabaseProductVersion(),
+                    targetDatabase.getDatabaseProductVersion()));
+        }
 
-		for (Table targetTable : targetSnapshot.getTables()) {
-			if (!referenceSnapshot.getTables().contains(targetTable)) {
-				diffResult.addUnexpectedTable(targetTable);
-			}
-		}
-	}
+    }
 
-	private void checkViews(DiffResult diffResult) {
-		for (View baseView : referenceSnapshot.getViews()) {
-			if (!targetSnapshot.getViews().contains(baseView)) {
-				diffResult.addMissingView(baseView);
-			}
-		}
+    private void checkTables(DiffResult diffResult) {
+        for (Table baseTable : referenceSnapshot.getTables()) {
+            if (!targetSnapshot.getTables().contains(baseTable)) {
+                diffResult.addMissingTable(baseTable);
+            }
+        }
 
-		for (View targetView : targetSnapshot.getViews()) {
-			if (!referenceSnapshot.getViews().contains(targetView)) {
-				diffResult.addUnexpectedView(targetView);
-			} else {
-				for (View referenceView : referenceSnapshot.getViews()) {
-					if (referenceView.getName().equals(targetView.getName())) {
-						if (!referenceView.getDefinition().equals(targetView.getDefinition())) {
-							diffResult.addChangedView(referenceView);
-						}
-					}
-				}
-			}
-		}
-	}
+        for (Table targetTable : targetSnapshot.getTables()) {
+            if (!referenceSnapshot.getTables().contains(targetTable)) {
+                diffResult.addUnexpectedTable(targetTable);
+            }
+        }
+    }
 
-	private void checkColumns(DiffResult diffResult) {
-		for (Column baseColumn : referenceSnapshot.getColumns()) {
-			if (!targetSnapshot.getColumns().contains(baseColumn)
-					&& (baseColumn.getTable() == null || !diffResult
-							.getMissingTables().contains(baseColumn.getTable()))
-					&& (baseColumn.getView() == null || !diffResult
-							.getMissingViews().contains(baseColumn.getView()))) {
-				diffResult.addMissingColumn(baseColumn);
-			}
-		}
+    private void checkViews(DiffResult diffResult) {
+        for (View baseView : referenceSnapshot.getViews()) {
+            if (!targetSnapshot.getViews().contains(baseView)) {
+                diffResult.addMissingView(baseView);
+            }
+        }
 
-		for (Column targetColumn : targetSnapshot.getColumns()) {
-			if (!referenceSnapshot.getColumns().contains(targetColumn)
-					&& (targetColumn.getTable() == null || !diffResult
-							.getUnexpectedTables().contains(
-									targetColumn.getTable()))
-					&& (targetColumn.getView() == null || !diffResult
-							.getUnexpectedViews().contains(
-									targetColumn.getView()))) {
-				diffResult.addUnexpectedColumn(targetColumn);
-			} else if (targetColumn.getTable() != null
-					&& !diffResult.getUnexpectedTables().contains(
-							targetColumn.getTable())) {
-				Column baseColumn = referenceSnapshot.getColumn(targetColumn
-						.getTable().getName(), targetColumn.getName());
+        for (View targetView : targetSnapshot.getViews()) {
+            if (!referenceSnapshot.getViews().contains(targetView)) {
+                diffResult.addUnexpectedView(targetView);
+            } else {
+                for (View referenceView : referenceSnapshot.getViews()) {
+                    if (referenceView.getName().equals(targetView.getName())) {
+                        if (!referenceView.getDefinition().equals(targetView.getDefinition())) {
+                            diffResult.addChangedView(referenceView);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-				if (baseColumn == null || targetColumn.isDifferent(baseColumn)) {
-					diffResult.addChangedColumn(targetColumn);
-				}
-			}
-		}
-	}
+    private void checkColumns(DiffResult diffResult) {
+        for (Column baseColumn : referenceSnapshot.getColumns()) {
+            if (!targetSnapshot.getColumns().contains(baseColumn)
+                    && (baseColumn.getTable() == null || !diffResult.getMissingTables().contains(baseColumn.getTable()))
+                    && (baseColumn.getView() == null || !diffResult.getMissingViews().contains(baseColumn.getView()))) {
+                diffResult.addMissingColumn(baseColumn);
+            }
+        }
 
-	private void checkForeignKeys(DiffResult diffResult) {
-		for (ForeignKey baseFK : referenceSnapshot.getForeignKeys()) {
-			if (!targetSnapshot.getForeignKeys().contains(baseFK)) {
-				diffResult.addMissingForeignKey(baseFK);
-			}
-		}
+        for (Column targetColumn : targetSnapshot.getColumns()) {
+            if (!referenceSnapshot.getColumns().contains(targetColumn)
+                    && (targetColumn.getTable() == null || !diffResult.getUnexpectedTables().contains(
+                            targetColumn.getTable()))
+                    && (targetColumn.getView() == null || !diffResult.getUnexpectedViews().contains(
+                            targetColumn.getView()))) {
+                diffResult.addUnexpectedColumn(targetColumn);
+            } else if (targetColumn.getTable() != null
+                    && !diffResult.getUnexpectedTables().contains(targetColumn.getTable())) {
+                Column baseColumn = referenceSnapshot.getColumn(targetColumn.getTable().getName(),
+                        targetColumn.getName());
 
-		for (ForeignKey targetFK : targetSnapshot.getForeignKeys()) {
-			if (!referenceSnapshot.getForeignKeys().contains(targetFK)) {
-				diffResult.addUnexpectedForeignKey(targetFK);
-			}
-		}
-	}
+                if (baseColumn == null || targetColumn.isDifferent(baseColumn)) {
+                    diffResult.addChangedColumn(targetColumn);
+                }
+            }
+        }
+    }
 
-	private void checkUniqueConstraints(DiffResult diffResult) {
-		for (UniqueConstraint baseIndex : referenceSnapshot
-				.getUniqueConstraints()) {
-			if (!targetSnapshot.getUniqueConstraints().contains(baseIndex)) {
-				diffResult.addMissingUniqueConstraint(baseIndex);
-			}
-		}
+    private void checkForeignKeys(DiffResult diffResult) {
+        for (ForeignKey baseFK : referenceSnapshot.getForeignKeys()) {
+            if (!targetSnapshot.getForeignKeys().contains(baseFK)) {
+                diffResult.addMissingForeignKey(baseFK);
+            }
+        }
 
-		for (UniqueConstraint targetIndex : targetSnapshot
-				.getUniqueConstraints()) {
-			if (!referenceSnapshot.getUniqueConstraints().contains(targetIndex)) {
-				diffResult.addUnexpectedUniqueConstraint(targetIndex);
-			}
-		}
-	}
+        for (ForeignKey targetFK : targetSnapshot.getForeignKeys()) {
+            if (!referenceSnapshot.getForeignKeys().contains(targetFK)) {
+                diffResult.addUnexpectedForeignKey(targetFK);
+            }
+        }
+    }
 
-	private void checkIndexes(DiffResult diffResult) {
-		for (Index baseIndex : referenceSnapshot.getIndexes()) {
-			if (!targetSnapshot.getIndexes().contains(baseIndex)) {
-				diffResult.addMissingIndex(baseIndex);
-			}
-		}
+    private void checkUniqueConstraints(DiffResult diffResult) {
+        for (UniqueConstraint baseIndex : referenceSnapshot.getUniqueConstraints()) {
+            if (!targetSnapshot.getUniqueConstraints().contains(baseIndex)) {
+                diffResult.addMissingUniqueConstraint(baseIndex);
+            }
+        }
 
-		for (Index targetIndex : targetSnapshot.getIndexes()) {
-			if (!referenceSnapshot.getIndexes().contains(targetIndex)) {
-				diffResult.addUnexpectedIndex(targetIndex);
-			}
-		}
-	}
+        for (UniqueConstraint targetIndex : targetSnapshot.getUniqueConstraints()) {
+            if (!referenceSnapshot.getUniqueConstraints().contains(targetIndex)) {
+                diffResult.addUnexpectedUniqueConstraint(targetIndex);
+            }
+        }
+    }
 
-	private void checkPrimaryKeys(DiffResult diffResult) {
-		for (PrimaryKey basePrimaryKey : referenceSnapshot.getPrimaryKeys()) {
-			if (!targetSnapshot.getPrimaryKeys().contains(basePrimaryKey)) {
-				diffResult.addMissingPrimaryKey(basePrimaryKey);
-			}
-		}
+    private void checkIndexes(DiffResult diffResult) {
+        for (Index baseIndex : referenceSnapshot.getIndexes()) {
+            if (!targetSnapshot.getIndexes().contains(baseIndex)) {
+                diffResult.addMissingIndex(baseIndex);
+            }
+        }
 
-		for (PrimaryKey targetPrimaryKey : targetSnapshot.getPrimaryKeys()) {
-			if (!referenceSnapshot.getPrimaryKeys().contains(targetPrimaryKey)) {
-				diffResult.addUnexpectedPrimaryKey(targetPrimaryKey);
-			}
-		}
-	}
+        for (Index targetIndex : targetSnapshot.getIndexes()) {
+            if (!referenceSnapshot.getIndexes().contains(targetIndex)) {
+                diffResult.addUnexpectedIndex(targetIndex);
+            }
+        }
+    }
 
-	private void checkSequences(DiffResult diffResult) {
-		for (Sequence baseSequence : referenceSnapshot.getSequences()) {
-			if (!targetSnapshot.getSequences().contains(baseSequence)) {
-				diffResult.addMissingSequence(baseSequence);
-			}
-		}
+    private void checkPrimaryKeys(DiffResult diffResult) {
+        for (PrimaryKey basePrimaryKey : referenceSnapshot.getPrimaryKeys()) {
+            if (!targetSnapshot.getPrimaryKeys().contains(basePrimaryKey)) {
+                diffResult.addMissingPrimaryKey(basePrimaryKey);
+            }
+        }
 
-		for (Sequence targetSequence : targetSnapshot.getSequences()) {
-			if (!referenceSnapshot.getSequences().contains(targetSequence)) {
-				diffResult.addUnexpectedSequence(targetSequence);
-			}
-		}
-	}
+        for (PrimaryKey targetPrimaryKey : targetSnapshot.getPrimaryKeys()) {
+            if (!referenceSnapshot.getPrimaryKeys().contains(targetPrimaryKey)) {
+                diffResult.addUnexpectedPrimaryKey(targetPrimaryKey);
+            }
+        }
+    }
+
+    private void checkSequences(DiffResult diffResult) {
+        for (Sequence baseSequence : referenceSnapshot.getSequences()) {
+            if (!targetSnapshot.getSequences().contains(baseSequence)) {
+                diffResult.addMissingSequence(baseSequence);
+            }
+        }
+
+        for (Sequence targetSequence : targetSnapshot.getSequences()) {
+            if (!referenceSnapshot.getSequences().contains(targetSequence)) {
+                diffResult.addUnexpectedSequence(targetSequence);
+            }
+        }
+    }
 
     /**
-	 * Removes duplicate Indexes from the DiffResult object.
-	 *
-	 * @param indexes [IN/OUT] - A set of Indexes to be updated.
-	 */
-	private void removeDuplicateIndexes( SortedSet<Index> indexes )
-	{
-		SortedSet<Index> combinedIndexes = new TreeSet<Index>();
-		SortedSet<Index> indexesToRemove = new TreeSet<Index>();
+     * Removes duplicate Indexes from the DiffResult object.
+     * 
+     * @param indexes
+     *            [IN/OUT] - A set of Indexes to be updated.
+     */
+    private void removeDuplicateIndexes(SortedSet<Index> indexes) {
+        SortedSet<Index> combinedIndexes = new TreeSet<Index>();
+        SortedSet<Index> indexesToRemove = new TreeSet<Index>();
 
-		// Find Indexes with the same name, copy their columns into the first one,
-		// then remove the duplicate Indexes.
-		for ( Index idx1 : indexes )
-		{
-			if ( !combinedIndexes.contains( idx1 ) )
-			{
-				for ( Index idx2 : indexes.tailSet( idx1 ) )
-				{
-					if ( idx1 == idx2 ) {
-						continue;
-					}
+        // Find Indexes with the same name, copy their columns into the first one,
+        // then remove the duplicate Indexes.
+        for (Index idx1 : indexes) {
+            if (!combinedIndexes.contains(idx1)) {
+                for (Index idx2 : indexes.tailSet(idx1)) {
+                    if (idx1 == idx2) {
+                        continue;
+                    }
 
                     String index1Name = StringUtils.trimToEmpty(idx1.getName());
                     String index2Name = StringUtils.trimToEmpty(idx2.getName());
-                    if ( index1Name.equalsIgnoreCase(index2Name)
-							&& idx1.getTable().getName().equalsIgnoreCase( idx2.getTable().getName() ) )
-					{
-						for ( String column : idx2.getColumns() )
-						{
-							if ( !idx1.getColumns().contains( column ) ) {
-								idx1.getColumns().add( column );
-							}
-						}
+                    if (index1Name.equalsIgnoreCase(index2Name)
+                            && idx1.getTable().getName().equalsIgnoreCase(idx2.getTable().getName())) {
+                        for (String column : idx2.getColumns()) {
+                            if (!idx1.getColumns().contains(column)) {
+                                idx1.getColumns().add(column);
+                            }
+                        }
 
-						indexesToRemove.add( idx2 );
-					}
-				}
+                        indexesToRemove.add(idx2);
+                    }
+                }
 
-				combinedIndexes.add( idx1 );
-			}
-		}
+                combinedIndexes.add(idx1);
+            }
+        }
 
-		indexes.removeAll( indexesToRemove );
-	}
+        indexes.removeAll(indexesToRemove);
+    }
 
-	/**
-	 * Removes duplicate Unique Constraints from the DiffResult object.
-	 *
-	 * @param uniqueConstraints [IN/OUT] - A set of Unique Constraints to be updated.
-	 */
-	private void removeDuplicateUniqueConstraints( SortedSet<UniqueConstraint> uniqueConstraints ) {
-		SortedSet<UniqueConstraint> combinedConstraints = new TreeSet<UniqueConstraint>();
-		SortedSet<UniqueConstraint> constraintsToRemove = new TreeSet<UniqueConstraint>();
+    /**
+     * Removes duplicate Unique Constraints from the DiffResult object.
+     * 
+     * @param uniqueConstraints
+     *            [IN/OUT] - A set of Unique Constraints to be updated.
+     */
+    private void removeDuplicateUniqueConstraints(SortedSet<UniqueConstraint> uniqueConstraints) {
+        SortedSet<UniqueConstraint> combinedConstraints = new TreeSet<UniqueConstraint>();
+        SortedSet<UniqueConstraint> constraintsToRemove = new TreeSet<UniqueConstraint>();
 
-		// Find UniqueConstraints with the same name, copy their columns into the first one,
-		// then remove the duplicate UniqueConstraints.
-		for ( UniqueConstraint uc1 : uniqueConstraints )
-		{
-			if ( !combinedConstraints.contains( uc1 ) )
-			{
-				for ( UniqueConstraint uc2 : uniqueConstraints.tailSet( uc1 ) )
-				{
-					if ( uc1 == uc2 ) {
-						continue;
-					}
+        // Find UniqueConstraints with the same name, copy their columns into the first one,
+        // then remove the duplicate UniqueConstraints.
+        for (UniqueConstraint uc1 : uniqueConstraints) {
+            if (!combinedConstraints.contains(uc1)) {
+                for (UniqueConstraint uc2 : uniqueConstraints.tailSet(uc1)) {
+                    if (uc1 == uc2) {
+                        continue;
+                    }
 
-					if ( uc1.getName().equalsIgnoreCase( uc2.getName() )
-							&& uc1.getTable().getName().equalsIgnoreCase( uc2.getTable().getName() ) )
-					{
-						for ( String column : uc2.getColumns() )
-						{
-							if ( !uc1.getColumns().contains( column ) ) {
-								uc1.getColumns().add( column );
-							}
-						}
+                    if (uc1.getName().equalsIgnoreCase(uc2.getName())
+                            && uc1.getTable().getName().equalsIgnoreCase(uc2.getTable().getName())) {
+                        for (String column : uc2.getColumns()) {
+                            if (!uc1.getColumns().contains(column)) {
+                                uc1.getColumns().add(column);
+                            }
+                        }
 
-						constraintsToRemove.add( uc2 );
-					}
-				}
+                        constraintsToRemove.add(uc2);
+                    }
+                }
 
-				combinedConstraints.add( uc1 );
-			}
-		}
+                combinedConstraints.add(uc1);
+            }
+        }
 
-		uniqueConstraints.removeAll( constraintsToRemove );
-	}
+        uniqueConstraints.removeAll(constraintsToRemove);
+    }
 }

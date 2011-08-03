@@ -5,7 +5,7 @@ import liquibase.change.CheckSum;
 import java.util.Date;
 
 /**
- * Encapsulates information about a previously-ran change set.  Used to build rollback statements. 
+ * Encapsulates information about a previously-ran change set. Used to build rollback statements.
  */
 public class RanChangeSet {
     private final String changeLog;
@@ -21,16 +21,12 @@ public class RanChangeSet {
     }
 
     public RanChangeSet(ChangeSet changeSet, ChangeSet.ExecType execType) {
-        this(changeSet.getFilePath(),
-             changeSet.getId(),
-             changeSet.getAuthor(),
-             changeSet.generateCheckSum(),
-             new Date(),
-             null,
-             execType);
+        this(changeSet.getFilePath(), changeSet.getId(), changeSet.getAuthor(), changeSet.generateCheckSum(),
+                new Date(), null, execType);
     }
 
-    public RanChangeSet(String changeLog, String id, String author, CheckSum lastCheckSum, Date dateExecuted, String tag, ChangeSet.ExecType execType) {
+    public RanChangeSet(String changeLog, String id, String author, CheckSum lastCheckSum, Date dateExecuted,
+            String tag, ChangeSet.ExecType execType) {
         this.changeLog = changeLog;
         this.id = id;
         this.author = author;

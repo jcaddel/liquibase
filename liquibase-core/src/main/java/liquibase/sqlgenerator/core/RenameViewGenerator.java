@@ -13,22 +13,20 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
 
     @Override
     public boolean supports(RenameViewStatement statement, Database database) {
-        return !(database instanceof DerbyDatabase
-                || database instanceof HsqlDatabase
-                 || database  instanceof H2Database
-                || database instanceof DB2Database
-                || database instanceof CacheDatabase
-                || database instanceof FirebirdDatabase
-                || database instanceof InformixDatabase
-                || database instanceof SybaseASADatabase);
+        return !(database instanceof DerbyDatabase || database instanceof HsqlDatabase
+                || database instanceof H2Database || database instanceof DB2Database
+                || database instanceof CacheDatabase || database instanceof FirebirdDatabase
+                || database instanceof InformixDatabase || database instanceof SybaseASADatabase);
     }
 
-    public ValidationErrors validate(RenameViewStatement renameViewStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(RenameViewStatement renameViewStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("oldViewName", renameViewStatement.getOldViewName());
         validationErrors.checkRequiredField("newViewName", renameViewStatement.getNewViewName());
 
-        validationErrors.checkDisallowedField("schemaName", renameViewStatement.getSchemaName(), database, OracleDatabase.class);
+        validationErrors.checkDisallowedField("schemaName", renameViewStatement.getSchemaName(), database,
+                OracleDatabase.class);
 
         return validationErrors;
     }
@@ -37,19 +35,22 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
         String sql;
 
         if (database instanceof MSSQLDatabase) {
-            sql = "exec sp_rename '" + database.escapeViewName(statement.getSchemaName(), statement.getOldViewName()) + "', '" + statement.getNewViewName() + '\'';
+            sql = "exec sp_rename '" + database.escapeViewName(statement.getSchemaName(), statement.getOldViewName())
+                    + "', '" + statement.getNewViewName() + '\'';
         } else if (database instanceof MySQLDatabase) {
-            sql = "RENAME TABLE " + database.escapeViewName(statement.getSchemaName(), statement.getOldViewName()) + " TO " + database.escapeViewName(statement.getSchemaName(), statement.getNewViewName());
+            sql = "RENAME TABLE " + database.escapeViewName(statement.getSchemaName(), statement.getOldViewName())
+                    + " TO " + database.escapeViewName(statement.getSchemaName(), statement.getNewViewName());
         } else if (database instanceof PostgresDatabase) {
-            sql = "ALTER TABLE " + database.escapeViewName(statement.getSchemaName(), statement.getOldViewName()) + " RENAME TO " + database.escapeViewName(null, statement.getNewViewName());
+            sql = "ALTER TABLE " + database.escapeViewName(statement.getSchemaName(), statement.getOldViewName())
+                    + " RENAME TO " + database.escapeViewName(null, statement.getNewViewName());
         } else if (database instanceof MaxDBDatabase) {
-            sql = "RENAME VIEW " + database.escapeViewName(statement.getSchemaName(), statement.getOldViewName()) + " TO " + database.escapeViewName(null, statement.getNewViewName());
+            sql = "RENAME VIEW " + database.escapeViewName(statement.getSchemaName(), statement.getOldViewName())
+                    + " TO " + database.escapeViewName(null, statement.getNewViewName());
         } else {
-            sql = "RENAME " + database.escapeViewName(statement.getSchemaName(), statement.getOldViewName()) + " TO " + database.escapeViewName(null, statement.getNewViewName());
+            sql = "RENAME " + database.escapeViewName(statement.getSchemaName(), statement.getOldViewName()) + " TO "
+                    + database.escapeViewName(null, statement.getNewViewName());
         }
 
-        return new Sql[]{
-                new UnparsedSql(sql)
-        };
+        return new Sql[] { new UnparsedSql(sql) };
     }
 }

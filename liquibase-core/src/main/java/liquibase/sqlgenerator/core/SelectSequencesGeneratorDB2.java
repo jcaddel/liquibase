@@ -22,15 +22,16 @@ public class SelectSequencesGeneratorDB2 extends AbstractSqlGenerator<SelectSequ
         return database instanceof DB2Database;
     }
 
-    public ValidationErrors validate(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(SelectSequencesStatement statement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
 
     public Sql[] generateSql(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         try {
-            return new Sql[] {
-                    new UnparsedSql("SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = '" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'")
-            };
+            return new Sql[] { new UnparsedSql(
+                    "SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = '"
+                            + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'") };
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }

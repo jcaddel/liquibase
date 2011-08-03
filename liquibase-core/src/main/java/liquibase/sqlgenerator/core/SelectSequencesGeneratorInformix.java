@@ -20,18 +20,17 @@ public class SelectSequencesGeneratorInformix extends AbstractSqlGenerator<Selec
         return database instanceof InformixDatabase;
     }
 
-    public ValidationErrors validate(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(SelectSequencesStatement statement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
 
     public Sql[] generateSql(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuilder sb = new StringBuilder("SELECT tabname FROM systables t, syssequences s WHERE s.tabid = t.tabid");
         String schemaName = statement.getSchemaName();
-		if (schemaName != null) {
-        	sb.append(" AND t.owner = ").append("'").append(schemaName).append("'");
+        if (schemaName != null) {
+            sb.append(" AND t.owner = ").append("'").append(schemaName).append("'");
         }
-		return new Sql[]{
-                new UnparsedSql(sb.toString())
-        };
+        return new Sql[] { new UnparsedSql(sb.toString()) };
     }
 }

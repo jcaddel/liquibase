@@ -16,28 +16,34 @@ public class DropUniqueConstraintGenerator extends AbstractSqlGenerator<DropUniq
         return !(database instanceof SQLiteDatabase);
     }
 
-    public ValidationErrors validate(DropUniqueConstraintStatement dropUniqueConstraintStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DropUniqueConstraintStatement dropUniqueConstraintStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropUniqueConstraintStatement.getTableName());
         return validationErrors;
     }
 
-    public Sql[] generateSql(DropUniqueConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(DropUniqueConstraintStatement statement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         String sql;
         if (database instanceof MySQLDatabase) {
-            sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " DROP KEY " + database.escapeConstraintName(statement.getConstraintName());
+            sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " DROP KEY " + database.escapeConstraintName(statement.getConstraintName());
         } else if (database instanceof MaxDBDatabase) {
-            sql = "DROP INDEX " + database.escapeConstraintName(statement.getConstraintName()) + " ON " + database.escapeTableName(statement.getSchemaName(), statement.getTableName());
+            sql = "DROP INDEX " + database.escapeConstraintName(statement.getConstraintName()) + " ON "
+                    + database.escapeTableName(statement.getSchemaName(), statement.getTableName());
         } else if (database instanceof OracleDatabase) {
-            sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName()) + " DROP INDEX";
+            sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName())
+                    + " DROP INDEX";
         } else if (database instanceof SybaseASADatabase) {
-            sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " DROP UNIQUE (" + statement.getUniqueColumns() + ")";
+            sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " DROP UNIQUE (" + statement.getUniqueColumns() + ")";
         } else {
-            sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
+            sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
         }
 
-        return new Sql[] {
-                new UnparsedSql(sql)
-        };
+        return new Sql[] { new UnparsedSql(sql) };
     }
 }

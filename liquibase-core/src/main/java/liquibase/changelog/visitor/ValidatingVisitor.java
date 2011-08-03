@@ -48,10 +48,10 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             }
             preconditions.check(database, changeLog, null);
         } catch (PreconditionFailedException e) {
-            LogFactory.getLogger().debug("Precondition Failed: "+e.getMessage(), e);
+            LogFactory.getLogger().debug("Precondition Failed: " + e.getMessage(), e);
             failedPreconditions.addAll(e.getFailedPreconditions());
         } catch (PreconditionErrorException e) {
-            LogFactory.getLogger().debug("Precondition Error: "+e.getMessage(), e);
+            LogFactory.getLogger().debug("Precondition Error: " + e.getMessage(), e);
             errorPreconditions.addAll(e.getErrorPreconditions());
         } finally {
             try {
@@ -80,7 +80,9 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                 ValidationErrors foundErrors = change.validate(database);
                 if (foundErrors != null && foundErrors.hasErrors()) {
                     if (changeSet.getOnValidationFail().equals(ChangeSet.ValidationFailOption.MARK_RAN)) {
-                        LogFactory.getLogger().info("Skipping changeSet "+changeSet+" due to validation error(s): "+ StringUtils.join(foundErrors.getErrorMessages(), ", "));
+                        LogFactory.getLogger().info(
+                                "Skipping changeSet " + changeSet + " due to validation error(s): "
+                                        + StringUtils.join(foundErrors.getErrorMessages(), ", "));
                         changeSet.setValidationFailed(true);
                     } else {
                         validationErrors.addAll(foundErrors, changeSet);
@@ -103,7 +105,6 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             }
         }
 
-
         String changeSetString = changeSet.toString(false);
         if (seenChangeSets.contains(changeSetString)) {
             duplicateChangeSets.add(changeSet);
@@ -115,7 +116,6 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     public List<ChangeSet> getInvalidMD5Sums() {
         return invalidMD5Sums;
     }
-
 
     public List<FailedPrecondition> getFailedPreconditions() {
         return failedPreconditions;
@@ -146,13 +146,9 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     }
 
     public boolean validationPassed() {
-        return invalidMD5Sums.size() == 0
-                && failedPreconditions.size() == 0
-                && errorPreconditions.size() == 0
-                && duplicateChangeSets.size() == 0
-                && changeValidationExceptions.size() == 0
-                && setupExceptions.size() == 0
-                && !validationErrors.hasErrors();
+        return invalidMD5Sums.size() == 0 && failedPreconditions.size() == 0 && errorPreconditions.size() == 0
+                && duplicateChangeSets.size() == 0 && changeValidationExceptions.size() == 0
+                && setupExceptions.size() == 0 && !validationErrors.hasErrors();
     }
 
     public Database getDatabase() {

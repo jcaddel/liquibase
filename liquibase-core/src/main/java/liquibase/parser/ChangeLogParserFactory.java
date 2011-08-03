@@ -14,14 +14,13 @@ public class ChangeLogParserFactory {
     private List<ChangeLogParser> parsers;
     private Comparator<ChangeLogParser> changelogParserComparator;
 
-
     public static void reset() {
         instance = new ChangeLogParserFactory();
     }
 
     public static ChangeLogParserFactory getInstance() {
         if (instance == null) {
-             instance = new ChangeLogParserFactory();
+            instance = new ChangeLogParserFactory();
         }
         return instance;
     }
@@ -39,7 +38,7 @@ public class ChangeLogParserFactory {
             classes = ServiceLocator.getInstance().findClasses(ChangeLogParser.class);
 
             for (Class<? extends ChangeLogParser> clazz : classes) {
-                    register((ChangeLogParser) clazz.getConstructor().newInstance());
+                register((ChangeLogParser) clazz.getConstructor().newInstance());
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
@@ -51,14 +50,15 @@ public class ChangeLogParserFactory {
         return parsers;
     }
 
-    public ChangeLogParser getParser(String fileNameOrExtension, ResourceAccessor resourceAccessor) throws LiquibaseException {
+    public ChangeLogParser getParser(String fileNameOrExtension, ResourceAccessor resourceAccessor)
+            throws LiquibaseException {
         for (ChangeLogParser parser : parsers) {
             if (parser.supports(fileNameOrExtension, resourceAccessor)) {
                 return parser;
             }
         }
 
-        throw new LiquibaseException("Cannot find parser that supports "+fileNameOrExtension);
+        throw new LiquibaseException("Cannot find parser that supports " + fileNameOrExtension);
     }
 
     public void register(ChangeLogParser changeLogParser) {

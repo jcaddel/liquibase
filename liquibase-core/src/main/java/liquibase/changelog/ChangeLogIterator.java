@@ -19,13 +19,14 @@ public class ChangeLogIterator {
         this.changeSetFilters = Arrays.asList(changeSetFilters);
     }
 
-    public ChangeLogIterator(List<RanChangeSet> changeSetList, DatabaseChangeLog changeLog, ChangeSetFilter... changeSetFilters) {
+    public ChangeLogIterator(List<RanChangeSet> changeSetList, DatabaseChangeLog changeLog,
+            ChangeSetFilter... changeSetFilters) {
         final List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
         for (RanChangeSet ranChangeSet : changeSetList) {
-        	ChangeSet changeSet = changeLog.getChangeSet(ranChangeSet);
-        	if (changeSet != null) {
-        		changeSets.add(changeSet);
-        	}
+            ChangeSet changeSet = changeLog.getChangeSet(ranChangeSet);
+            if (changeSet != null) {
+                changeSets.add(changeSet);
+            }
         }
         this.databaseChangeLog = (new DatabaseChangeLog() {
             @Override

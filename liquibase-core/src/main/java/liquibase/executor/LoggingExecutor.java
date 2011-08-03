@@ -56,7 +56,8 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
         return 0;
     }
 
-    public Map call(CallableSqlStatement csc, List declaredParameters, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    public Map call(CallableSqlStatement csc, List declaredParameters, List<SqlVisitor> sqlVisitors)
+            throws DatabaseException {
         throw new DatabaseException("Do not know how to output callable statement");
     }
 
@@ -78,7 +79,8 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     private void outputStatement(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         try {
             if (SqlGeneratorFactory.getInstance().requiresCurrentDatabaseMetadata(sql, database)) {
-                throw new DatabaseException(sql.getClass().getSimpleName()+" requires access to up to date database metadata which is not available in SQL output mode");
+                throw new DatabaseException(sql.getClass().getSimpleName()
+                        + " requires access to up to date database metadata which is not available in SQL output mode");
             }
             for (String statement : applyVisitors(sql, sqlVisitors)) {
                 if (statement == null) {
@@ -86,13 +88,13 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
                 }
                 output.write(statement);
 
-
-                if (database instanceof MSSQLDatabase || database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
+                if (database instanceof MSSQLDatabase || database instanceof SybaseDatabase
+                        || database instanceof SybaseASADatabase) {
                     output.write(StreamUtil.getLineSeparator());
                     output.write("GO");
-    //            } else if (database instanceof OracleDatabase) {
-    //                output.write(StreamUtil.getLineSeparator());
-    //                output.write("/");
+                    // } else if (database instanceof OracleDatabase) {
+                    // output.write(StreamUtil.getLineSeparator());
+                    // output.write("/");
                 } else {
                     String endDelimiter = ";";
                     if (sql instanceof RawSqlStatement) {
@@ -117,7 +119,8 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
         return delegatedReadExecutor.queryForObject(sql, requiredType);
     }
 
-    public Object queryForObject(SqlStatement sql, Class requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    public Object queryForObject(SqlStatement sql, Class requiredType, List<SqlVisitor> sqlVisitors)
+            throws DatabaseException {
         return delegatedReadExecutor.queryForObject(sql, requiredType, sqlVisitors);
     }
 
@@ -133,7 +136,7 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
         try {
             return delegatedReadExecutor.queryForInt(sql);
         } catch (DatabaseException e) {
-            if (sql instanceof GetNextChangeSetSequenceValueStatement) { //table probably does not exist
+            if (sql instanceof GetNextChangeSetSequenceValueStatement) { // table probably does not exist
                 return 0;
             }
             throw e;
@@ -148,7 +151,8 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
         return delegatedReadExecutor.queryForList(sql, elementType);
     }
 
-    public List queryForList(SqlStatement sql, Class elementType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    public List queryForList(SqlStatement sql, Class elementType, List<SqlVisitor> sqlVisitors)
+            throws DatabaseException {
         return delegatedReadExecutor.queryForList(sql, elementType, sqlVisitors);
     }
 

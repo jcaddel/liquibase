@@ -17,7 +17,8 @@ public class ChangeLogSyncVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
-    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
+    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database)
+            throws LiquibaseException {
         this.database.markChangeSetExecStatus(changeSet, ChangeSet.ExecType.EXECUTED);
     }
 }

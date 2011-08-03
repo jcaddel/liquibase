@@ -10,7 +10,6 @@ public class UnparsedSql implements Sql {
     private String endDelimiter;
     private Set<DatabaseObject> affectedDatabaseObjects = new HashSet<DatabaseObject>();
 
-
     public UnparsedSql(String sql, DatabaseObject... affectedDatabaseObjects) {
         this(sql, ";", affectedDatabaseObjects);
     }
@@ -28,7 +27,8 @@ public class UnparsedSql implements Sql {
                 DatabaseObject[] containingObjects = object.getContainingObjects();
                 if (containingObjects != null) {
                     for (DatabaseObject containingObject : containingObjects) {
-                        if (containingObject != null && !this.affectedDatabaseObjects.contains(containingObject) && !moreAffectedDatabaseObjects.contains(containingObject)) {
+                        if (containingObject != null && !this.affectedDatabaseObjects.contains(containingObject)
+                                && !moreAffectedDatabaseObjects.contains(containingObject)) {
                             moreAffectedDatabaseObjects.add(containingObject);
                         }
                     }

@@ -12,7 +12,6 @@ public class DeleteStatement extends AbstractSqlStatement {
     private String whereClause;
     private List<Object> whereParameters = new ArrayList<Object>();
 
-
     public DeleteStatement(String schemaName, String tableName) {
         this.schemaName = schemaName;
         this.tableName = tableName;

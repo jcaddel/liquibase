@@ -19,7 +19,7 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
     private String tableName;
     private List<ColumnConfig> columns;
 
-    @TextNode(nodeName="where")
+    @TextNode(nodeName = "where")
     private String whereClause;
 
     public UpdateDataChange() {
@@ -69,7 +69,8 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
 
     public SqlStatement[] generateStatements(Database database) {
 
-        UpdateStatement statement = new UpdateStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName());
+        UpdateStatement statement = new UpdateStatement(getSchemaName() == null ? database.getDefaultSchemaName()
+                : getSchemaName(), getTableName());
 
         for (ColumnConfig column : columns) {
             statement.addNewColumnValue(column.getName(), column.getValueObject());
@@ -77,9 +78,7 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
 
         statement.setWhereClause(whereClause);
 
-        return new SqlStatement[]{
-                statement
-        };
+        return new SqlStatement[] { statement };
     }
 
     public String getConfirmationMessage() {

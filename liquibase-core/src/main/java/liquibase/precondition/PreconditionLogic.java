@@ -16,5 +16,5 @@ public abstract class PreconditionLogic implements Precondition {
     public void addNestedPrecondition(Precondition precondition) {
         nestedPreconditions.add(precondition);
     }
-    
+
 }

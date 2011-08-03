@@ -10,15 +10,15 @@ import liquibase.statement.core.DropViewStatement;
 
 public class DropViewGenerator extends AbstractSqlGenerator<DropViewStatement> {
 
-    public ValidationErrors validate(DropViewStatement dropViewStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DropViewStatement dropViewStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("viewName", dropViewStatement.getViewName());
         return validationErrors;
     }
 
     public Sql[] generateSql(DropViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        return new Sql[] {
-                new UnparsedSql("DROP VIEW " + database.escapeViewName(statement.getSchemaName(), statement.getViewName()))
-        };
+        return new Sql[] { new UnparsedSql("DROP VIEW "
+                + database.escapeViewName(statement.getSchemaName(), statement.getViewName())) };
     }
 }

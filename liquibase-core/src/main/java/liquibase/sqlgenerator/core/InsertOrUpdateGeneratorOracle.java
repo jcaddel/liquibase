@@ -14,21 +14,23 @@ import java.util.Date;
 
 public class InsertOrUpdateGeneratorOracle extends InsertOrUpdateGenerator {
 
-
     @Override
     public boolean supports(InsertOrUpdateStatement statement, Database database) {
         return database instanceof OracleDatabase;
     }
 
     @Override
-    protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause) {
+    protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database,
+            String whereClause) {
 
         StringBuffer recordCheckSql = new StringBuffer();
 
         recordCheckSql.append("DECLARE\n");
         recordCheckSql.append("\tv_reccount NUMBER := 0;\n");
         recordCheckSql.append("BEGIN\n");
-        recordCheckSql.append("\tSELECT COUNT(*) INTO v_reccount FROM " + database.escapeTableName(insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName()) + " WHERE ");
+        recordCheckSql.append("\tSELECT COUNT(*) INTO v_reccount FROM "
+                + database.escapeTableName(insertOrUpdateStatement.getSchemaName(),
+                        insertOrUpdateStatement.getTableName()) + " WHERE ");
 
         recordCheckSql.append(whereClause);
         recordCheckSql.append(";\n");
@@ -39,12 +41,12 @@ public class InsertOrUpdateGeneratorOracle extends InsertOrUpdateGenerator {
     }
 
     @Override
-    protected String getElse(Database database){
-               return "\tELSIF v_reccount = 1 THEN\n";
+    protected String getElse(Database database) {
+        return "\tELSIF v_reccount = 1 THEN\n";
     }
 
     @Override
-    protected String getPostUpdateStatements(){
+    protected String getPostUpdateStatements() {
         StringBuffer endStatements = new StringBuffer();
         endStatements.append("END IF;\n");
         endStatements.append("END;\n");

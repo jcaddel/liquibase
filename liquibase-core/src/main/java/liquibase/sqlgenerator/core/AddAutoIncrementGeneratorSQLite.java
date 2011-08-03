@@ -18,9 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * SQLite does not support this ALTER TABLE operation until now.
- * For more information see: http://www.sqlite.org/omitted.html.
- * This is a small work around...
+ * SQLite does not support this ALTER TABLE operation until now. For more information see:
+ * http://www.sqlite.org/omitted.html. This is a small work around...
  */
 public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
 
@@ -35,7 +34,8 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public Sql[] generateSql(final AddAutoIncrementStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(final AddAutoIncrementStatement statement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         List<Sql> statements = new ArrayList<Sql>();
 
         // define alter table logic
@@ -63,8 +63,10 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
 
         try {
             // alter table
-            for (SqlStatement generatedStatement : SQLiteDatabase.getAlterTableStatements(rename_alter_visitor,database, statement.getSchemaName(), statement.getTableName())) {
-                    statements.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(generatedStatement, database)));
+            for (SqlStatement generatedStatement : SQLiteDatabase.getAlterTableStatements(rename_alter_visitor,
+                    database, statement.getSchemaName(), statement.getTableName())) {
+                statements.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(generatedStatement,
+                        database)));
             }
         } catch (DatabaseException e) {
             e.printStackTrace();

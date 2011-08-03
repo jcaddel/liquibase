@@ -34,7 +34,7 @@ public class ChangeLogPropertyDefinedPrecondition implements Precondition {
     public void setValue(String value) {
         this.value = value;
     }
-    
+
     public Warnings warn(Database database) {
         return new Warnings();
     }
@@ -43,17 +43,19 @@ public class ChangeLogPropertyDefinedPrecondition implements Precondition {
         return new ValidationErrors();
     }
 
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
+            throws PreconditionFailedException, PreconditionErrorException {
         ChangeLogParameters changeLogParameters = changeLog.getChangeLogParameters();
         if (changeLogParameters == null) {
             throw new PreconditionFailedException("No Changelog properties were set", changeLog, this);
         }
         Object propertyValue = changeLogParameters.getValue(property);
         if (propertyValue == null) {
-            throw new PreconditionFailedException("Changelog property '"+ property +"' was not set", changeLog, this);
+            throw new PreconditionFailedException("Changelog property '" + property + "' was not set", changeLog, this);
         }
         if (value != null && !propertyValue.toString().equals(value)) {
-            throw new PreconditionFailedException("Expected changelog property '"+ property +"' to have a value of '"+value+"'.  Got '"+propertyValue+"'", changeLog, this);
+            throw new PreconditionFailedException("Expected changelog property '" + property + "' to have a value of '"
+                    + value + "'.  Got '" + propertyValue + "'", changeLog, this);
         }
     }
 }

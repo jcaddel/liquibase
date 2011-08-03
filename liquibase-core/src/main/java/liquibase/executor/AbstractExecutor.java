@@ -25,7 +25,7 @@ public abstract class AbstractExecutor {
         }
         String[] returnSql = new String[sql.length];
 
-        for (int i=0; i<sql.length; i++) {
+        for (int i = 0; i < sql.length; i++) {
             if (sql[i] == null) {
                 continue;
             }

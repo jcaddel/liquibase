@@ -20,7 +20,7 @@ public class DefaultXmlWriter implements XmlWriter {
             try {
                 factory.setAttribute("indent-number", 4);
             } catch (Exception e) {
-                ; //guess we can't set it, that's ok
+                ; // guess we can't set it, that's ok
             }
 
             Transformer transformer = factory.newTransformer();
@@ -28,7 +28,8 @@ public class DefaultXmlWriter implements XmlWriter {
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 
-            //need to nest outputStreamWriter to get around JDK 5 bug.  See http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6296446
+            // need to nest outputStreamWriter to get around JDK 5 bug. See
+            // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6296446
             transformer.transform(new DOMSource(doc), new StreamResult(new OutputStreamWriter(outputStream, "utf-8")));
         } catch (TransformerException e) {
             throw new IOException(e.getMessage());

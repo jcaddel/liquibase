@@ -49,32 +49,36 @@ public class CustomPreconditionWrapper implements Precondition {
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
-    
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
+            throws PreconditionFailedException, PreconditionErrorException {
         CustomPrecondition customPrecondition;
         try {
-//            System.out.println(classLoader.toString());
+            // System.out.println(classLoader.toString());
             try {
                 customPrecondition = (CustomPrecondition) Class.forName(className, true, classLoader).newInstance();
-            } catch (ClassCastException e) { //fails in Ant in particular
+            } catch (ClassCastException e) { // fails in Ant in particular
                 customPrecondition = (CustomPrecondition) Class.forName(className).newInstance();
             }
         } catch (Exception e) {
-            throw new PreconditionFailedException("Could not open custom precondition class "+className, changeLog, this);
+            throw new PreconditionFailedException("Could not open custom precondition class " + className, changeLog,
+                    this);
         }
 
         for (String param : params) {
             try {
                 ObjectUtil.setProperty(customPrecondition, param, paramValues.get(param));
             } catch (Exception e) {
-                throw new PreconditionFailedException("Error setting parameter "+param+" on custom precondition "+className, changeLog, this);
+                throw new PreconditionFailedException("Error setting parameter " + param + " on custom precondition "
+                        + className, changeLog, this);
             }
         }
 
         try {
             customPrecondition.check(database);
         } catch (CustomPreconditionFailedException e) {
-            throw new PreconditionFailedException(new FailedPrecondition("Custom Precondition Failed: "+e.getMessage(), changeLog, this));
+            throw new PreconditionFailedException(new FailedPrecondition("Custom Precondition Failed: "
+                    + e.getMessage(), changeLog, this));
         } catch (CustomPreconditionErrorException e) {
             throw new PreconditionErrorException(new ErrorPrecondition(e, changeLog, this));
         }

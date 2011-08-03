@@ -12,9 +12,9 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
 
 /**
- * Implementation of liquibase.FileOpener for Maven which will use a default or user
- * specified {@link ClassLoader} to load files/resources.
- *
+ * Implementation of liquibase.FileOpener for Maven which will use a default or user specified {@link ClassLoader} to
+ * load files/resources.
+ * 
  * @see liquibase.resource.ResourceAccessor
  */
 public class MavenResourceAccessor implements ResourceAccessor {
@@ -32,10 +32,11 @@ public class MavenResourceAccessor implements ResourceAccessor {
     }
 
     /**
-     * Creates a {@link liquibase.resource.ResourceAccessor} that will use the specified
-     * {@link ClassLoader} to load files.
-     *
-     * @param cl The {@link ClassLoader} to use to load files/resources.
+     * Creates a {@link liquibase.resource.ResourceAccessor} that will use the specified {@link ClassLoader} to load
+     * files.
+     * 
+     * @param cl
+     *            The {@link ClassLoader} to use to load files/resources.
      */
     public MavenResourceAccessor(ClassLoader cl) {
         _loader = cl;
@@ -58,13 +59,13 @@ public class MavenResourceAccessor implements ResourceAccessor {
         String description;
         if (_loader instanceof URLClassLoader) {
             List<String> urls = new ArrayList<String>();
-            for (URL url : ((URLClassLoader) _loader ).getURLs()) {
+            for (URL url : ((URLClassLoader) _loader).getURLs()) {
                 urls.add(url.toExternalForm());
             }
             description = StringUtils.join(urls, ",");
         } else {
-            description = _loader .getClass().getName();
+            description = _loader.getClass().getName();
         }
-        return getClass().getName()+"("+ description +")";
+        return getClass().getName() + "(" + description + ")";
     }
 }

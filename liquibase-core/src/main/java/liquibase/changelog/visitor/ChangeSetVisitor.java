@@ -8,11 +8,10 @@ import liquibase.exception.LiquibaseException;
 public interface ChangeSetVisitor {
 
     public enum Direction {
-        FORWARD,
-        REVERSE
+        FORWARD, REVERSE
     };
 
-    Direction getDirection(); 
+    Direction getDirection();
 
     void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException;
 }

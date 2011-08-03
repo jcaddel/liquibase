@@ -16,19 +16,24 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         return database.supportsSequences();
     }
 
-    public ValidationErrors validate(CreateSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateSequenceStatement statement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("sequenceName", statement.getSequenceName());
 
-        validationErrors.checkDisallowedField("startValue", statement.getStartValue(), database, FirebirdDatabase.class);
-        validationErrors.checkDisallowedField("incrementBy", statement.getIncrementBy(), database, FirebirdDatabase.class);
+        validationErrors
+                .checkDisallowedField("startValue", statement.getStartValue(), database, FirebirdDatabase.class);
+        validationErrors.checkDisallowedField("incrementBy", statement.getIncrementBy(), database,
+                FirebirdDatabase.class);
 
-        validationErrors.checkDisallowedField("minValue", statement.getMinValue(), database, FirebirdDatabase.class, H2Database.class, HsqlDatabase.class);
-        validationErrors.checkDisallowedField("maxValue", statement.getMaxValue(), database, FirebirdDatabase.class, H2Database.class, HsqlDatabase.class);
+        validationErrors.checkDisallowedField("minValue", statement.getMinValue(), database, FirebirdDatabase.class,
+                H2Database.class, HsqlDatabase.class);
+        validationErrors.checkDisallowedField("maxValue", statement.getMaxValue(), database, FirebirdDatabase.class,
+                H2Database.class, HsqlDatabase.class);
 
-        validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, DB2Database.class, MaxDBDatabase.class);
-
+        validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, DB2Database.class,
+                MaxDBDatabase.class);
 
         return validationErrors;
     }
@@ -61,6 +66,6 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             }
         }
 
-        return new Sql[]{new UnparsedSql(buffer.toString())};
+        return new Sql[] { new UnparsedSql(buffer.toString()) };
     }
 }

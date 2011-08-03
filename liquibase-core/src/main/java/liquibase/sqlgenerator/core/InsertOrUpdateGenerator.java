@@ -16,11 +16,12 @@ import java.util.HashSet;
 
 public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<InsertOrUpdateStatement> {
 
-    protected abstract String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause);
+    protected abstract String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database,
+            String whereClause);
 
     protected abstract String getElse(Database database);
 
-    protected String getPostUpdateStatements(){
+    protected String getPostUpdateStatements() {
         return "";
     }
 
@@ -29,7 +30,8 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         return PRIORITY_DATABASE;
     }
 
-    public ValidationErrors validate(InsertOrUpdateStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(InsertOrUpdateStatement statement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", statement.getTableName());
         validationErrors.checkRequiredField("columns", statement.getColumnValues());
@@ -43,9 +45,10 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
 
         String[] pkColumns = insertOrUpdateStatement.getPrimaryKey().split(",");
 
-        for(String thisPkColumn:pkColumns)
-        {
-            where.append(database.escapeColumnName(insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName(), thisPkColumn)).append(" = ");
+        for (String thisPkColumn : pkColumns) {
+            where.append(
+                    database.escapeColumnName(insertOrUpdateStatement.getSchemaName(),
+                            insertOrUpdateStatement.getTableName(), thisPkColumn)).append(" = ");
             Object newValue = insertOrUpdateStatement.getColumnValues().get(thisPkColumn);
             if (newValue == null || newValue.toString().equals("NULL")) {
                 where.append("NULL");
@@ -55,9 +58,11 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
                 where.append(database.getDateLiteral(((Date) newValue)));
             } else if (newValue instanceof Boolean) {
                 if (((Boolean) newValue)) {
-                    where.append(TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getTrueBooleanValue());
+                    where.append(TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType()
+                            .getTrueBooleanValue());
                 } else {
-                    where.append(TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getFalseBooleanValue());
+                    where.append(TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType()
+                            .getFalseBooleanValue());
                 }
             } else {
                 where.append(newValue);
@@ -66,17 +71,17 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
             where.append(" AND ");
         }
 
-        where.delete(where.lastIndexOf(" AND "),where.lastIndexOf(" AND ") + " AND ".length());
+        where.delete(where.lastIndexOf(" AND "), where.lastIndexOf(" AND ") + " AND ".length());
         return where.toString();
     }
 
-    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer insertBuffer = new StringBuffer();
         InsertGenerator insert = new InsertGenerator();
-        Sql[] insertSql = insert.generateSql(insertOrUpdateStatement,database,sqlGeneratorChain);
+        Sql[] insertSql = insert.generateSql(insertOrUpdateStatement, database, sqlGeneratorChain);
 
-        for(Sql s:insertSql)
-        {
+        for (Sql s : insertSql) {
             insertBuffer.append(s.toSql());
             insertBuffer.append(";");
         }
@@ -94,31 +99,31 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
      * @param sqlGeneratorChain
      * @return the update statement, if there is nothing to update return null
      */
-    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement,Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {
+    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database,
+            String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {
 
         StringBuffer updateSqlString = new StringBuffer();
 
         UpdateGenerator update = new UpdateGenerator();
-        UpdateStatement updateStatement = new UpdateStatement(insertOrUpdateStatement.getSchemaName(),insertOrUpdateStatement.getTableName());
+        UpdateStatement updateStatement = new UpdateStatement(insertOrUpdateStatement.getSchemaName(),
+                insertOrUpdateStatement.getTableName());
         updateStatement.setWhereClause(whereClause + ";\n");
 
-        String[] pkFields=insertOrUpdateStatement.getPrimaryKey().split(",");
+        String[] pkFields = insertOrUpdateStatement.getPrimaryKey().split(",");
         HashSet<String> hashPkFields = new HashSet<String>(Arrays.asList(pkFields));
-        for(String columnKey:insertOrUpdateStatement.getColumnValues().keySet())
-        {
+        for (String columnKey : insertOrUpdateStatement.getColumnValues().keySet()) {
             if (!hashPkFields.contains(columnKey)) {
-                updateStatement.addNewColumnValue(columnKey,insertOrUpdateStatement.getColumnValue(columnKey));
+                updateStatement.addNewColumnValue(columnKey, insertOrUpdateStatement.getColumnValue(columnKey));
             }
         }
         // this isn't very elegant but the code fails above without any columns to update
-        if(updateStatement.getNewColumnValues().isEmpty()) {
-        	throw new LiquibaseException("No fields to update in set clause");
+        if (updateStatement.getNewColumnValues().isEmpty()) {
+            throw new LiquibaseException("No fields to update in set clause");
         }
 
         Sql[] updateSql = update.generateSql(updateStatement, database, sqlGeneratorChain);
 
-        for(Sql s:updateSql)
-        {
+        for (Sql s : updateSql) {
             updateSqlString.append(s.toSql());
             updateSqlString.append(";");
         }
@@ -130,28 +135,29 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
 
     }
 
-    public Sql[] generateSql(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(InsertOrUpdateStatement insertOrUpdateStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer completeSql = new StringBuffer();
         String whereClause = getWhereClause(insertOrUpdateStatement, database);
 
-        completeSql.append( getRecordCheck(insertOrUpdateStatement, database, whereClause));
+        completeSql.append(getRecordCheck(insertOrUpdateStatement, database, whereClause));
 
         completeSql.append(getInsertStatement(insertOrUpdateStatement, database, sqlGeneratorChain));
 
         try {
-        	
-            String updateStatement = getUpdateStatement(insertOrUpdateStatement,database,whereClause,sqlGeneratorChain);
-            
+
+            String updateStatement = getUpdateStatement(insertOrUpdateStatement, database, whereClause,
+                    sqlGeneratorChain);
+
             completeSql.append(getElse(database));
 
             completeSql.append(updateStatement);
-            
-        } catch (LiquibaseException e) {}
+
+        } catch (LiquibaseException e) {
+        }
 
         completeSql.append(getPostUpdateStatements());
 
-        return new Sql[]{
-                new UnparsedSql(completeSql.toString())
-        };
+        return new Sql[] { new UnparsedSql(completeSql.toString()) };
     }
 }

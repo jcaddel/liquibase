@@ -43,12 +43,11 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     }
 
     public String[] getValidFileExtensions() {
-        return new String[] {"xml"};
+        return new String[] { "xml" };
     }
 
-
     public String serialize(DatabaseChangeLog databaseChangeLog) {
-        return null; //todo
+        return null; // todo
     }
 
     public String serialize(Change change) {
@@ -76,39 +75,39 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     }
 
+    public void write(List<ChangeSet> changeSets, OutputStream out) throws IOException {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder;
+        try {
+            documentBuilder = factory.newDocumentBuilder();
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException(e);
+        }
+        documentBuilder.setEntityResolver(new LiquibaseEntityResolver());
 
-	public void write(List<ChangeSet> changeSets, OutputStream out)
-			throws IOException {
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder documentBuilder;
-		try {
-			documentBuilder = factory.newDocumentBuilder();
-		}
-		catch(ParserConfigurationException e) {
-			throw new RuntimeException(e);
-		}
-		documentBuilder.setEntityResolver(new LiquibaseEntityResolver());
+        Document doc = documentBuilder.newDocument();
+        Element changeLogElement = doc.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(),
+                "databaseChangeLog");
 
-		Document doc = documentBuilder.newDocument();
-		Element changeLogElement = doc.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "databaseChangeLog");
+        changeLogElement.setAttribute("xmlns", XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace());
+        changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+        changeLogElement.setAttribute("xsi:schemaLocation",
+                "http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-"
+                        + XMLChangeLogSAXParser.getSchemaVersion() + ".xsd");
 
-		changeLogElement.setAttribute("xmlns", XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace());
-		changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-		changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-"+ XMLChangeLogSAXParser.getSchemaVersion()+ ".xsd");
+        doc.appendChild(changeLogElement);
+        setCurrentChangeLogFileDOM(doc);
 
-		doc.appendChild(changeLogElement);
-		setCurrentChangeLogFileDOM(doc);
+        for (ChangeSet changeSet : changeSets) {
+            doc.getDocumentElement().appendChild(createNode(changeSet));
+        }
 
-		for (ChangeSet changeSet : changeSets) {
-			doc.getDocumentElement().appendChild(createNode(changeSet));
-		}
+        new DefaultXmlWriter().write(doc, out);
+    }
 
-		new DefaultXmlWriter().write(doc, out);
-	}
-
-	
     public Element createNode(SqlVisitor visitor) {
-        Element node = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), visitor.getName());
+        Element node = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(),
+                visitor.getName());
         try {
             List<Field> allFields = new ArrayList<Field>();
             Class classToExtractFieldsFrom = visitor.getClass();
@@ -126,10 +125,9 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 if (field.getName().equals("serialVersionUID")) {
                     continue;
                 }
-                if (field.getName().equals("$VRc")) { //from emma
+                if (field.getName().equals("$VRc")) { // from emma
                     continue;
                 }
-
 
                 String propertyName = field.getName();
                 Object value = field.get(visitor);
@@ -145,7 +143,8 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     }
 
     public Element createNode(Change change) {
-        Element node = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), change.getChangeMetaData().getName());
+        Element node = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(),
+                change.getChangeMetaData().getName());
         try {
             List<Field> allFields = new ArrayList<Field>();
             Class classToExtractFieldsFrom = change.getClass();
@@ -163,10 +162,10 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 if (field.getName().equals("serialVersionUID")) {
                     continue;
                 }
-                if (field.getName().equals("$VRc")) { //from emma
+                if (field.getName().equals("$VRc")) { // from emma
                     continue;
                 }
-                
+
                 // String properties annotated with @TextNode are serialized as a child node
                 TextNode textNodeAnnotation = field.getAnnotation(TextNode.class);
                 if (textNodeAnnotation != null) {
@@ -174,7 +173,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                     node.appendChild(createNode(textNodeAnnotation.nodeName(), textNodeContent));
                     continue;
                 }
-                
+
                 String propertyName = field.getName();
                 if (field.getType().equals(ColumnConfig.class)) {
                     node.appendChild(createNode((ColumnConfig) field.get(change)));
@@ -187,8 +186,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 } else {
                     Object value = field.get(change);
                     if (value != null) {
-                        if (propertyName.equals("procedureBody")
-                                || propertyName.equals("sql")
+                        if (propertyName.equals("procedureBody") || propertyName.equals("sql")
                                 || propertyName.equals("selectQuery")) {
                             node.setTextContent(value.toString());
                         } else {
@@ -206,13 +204,15 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     // create a XML node with nodeName and simple text content
     public Element createNode(String nodeName, String nodeContent) {
-        Element element = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), nodeName);
+        Element element = currentChangeLogFileDOM.createElementNS(
+                XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), nodeName);
         element.setTextContent(nodeContent);
         return element;
     }
-    
+
     public Element createNode(ColumnConfig columnConfig) {
-        Element element = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "column");
+        Element element = currentChangeLogFileDOM.createElementNS(
+                XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "column");
         if (columnConfig.getName() != null) {
             element.setAttribute("name", columnConfig.getName());
         }
@@ -261,7 +261,8 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         ConstraintsConfig constraints = columnConfig.getConstraints();
         if (constraints != null) {
-            Element constraintsElement = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "constraints");
+            Element constraintsElement = currentChangeLogFileDOM.createElementNS(
+                    XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "constraints");
             if (constraints.getCheck() != null) {
                 constraintsElement.setAttribute("check", constraints.getCheck());
             }
@@ -298,7 +299,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 constraintsElement.setAttribute("primaryKeyName", constraints.getPrimaryKeyName());
             }
 
-	        if (constraints.getPrimaryKeyTablespace() != null) {
+            if (constraints.getPrimaryKeyTablespace() != null) {
                 constraintsElement.setAttribute("primaryKeyTablespace", constraints.getPrimaryKeyTablespace());
             }
             element.appendChild(constraintsElement);
@@ -308,7 +309,8 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     }
 
     public Element createNode(ChangeSet changeSet) {
-        Element node = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "changeSet");
+        Element node = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(),
+                "changeSet");
         node.setAttribute("id", changeSet.getId());
         node.setAttribute("author", changeSet.getAuthor());
 
@@ -341,34 +343,35 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         }
 
         if (StringUtils.trimToNull(changeSet.getComments()) != null) {
-            Element commentsElement = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "comment");
+            Element commentsElement = currentChangeLogFileDOM.createElementNS(
+                    XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "comment");
             Text commentsText = currentChangeLogFileDOM.createTextNode(changeSet.getComments());
             commentsElement.appendChild(commentsText);
             node.appendChild(commentsElement);
         }
 
-
         for (Change change : changeSet.getChanges()) {
             node.appendChild(createNode(change));
         }
-        if (changeSet.getRollBackChanges()!=null && changeSet.getRollBackChanges().length > 0) {
+        if (changeSet.getRollBackChanges() != null && changeSet.getRollBackChanges().length > 0) {
             Element rollback = currentChangeLogFileDOM.createElement("rollback");
             for (Change change : changeSet.getRollBackChanges()) {
                 rollback.appendChild(createNode(change));
             }
-            node.appendChild( rollback );
+            node.appendChild(rollback);
         }
-        
+
         return node;
     }
 
-
     public Element createNode(CustomChangeWrapper change) {
-        Element customElement = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "custom");
+        Element customElement = currentChangeLogFileDOM.createElementNS(
+                XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "custom");
         customElement.setAttribute("class", change.getClassName());
 
         for (String param : change.getParams()) {
-            Element paramElement = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "param");
+            Element paramElement = currentChangeLogFileDOM.createElementNS(
+                    XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "param");
             paramElement.setAttribute("name", param);
             paramElement.setAttribute("value", change.getParamValues().get(param));
 
@@ -379,12 +382,11 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     }
 
     /*
-     * Creates a {@link String} using the XML element representation of this
-     * change
-     *
+     * Creates a {@link String} using the XML element representation of this change
+     * 
      * @param node the {@link Element} associated to this change
-     * @param buffer a {@link StringBuffer} object used to hold the {@link String}
-     *               representation of the change
+     * 
+     * @param buffer a {@link StringBuffer} object used to hold the {@link String} representation of the change
      */
     private void nodeToStringBuffer(Node node, StringBuffer buffer) {
         buffer.append("<").append(node.getNodeName());

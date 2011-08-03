@@ -29,9 +29,9 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     private String onUpdate;
     private String onDelete;
 
-	// Some databases supports creation of FK with referention to column marked as unique, not primary
-	// If FK referenced to such unique column this option should be set to false
-	private Boolean referencesUniqueColumn;
+    // Some databases supports creation of FK with referention to column marked as unique, not primary
+    // If FK referenced to such unique column this option should be set to false
+    private Boolean referencesUniqueColumn;
 
     public AddForeignKeyConstraintChange() {
         super("addForeignKeyConstraint", "Add Foreign Key Constraint", ChangeMetaData.PRIORITY_DEFAULT);
@@ -109,9 +109,9 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.initiallyDeferred = initiallyDeferred;
     }
 
-//    public Boolean getDeleteCascade() {
-//        return deleteCascade;
-//    }
+    // public Boolean getDeleteCascade() {
+    // return deleteCascade;
+    // }
 
     public void setDeleteCascade(Boolean deleteCascade) {
         if (deleteCascade != null && deleteCascade) {
@@ -135,17 +135,17 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         return this.onDelete;
     }
 
-	public Boolean getReferencesUniqueColumn() {
-		return referencesUniqueColumn;
-	}
+    public Boolean getReferencesUniqueColumn() {
+        return referencesUniqueColumn;
+    }
 
-	public void setReferencesUniqueColumn(Boolean referencesUniqueColumn) {
-		this.referencesUniqueColumn = referencesUniqueColumn;
-	}
+    public void setReferencesUniqueColumn(Boolean referencesUniqueColumn) {
+        this.referencesUniqueColumn = referencesUniqueColumn;
+    }
 
-	public void setOnDelete(ForeignKeyConstraintType rule) {
+    public void setOnDelete(ForeignKeyConstraintType rule) {
         if (rule == null) {
-            //nothing
+            // nothing
         } else if (rule == ForeignKeyConstraintType.importedKeyCascade) {
             setOnDelete("CASCADE");
         } else if (rule == ForeignKeyConstraintType.importedKeySetNull) {
@@ -154,19 +154,19 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
             setOnDelete("SET DEFAULT");
         } else if (rule == ForeignKeyConstraintType.importedKeyRestrict) {
             setOnDelete("RESTRICT");
-        } else if (rule == ForeignKeyConstraintType.importedKeyNoAction){
+        } else if (rule == ForeignKeyConstraintType.importedKeyNoAction) {
             setOnDelete("NO ACTION");
         } else {
-            throw new UnexpectedLiquibaseException("Unknown onDelete action: "+rule);
+            throw new UnexpectedLiquibaseException("Unknown onDelete action: " + rule);
         }
     }
 
     public void setOnUpdate(ForeignKeyConstraintType rule) {
         if (rule == null) {
-            //nothing
+            // nothing
         } else if (rule == ForeignKeyConstraintType.importedKeyCascade) {
             setOnUpdate("CASCADE");
-        } else  if (rule == ForeignKeyConstraintType.importedKeySetNull) {
+        } else if (rule == ForeignKeyConstraintType.importedKeySetNull) {
             setOnUpdate("SET NULL");
         } else if (rule == ForeignKeyConstraintType.importedKeySetDefault) {
             setOnUpdate("SET DEFAULT");
@@ -175,7 +175,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         } else if (rule == ForeignKeyConstraintType.importedKeyNoAction) {
             setOnUpdate("NO ACTION");
         } else {
-            throw new UnexpectedLiquibaseException("Unknown onUpdate action: "+onUpdate);
+            throw new UnexpectedLiquibaseException("Unknown onUpdate action: " + onUpdate);
         }
     }
 
@@ -191,20 +191,13 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
             initiallyDeferred = getInitiallyDeferred();
         }
 
-        return new SqlStatement[]{
-                new AddForeignKeyConstraintStatement(getConstraintName(),
-                        getBaseTableSchemaName() == null ? database.getDefaultSchemaName() : getBaseTableSchemaName(),
-                        getBaseTableName(),
-                        getBaseColumnNames(),
-                        getReferencedTableSchemaName() == null ? database.getDefaultSchemaName() : getReferencedTableSchemaName(),
-                        getReferencedTableName(),
-                        getReferencedColumnNames())
-                        .setDeferrable(deferrable)
-                        .setInitiallyDeferred(initiallyDeferred)
-                        .setOnUpdate(getOnUpdate())
-                        .setOnDelete(getOnDelete())
-		                .setReferencesUniqueColumn(getReferencesUniqueColumn())
-        };
+        return new SqlStatement[] { new AddForeignKeyConstraintStatement(getConstraintName(),
+                getBaseTableSchemaName() == null ? database.getDefaultSchemaName() : getBaseTableSchemaName(),
+                getBaseTableName(), getBaseColumnNames(),
+                getReferencedTableSchemaName() == null ? database.getDefaultSchemaName()
+                        : getReferencedTableSchemaName(), getReferencedTableName(), getReferencedColumnNames())
+                .setDeferrable(deferrable).setInitiallyDeferred(initiallyDeferred).setOnUpdate(getOnUpdate())
+                .setOnDelete(getOnDelete()).setReferencesUniqueColumn(getReferencesUniqueColumn()) };
     }
 
     @Override
@@ -214,9 +207,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         inverse.setBaseTableName(getBaseTableName());
         inverse.setConstraintName(getConstraintName());
 
-        return new Change[]{
-                inverse
-        };
+        return new Change[] { inverse };
     }
 
     public String getConfirmationMessage() {

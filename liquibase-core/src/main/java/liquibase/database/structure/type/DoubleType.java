@@ -1,12 +1,12 @@
 package liquibase.database.structure.type;
 
-public class DoubleType  extends DataType {
+public class DoubleType extends DataType {
     public DoubleType() {
-        super("DOUBLE",0,2);
+        super("DOUBLE", 0, 2);
     }
 
     public DoubleType(String dataTypeName) {
-        super(dataTypeName,0,0);
+        super(dataTypeName, 0, 0);
     }
 
 }

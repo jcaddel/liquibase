@@ -22,7 +22,6 @@ public class AlterSequenceStatement extends AbstractSqlStatement {
     public boolean skipOnUnsupported() {
         return true;
     }
-    
 
     public String getSchemaName() {
         return schemaName;

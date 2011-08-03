@@ -6,9 +6,9 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.StringUtils;
 
 /**
- * Object representing a data type, instead of a plain string. It will be returned by
- * the getXXXType in the Database interface.
- *
+ * Object representing a data type, instead of a plain string. It will be returned by the getXXXType in the Database
+ * interface.
+ * 
  * @author dsmith
  */
 public abstract class DataType {
@@ -17,8 +17,8 @@ public abstract class DataType {
     private int minParameters;
     private int maxParameters;
 
-	// Unit of data-type precision (i.e. BYTE, CHAR for Oracle)
-	private String unit;
+    // Unit of data-type precision (i.e. BYTE, CHAR for Oracle)
+    private String unit;
 
     private String firstParameter;
     private String secondParameter;
@@ -53,7 +53,8 @@ public abstract class DataType {
 
     public void setFirstParameter(String firstParameter) {
         if (maxParameters < 1) {
-            throw new UnexpectedLiquibaseException("Type "+getClass()+" doesn't support precision but precision was specified");
+            throw new UnexpectedLiquibaseException("Type " + getClass()
+                    + " doesn't support precision but precision was specified");
         }
         this.firstParameter = firstParameter;
     }
@@ -62,22 +63,22 @@ public abstract class DataType {
         return secondParameter;
     }
 
-
     public void setSecondParameter(String secondParameter) {
-        if (maxParameters <2 ) {
-            throw new UnexpectedLiquibaseException("Type "+getClass()+" doesn't support second parameters but one was specified");
+        if (maxParameters < 2) {
+            throw new UnexpectedLiquibaseException("Type " + getClass()
+                    + " doesn't support second parameters but one was specified");
         }
 
         this.secondParameter = secondParameter;
     }
 
-	public String getUnit() {
-		return unit;
-	}
+    public String getUnit() {
+        return unit;
+    }
 
-	public void setUnit(String unit) {
-		this.unit = unit;
-	}
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
 
     public String getAdditionalInformation() {
         return additionalInformation;
@@ -93,9 +94,11 @@ public abstract class DataType {
         } else if (value.toString().equals("CURRENT_TIMESTAMP()")) {
             return database.getCurrentDateTimeFunction();
         } else if (value.equals(Boolean.TRUE)) {
-            return TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getTrueBooleanValue();
+            return TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType()
+                    .getTrueBooleanValue();
         } else if (value.equals(Boolean.FALSE)) {
-            return TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getFalseBooleanValue();
+            return TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType()
+                    .getFalseBooleanValue();
         }
         return value.toString();
     }
@@ -104,20 +107,20 @@ public abstract class DataType {
     public String toString() {
         String returnString = getDataTypeName();
         if (getFirstParameter() != null) {
-            returnString += "("+getFirstParameter();
+            returnString += "(" + getFirstParameter();
 
             if (getSecondParameter() != null) {
-                returnString+=","+getSecondParameter();
+                returnString += "," + getSecondParameter();
             }
 
-	        if (getUnit() != null) {
-		        returnString+=" " + getUnit();
-	        }
+            if (getUnit() != null) {
+                returnString += " " + getUnit();
+            }
 
-            returnString+= ")";
+            returnString += ")";
         }
 
-        returnString += " "+ StringUtils.trimToEmpty(additionalInformation);
+        returnString += " " + StringUtils.trimToEmpty(additionalInformation);
 
         return returnString.trim();
     }
@@ -132,10 +135,10 @@ public abstract class DataType {
         return toString().hashCode();
     }
 
-//    @Override
-//    public String toString() {
-//        return this.getClass().getName() + "[" + getDataTypeName() + ", " + getSupportsPrecision() + "]";
-//    }
+    // @Override
+    // public String toString() {
+    // return this.getClass().getName() + "[" + getDataTypeName() + ", " + getSupportsPrecision() + "]";
+    // }
 
     public boolean getSupportsPrecision() {
         return false;

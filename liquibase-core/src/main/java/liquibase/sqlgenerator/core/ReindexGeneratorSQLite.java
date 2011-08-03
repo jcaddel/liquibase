@@ -20,15 +20,15 @@ public class ReindexGeneratorSQLite extends AbstractSqlGenerator<ReindexStatemen
         return (database instanceof SQLiteDatabase);
     }
 
-    public ValidationErrors validate(ReindexStatement reindexStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(ReindexStatement reindexStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", reindexStatement.getTableName());
         return validationErrors;
     }
 
     public Sql[] generateSql(ReindexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        return new Sql[] {
-                new UnparsedSql("REINDEX "+database.escapeTableName(statement.getSchemaName(), statement.getTableName()))
-        };
+        return new Sql[] { new UnparsedSql("REINDEX "
+                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())) };
     }
 }

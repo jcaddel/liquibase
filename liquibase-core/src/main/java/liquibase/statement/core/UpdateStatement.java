@@ -11,7 +11,6 @@ public class UpdateStatement extends AbstractSqlStatement {
     private String whereClause;
     private List<Object> whereParameters = new ArrayList<Object>();
 
-
     public UpdateStatement(String schemaName, String tableName) {
         this.schemaName = schemaName;
         this.tableName = tableName;

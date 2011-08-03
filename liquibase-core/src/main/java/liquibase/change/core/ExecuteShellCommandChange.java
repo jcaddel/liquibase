@@ -35,7 +35,6 @@ public class ExecuteShellCommandChange extends AbstractChange {
         super("executeCommand", "Execute Shell Command", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
-
     public String getExecutable() {
         return executable;
     }
@@ -47,7 +46,6 @@ public class ExecuteShellCommandChange extends AbstractChange {
     public void addArg(String arg) {
         this.args.add(arg);
     }
-
 
     public void setOs(String os) {
         this.os = StringUtils.splitAndTrim(os, ",");
@@ -62,7 +60,6 @@ public class ExecuteShellCommandChange extends AbstractChange {
         return new ValidationErrors();
     }
 
-
     @Override
     public Warnings warn(Database database) {
         return new Warnings();
@@ -74,21 +71,20 @@ public class ExecuteShellCommandChange extends AbstractChange {
             String currentOS = System.getProperty("os.name");
             if (!os.contains(currentOS)) {
                 shouldRun = false;
-                LogFactory.getLogger().info("Not executing on os "+currentOS+" when "+os+" was specified");
+                LogFactory.getLogger().info("Not executing on os " + currentOS + " when " + os + " was specified");
             }
         }
 
-    	// check if running under not-executed mode (logging output)
+        // check if running under not-executed mode (logging output)
         boolean nonExecutedMode = false;
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         if (executor instanceof LoggingExecutor) {
-        	nonExecutedMode = true;
+            nonExecutedMode = true;
         }
-        
+
         if (shouldRun && !nonExecutedMode) {
 
-
-            return new SqlStatement[]{new RuntimeStatement() {
+            return new SqlStatement[] { new RuntimeStatement() {
 
                 @Override
                 public Sql[] generate(Database database) {
@@ -124,15 +120,13 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
                     return null;
                 }
-            }};
+            } };
         }
-        
+
         if (nonExecutedMode) {
-        	return new SqlStatement[] {
-        			new CommentStatement(getCommandString())
-        	};
+            return new SqlStatement[] { new CommentStatement(getCommandString()) };
         }
-        
+
         return new SqlStatement[0];
     }
 

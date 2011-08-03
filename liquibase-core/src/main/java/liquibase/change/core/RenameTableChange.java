@@ -53,7 +53,7 @@ public class RenameTableChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
-        String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
+        String schemaName = getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName();
         statements.add(new RenameTableStatement(schemaName, getOldTableName(), getNewTableName()));
         if (database instanceof DB2Database) {
             statements.add(new ReorganizeTableStatement(schemaName, getNewTableName()));
@@ -69,9 +69,7 @@ public class RenameTableChange extends AbstractChange {
         inverse.setOldTableName(getNewTableName());
         inverse.setNewTableName(getOldTableName());
 
-        return new Change[]{
-                inverse
-        };
+        return new Change[] { inverse };
     }
 
     public String getConfirmationMessage() {

@@ -23,7 +23,6 @@ public class DatabaseRollbackFutureTask extends BaseLiquibaseTask {
 
             liquibase = createLiquibase();
 
-
             liquibase.futureRollbackSQL(getContexts(), writer);
 
             writer.flush();

@@ -25,15 +25,16 @@ public class MSSQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
     }
 
     /**
-     * The sp_fkeys stored procedure spec says that returned integer values of 0, 1 and 2 
-     * translate to cascade, noAction and SetNull, which are not the values in the JDBC
-     * standard. This override is a sticking plaster to stop invalid SQL from being generated.
+     * The sp_fkeys stored procedure spec says that returned integer values of 0, 1 and 2 translate to cascade, noAction
+     * and SetNull, which are not the values in the JDBC standard. This override is a sticking plaster to stop invalid
+     * SQL from being generated.
      * 
-     * @param JDBC foreign constraint type from JTDS (via sys.sp_fkeys)
+     * @param JDBC
+     *            foreign constraint type from JTDS (via sys.sp_fkeys)
      */
     @Override
     protected ForeignKeyConstraintType convertToForeignKeyConstraintType(int jdbcType) throws DatabaseException {
-    	
+
         if (jdbcType == 0) {
             return ForeignKeyConstraintType.importedKeyCascade;
         } else if (jdbcType == 1) {

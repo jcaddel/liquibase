@@ -4,25 +4,23 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
- * Simple adapter for PreparedStatementSetter that applies
- * a given array of arguments.
- *
+ * Simple adapter for PreparedStatementSetter that applies a given array of arguments.
+ * 
  * @author Spring Framework
  */
 class ArgPreparedStatementSetter implements PreparedStatementSetter {
 
     private final Object[] args;
 
-
     /**
      * Create a new ArgPreparedStatementSetter for the given arguments.
-     *
-     * @param args the arguments to set
+     * 
+     * @param args
+     *            the arguments to set
      */
     public ArgPreparedStatementSetter(Object[] args) {
         this.args = args;
     }
-
 
     public void setValues(PreparedStatement ps) throws SQLException {
         if (this.args != null) {
@@ -37,6 +35,5 @@ class ArgPreparedStatementSetter implements PreparedStatementSetter {
             }
         }
     }
-
 
 }

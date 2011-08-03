@@ -36,13 +36,15 @@ public class RunningAsPrecondition implements Precondition {
         return new ValidationErrors();
     }
 
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
+            throws PreconditionFailedException, PreconditionErrorException {
         String loggedusername = database.getConnection().getConnectionUserName();
         if (loggedusername.indexOf('@') >= 0) {
             loggedusername = loggedusername.substring(0, loggedusername.indexOf('@'));
         }
         if (!username.equalsIgnoreCase(loggedusername)) {
-            throw new PreconditionFailedException("RunningAs Precondition failed: expected "+username+", was "+loggedusername, changeLog, this);
+            throw new PreconditionFailedException("RunningAs Precondition failed: expected " + username + ", was "
+                    + loggedusername, changeLog, this);
         }
     }
 

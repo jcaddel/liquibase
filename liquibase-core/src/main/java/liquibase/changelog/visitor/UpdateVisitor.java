@@ -21,7 +21,8 @@ public class UpdateVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
-    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
+    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database)
+            throws LiquibaseException {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
         log.debug("Running Changeset:" + changeSet);
         ChangeSet.ExecType execType = changeSet.execute(databaseChangeLog, this.database);

@@ -9,7 +9,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddPrimaryKeyStatement;
 
 public class AddPrimaryKeyGeneratorInformix extends AddPrimaryKeyGenerator {
-	
+
     @Override
     public int getPriority() {
         return SqlGenerator.PRIORITY_DATABASE;
@@ -19,7 +19,7 @@ public class AddPrimaryKeyGeneratorInformix extends AddPrimaryKeyGenerator {
     public boolean supports(AddPrimaryKeyStatement statement, Database database) {
         return (database instanceof InformixDatabase);
     }
-    
+
     @Override
     public Sql[] generateSql(AddPrimaryKeyStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuilder sql = new StringBuilder();
@@ -28,13 +28,11 @@ public class AddPrimaryKeyGeneratorInformix extends AddPrimaryKeyGenerator {
         sql.append(" ADD CONSTRAINT PRIMARY KEY (");
         sql.append(database.escapeColumnNameList(statement.getColumnNames()));
         sql.append(")");
-   	    if (statement.getConstraintName() != null) {
-   	        sql.append(" CONSTRAINT ");
-   	        sql.append(database.escapeConstraintName(statement.getConstraintName()));
-   	    }
+        if (statement.getConstraintName() != null) {
+            sql.append(" CONSTRAINT ");
+            sql.append(database.escapeConstraintName(statement.getConstraintName()));
+        }
 
-        return new Sql[] {
-                new UnparsedSql(sql.toString())
-        };
+        return new Sql[] { new UnparsedSql(sql.toString()) };
     }
 }

@@ -9,7 +9,8 @@ public class SetNullableStatement extends AbstractSqlStatement {
     private String columnDataType;
     private boolean nullable;
 
-    public SetNullableStatement(String schemaName, String tableName, String columnName, String columnDataType, boolean nullable) {
+    public SetNullableStatement(String schemaName, String tableName, String columnName, String columnDataType,
+            boolean nullable) {
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.columnName = columnName;

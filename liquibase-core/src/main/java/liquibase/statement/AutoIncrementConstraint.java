@@ -10,7 +10,6 @@ public class AutoIncrementConstraint implements ColumnConstraint {
         setColumnName(columnName);
     }
 
-
     public String getColumnName() {
         return columnName;
     }

@@ -15,7 +15,6 @@ public class DatabaseFunctionType extends DataType {
             return "null";
         }
 
-
         return value.toString();
     }
 }

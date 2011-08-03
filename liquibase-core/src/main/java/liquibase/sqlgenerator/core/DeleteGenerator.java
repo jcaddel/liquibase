@@ -19,14 +19,16 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
         return !(database instanceof SQLiteDatabase);
     }
 
-    public ValidationErrors validate(DeleteStatement deleteStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DeleteStatement deleteStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", deleteStatement.getTableName());
         return validationErrors;
     }
 
     public Sql[] generateSql(DeleteStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer sql = new StringBuffer("DELETE FROM " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()));
+        StringBuffer sql = new StringBuffer("DELETE FROM "
+                + database.escapeTableName(statement.getSchemaName(), statement.getTableName()));
 
         if (statement.getWhereClause() != null) {
             String fixedWhereClause = " WHERE " + statement.getWhereClause();
@@ -36,7 +38,7 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
             sql.append(" ").append(fixedWhereClause);
         }
 
-        return new Sql[]{new UnparsedSql(sql.toString())};
+        return new Sql[] { new UnparsedSql(sql.toString()) };
     }
 
     private String convertToString(Object newValue, Database database) {
@@ -49,9 +51,11 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
             sqlString = database.getDateLiteral(((Date) newValue));
         } else if (newValue instanceof Boolean) {
             if (((Boolean) newValue)) {
-                sqlString = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getTrueBooleanValue();
+                sqlString = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType()
+                        .getTrueBooleanValue();
             } else {
-                sqlString = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getFalseBooleanValue();
+                sqlString = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType()
+                        .getFalseBooleanValue();
             }
         } else {
             sqlString = newValue.toString();

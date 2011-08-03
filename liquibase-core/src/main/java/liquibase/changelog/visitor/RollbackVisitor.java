@@ -18,7 +18,8 @@ public class RollbackVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.REVERSE;
     }
 
-    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
+    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database)
+            throws LiquibaseException {
         LogFactory.getLogger().info("Rolling Back Changeset:" + changeSet);
         changeSet.rollback(this.database);
         this.database.removeRanStatus(changeSet);

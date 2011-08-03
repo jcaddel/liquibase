@@ -11,10 +11,12 @@ import liquibase.statement.DatabaseFunction;
 
 public class ObjectUtil {
 
-	private static Map<Class<?>,Method[]>methodCache = new HashMap<Class<?>, Method[]>();
-	
-    public static Object getProperty(Object object, String propertyName) throws IllegalAccessException, InvocationTargetException {
-        String methodName = "get" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH) + propertyName.substring(1);
+    private static Map<Class<?>, Method[]> methodCache = new HashMap<Class<?>, Method[]>();
+
+    public static Object getProperty(Object object, String propertyName) throws IllegalAccessException,
+            InvocationTargetException {
+        String methodName = "get" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH)
+                + propertyName.substring(1);
         Method[] methods = object.getClass().getMethods();
         for (Method method : methods) {
             if (method.getName().equals(methodName) && method.getParameterTypes().length == 0) {
@@ -24,17 +26,19 @@ public class ObjectUtil {
         throw new RuntimeException("Property not found: " + propertyName);
     }
 
-    public static void setProperty(Object object, String propertyName, String propertyValue) throws IllegalAccessException, InvocationTargetException {
-        String methodName = "set" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH) + propertyName.substring(1);
+    public static void setProperty(Object object, String propertyName, String propertyValue)
+            throws IllegalAccessException, InvocationTargetException {
+        String methodName = "set" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH)
+                + propertyName.substring(1);
         Method[] methods;
-        
+
         methods = methodCache.get(object.getClass());
-        
+
         if (methods == null) {
-        	methods = object.getClass().getMethods();
-        	methodCache.put(object.getClass(), methods);
+            methods = object.getClass().getMethods();
+            methodCache.put(object.getClass(), methods);
         }
-        
+
         for (Method method : methods) {
             if (method.getName().equals(methodName)) {
                 Class<?> parameterType = method.getParameterTypes()[0];
@@ -61,6 +65,7 @@ public class ObjectUtil {
                 }
             }
         }
-        throw new RuntimeException("Property '" + propertyName+"' not found on object type "+object.getClass().getName());
+        throw new RuntimeException("Property '" + propertyName + "' not found on object type "
+                + object.getClass().getName());
     }
 }

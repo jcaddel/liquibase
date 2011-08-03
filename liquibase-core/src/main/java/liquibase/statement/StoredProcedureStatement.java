@@ -10,7 +10,6 @@ public class StoredProcedureStatement extends AbstractSqlStatement implements Ca
     private List<String> parameters = new ArrayList<String>();
     private List<Integer> types = new ArrayList<Integer>();
 
-
     public StoredProcedureStatement(String procedureName) {
         this.procedureName = procedureName;
     }
@@ -18,7 +17,6 @@ public class StoredProcedureStatement extends AbstractSqlStatement implements Ca
     public String getProcedureName() {
         return procedureName;
     }
-
 
     public List<String> getParameters() {
         return Collections.unmodifiableList(parameters);
@@ -30,7 +28,7 @@ public class StoredProcedureStatement extends AbstractSqlStatement implements Ca
     }
 
     public int getParameterType(String param) {
-        for  (int i=0; i<parameters.size(); i++) {
+        for (int i = 0; i < parameters.size(); i++) {
             if (parameters.get(i).equals(param)) {
                 return types.get(i);
             }

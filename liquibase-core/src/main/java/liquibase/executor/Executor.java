@@ -34,7 +34,6 @@ public interface Executor {
 
     List<Map> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
 
-
     /** Write methods */
     void execute(SqlStatement sql) throws DatabaseException;
 
@@ -47,7 +46,8 @@ public interface Executor {
     Map call(CallableSqlStatement csc, List declaredParameters, List<SqlVisitor> sqlVisitors) throws DatabaseException;
 
     /**
-     * Adds a comment to the database.  Currently does nothing but is over-ridden in the output JDBC template
+     * Adds a comment to the database. Currently does nothing but is over-ridden in the output JDBC template
+     * 
      * @param message
      * @throws liquibase.exception.DatabaseException
      */

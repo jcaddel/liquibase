@@ -22,14 +22,15 @@ public class NotPrecondition extends PreconditionLogic {
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
-    
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
+            throws PreconditionFailedException, PreconditionErrorException {
         for (Precondition precondition : getNestedPreconditions()) {
             boolean threwException = false;
             try {
                 precondition.check(database, changeLog, changeSet);
             } catch (PreconditionFailedException e) {
-                ; //that's what we want with a Not precondition
+                ; // that's what we want with a Not precondition
                 threwException = true;
             }
 

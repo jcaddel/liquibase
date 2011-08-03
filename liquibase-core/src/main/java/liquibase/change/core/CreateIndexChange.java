@@ -20,11 +20,10 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     private Boolean unique;
     private String tablespace;
     private List<ColumnConfig> columns;
-	// Contain associations of index
-	// for example: foreignKey, primaryKey or uniqueConstraint
+    // Contain associations of index
+    // for example: foreignKey, primaryKey or uniqueConstraint
     @ChangeProperty(includeInSerialization = false)
-	private String associatedWith;
-
+    private String associatedWith;
 
     public CreateIndexChange() {
         super("createIndex", "Create Index", ChangeMetaData.PRIORITY_DEFAULT);
@@ -67,7 +66,6 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         columns.add(column);
     }
 
-
     public String getTablespace() {
         return tablespace;
     }
@@ -82,16 +80,10 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
             columns.add(column.getName());
         }
 
-	    return new SqlStatement[]{
-			    new CreateIndexStatement(
-					    getIndexName(),
-					    getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName(),
-					    getTableName(),
-					    this.isUnique(),
-					    getAssociatedWith(),
-					    columns.toArray(new String[getColumns().size()]))
-					    .setTablespace(getTablespace())
-	    };
+        return new SqlStatement[] { new CreateIndexStatement(getIndexName(),
+                getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName(), getTableName(),
+                this.isUnique(), getAssociatedWith(), columns.toArray(new String[getColumns().size()]))
+                .setTablespace(getTablespace()) };
     }
 
     @Override
@@ -101,9 +93,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         inverse.setTableName(getTableName());
         inverse.setIndexName(getIndexName());
 
-        return new Change[]{
-                inverse
-        };
+        return new Change[] { inverse };
     }
 
     public String getConfirmationMessage() {
@@ -111,7 +101,8 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     }
 
     /**
-     * @param isUnique the isUnique to set
+     * @param isUnique
+     *            the isUnique to set
      */
     public void setUnique(Boolean isUnique) {
         this.unique = isUnique;
@@ -124,18 +115,15 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         return this.unique;
     }
 
-	/**
-	 * @return Index associations. Valid values:<br>
-	 * <li>primaryKey</li>
-	 * <li>foreignKey</li>
-	 * <li>uniqueConstraint</li>
-	 * <li>none</li>
-	 * */
-	public String getAssociatedWith() {
-		return associatedWith;
-	}
+    /**
+     * @return Index associations. Valid values:<br>
+     *         <li>primaryKey</li> <li>foreignKey</li> <li>uniqueConstraint</li> <li>none</li>
+     * */
+    public String getAssociatedWith() {
+        return associatedWith;
+    }
 
-	public void setAssociatedWith(String associatedWith) {
-		this.associatedWith = associatedWith;
-	}
+    public void setAssociatedWith(String associatedWith) {
+        this.associatedWith = associatedWith;
+    }
 }

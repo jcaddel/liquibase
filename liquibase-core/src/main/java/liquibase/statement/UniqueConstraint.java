@@ -8,7 +8,6 @@ public class UniqueConstraint implements ColumnConstraint {
     private String constraintName;
     private List<String> columns = new ArrayList<String>();
 
-
     public UniqueConstraint() {
 
     }

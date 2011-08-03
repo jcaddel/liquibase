@@ -37,10 +37,13 @@ public class ViewExistsPrecondition implements Precondition {
         return new ValidationErrors();
     }
 
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
-    	try {
-            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasView(getSchemaName(), getViewName(), database)) {
-                throw new PreconditionFailedException("View "+database.escapeTableName(getSchemaName(), getViewName())+" does not exist", changeLog, this);
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
+            throws PreconditionFailedException, PreconditionErrorException {
+        try {
+            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database)
+                    .hasView(getSchemaName(), getViewName(), database)) {
+                throw new PreconditionFailedException("View "
+                        + database.escapeTableName(getSchemaName(), getViewName()) + " does not exist", changeLog, this);
             }
         } catch (PreconditionFailedException e) {
             throw e;

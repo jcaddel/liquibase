@@ -20,11 +20,13 @@ public class CacheTypeConverter extends AbstractTypeConverter {
     }
 
     @Override
-    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
+    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits,
+            Database database) throws ParseException {
         if (defaultValue != null) {
             if (defaultValue instanceof String) {
                 String stringDefaultValue = (String) defaultValue;
-                if (stringDefaultValue.charAt(0) == '"' && stringDefaultValue.charAt(stringDefaultValue.length() - 1) == '"') {
+                if (stringDefaultValue.charAt(0) == '"'
+                        && stringDefaultValue.charAt(stringDefaultValue.length() - 1) == '"') {
                     defaultValue = stringDefaultValue.substring(1, stringDefaultValue.length() - 1);
                 } else if (stringDefaultValue.startsWith("$")) {
                     defaultValue = "OBJECTSCRIPT '" + defaultValue + "'";

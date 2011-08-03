@@ -25,8 +25,8 @@ public class LockService {
 
     private boolean hasChangeLogLock = false;
 
-    private long changeLogLockWaitTime = 1000 * 60 * 5;  //default to 5 mins
-    private long changeLogLocRecheckTime = 1000 * 10;  //default to every 10 seconds
+    private long changeLogLockWaitTime = 1000 * 60 * 5; // default to 5 mins
+    private long changeLogLocRecheckTime = 1000 * 10; // default to every 10 seconds
 
     private static Map<Database, LockService> instances = new ConcurrentHashMap<Database, LockService>();
 
@@ -74,7 +74,10 @@ public class LockService {
             String lockedBy;
             if (locks.length > 0) {
                 DatabaseChangeLogLock lock = locks[0];
-                lockedBy = lock.getLockedBy() + " since " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(lock.getLockGranted());
+                lockedBy = lock.getLockedBy()
+                        + " since "
+                        + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(
+                                lock.getLockGranted());
             } else {
                 lockedBy = "UNKNOWN";
             }
@@ -93,7 +96,8 @@ public class LockService {
             database.rollback();
             database.checkDatabaseChangeLogLockTable();
 
-            Boolean locked = (Boolean) ExecutorService.getInstance().getExecutor(database).queryForObject(new SelectFromDatabaseChangeLogLockStatement("LOCKED"), Boolean.class);
+            Boolean locked = (Boolean) ExecutorService.getInstance().getExecutor(database)
+                    .queryForObject(new SelectFromDatabaseChangeLogLockStatement("LOCKED"), Boolean.class);
 
             if (locked) {
                 return false;
@@ -104,8 +108,7 @@ public class LockService {
                 if (rowsUpdated > 1) {
                     throw new LockException("Did not update change log lock correctly");
                 }
-                if (rowsUpdated == 0)
-                {
+                if (rowsUpdated == 0) {
                     // another node was faster
                     return false;
                 }
@@ -137,7 +140,13 @@ public class LockService {
                 database.rollback();
                 int updatedRows = executor.update(new UnlockDatabaseChangeLogStatement());
                 if (updatedRows != 1) {
-                    throw new LockException("Did not update change log lock correctly.\n\n" + updatedRows + " rows were updated instead of the expected 1 row using executor " + executor.getClass().getName()+" there are "+executor.queryForInt(new RawSqlStatement("select count(*) from "+database.getDatabaseChangeLogLockTableName()))+" rows in the table");
+                    throw new LockException("Did not update change log lock correctly.\n\n"
+                            + updatedRows
+                            + " rows were updated instead of the expected 1 row using executor "
+                            + executor.getClass().getName()
+                            + " there are "
+                            + executor.queryForInt(new RawSqlStatement("select count(*) from "
+                                    + database.getDatabaseChangeLogLockTableName())) + " rows in the table");
                 }
                 database.commit();
                 hasChangeLogLock = false;
@@ -166,7 +175,8 @@ public class LockService {
             }
 
             List<DatabaseChangeLogLock> allLocks = new ArrayList<DatabaseChangeLogLock>();
-            SqlStatement sqlStatement = new SelectFromDatabaseChangeLogLockStatement("ID", "LOCKED", "LOCKGRANTED", "LOCKEDBY");
+            SqlStatement sqlStatement = new SelectFromDatabaseChangeLogLockStatement("ID", "LOCKED", "LOCKGRANTED",
+                    "LOCKEDBY");
             List<Map> rows = ExecutorService.getInstance().getExecutor(database).queryForList(sqlStatement);
             for (Map columnMap : rows) {
                 Object lockedValue = columnMap.get("LOCKED");
@@ -177,7 +187,8 @@ public class LockService {
                     locked = (Boolean) lockedValue;
                 }
                 if (locked != null && locked) {
-                    allLocks.add(new DatabaseChangeLogLock(((Number) columnMap.get("ID")).intValue(), (Date) columnMap.get("LOCKGRANTED"), (String) columnMap.get("LOCKEDBY")));
+                    allLocks.add(new DatabaseChangeLogLock(((Number) columnMap.get("ID")).intValue(), (Date) columnMap
+                            .get("LOCKGRANTED"), (String) columnMap.get("LOCKEDBY")));
                 }
             }
             return allLocks.toArray(new DatabaseChangeLogLock[allLocks.size()]);
@@ -192,16 +203,14 @@ public class LockService {
     public void forceReleaseLock() throws LockException, DatabaseException {
         database.checkDatabaseChangeLogLockTable();
         releaseLock();
-        /*try {
-            releaseLock();
-        } catch (LockException e) {
-            // ignore ?
-            LogFactory.getLogger().info("Ignored exception in forceReleaseLock: " + e.getMessage());
-        }*/
+        /*
+         * try { releaseLock(); } catch (LockException e) { // ignore ?
+         * LogFactory.getLogger().info("Ignored exception in forceReleaseLock: " + e.getMessage()); }
+         */
     }
 
     /**
-     * Clears information the lock handler knows about the tables.  Should only be called by Liquibase internal calls
+     * Clears information the lock handler knows about the tables. Should only be called by Liquibase internal calls
      */
     public void reset() {
         hasChangeLogLock = false;

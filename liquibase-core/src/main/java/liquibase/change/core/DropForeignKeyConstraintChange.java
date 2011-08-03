@@ -44,25 +44,22 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) {
-    	
-    	if (database instanceof SQLiteDatabase) {
-    		// return special statements for SQLite databases
-    		return generateStatementsForSQLiteDatabase(database);
-    	} 
-    	
-        return new SqlStatement[]{
-                new DropForeignKeyConstraintStatement(
-                        getBaseTableSchemaName() == null?database.getDefaultSchemaName():getBaseTableSchemaName(),
-                        getBaseTableName(),
-                        getConstraintName()),
-        };    	
+
+        if (database instanceof SQLiteDatabase) {
+            // return special statements for SQLite databases
+            return generateStatementsForSQLiteDatabase(database);
+        }
+
+        return new SqlStatement[] { new DropForeignKeyConstraintStatement(
+                getBaseTableSchemaName() == null ? database.getDefaultSchemaName() : getBaseTableSchemaName(),
+                getBaseTableName(), getConstraintName()), };
     }
-    
+
     private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
-    	// SQLite does not support foreign keys until now.
-		// See for more information: http://www.sqlite.org/omitted.html
-		// Therefore this is an empty operation...
-		return new SqlStatement[]{};
+        // SQLite does not support foreign keys until now.
+        // See for more information: http://www.sqlite.org/omitted.html
+        // Therefore this is an empty operation...
+        return new SqlStatement[] {};
     }
 
     public String getConfirmationMessage() {

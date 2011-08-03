@@ -10,7 +10,8 @@ import liquibase.statement.StoredProcedureStatement;
 
 public class StoredProcedureGenerator extends AbstractSqlGenerator<StoredProcedureStatement> {
 
-    public ValidationErrors validate(StoredProcedureStatement storedProcedureStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(StoredProcedureStatement storedProcedureStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("procedureName", storedProcedureStatement.getProcedureName());
         return validationErrors;
@@ -22,7 +23,7 @@ public class StoredProcedureGenerator extends AbstractSqlGenerator<StoredProcedu
         for (String param : statement.getParameters()) {
             string.append(" ").append(param).append(",");
         }
-        return new Sql[] { new UnparsedSql(string.toString().replaceFirst(",$", ")") )};
+        return new Sql[] { new UnparsedSql(string.toString().replaceFirst(",$", ")")) };
 
     }
 }

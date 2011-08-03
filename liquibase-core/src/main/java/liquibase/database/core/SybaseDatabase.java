@@ -52,22 +52,22 @@ public class SybaseDatabase extends AbstractDatabase {
         systemTablesAndViews.add("sysconstraints");
     }
 
-/*    public void setConnection(Connection connection) {
-        super.setConnection(new SybaseConnectionDelegate(connection));
-    }
-    */
+    /*
+     * public void setConnection(Connection connection) { super.setConnection(new SybaseConnectionDelegate(connection));
+     * }
+     */
 
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
-    
+
     /**
-     * Sybase does not support DDL and meta data in transactions properly,
-     * as such we turn off the commit and turn on auto commit.
+     * Sybase does not support DDL and meta data in transactions properly, as such we turn off the commit and turn on
+     * auto commit.
      */
     @Override
     public boolean supportsDDLInTransaction() {
-    	return false;
+        return false;
     }
 
     @Override
@@ -91,11 +91,8 @@ public class SybaseDatabase extends AbstractDatabase {
 
     // package private to facilitate testing
     boolean isSybaseProductName(String dbProductName) {
-        return
-                "Adaptive Server Enterprise".equals(dbProductName)
-                || "Sybase SQL Server".equals(dbProductName)
-                || "sql server".equals(dbProductName)
-                || "ASE".equals(dbProductName);
+        return "Adaptive Server Enterprise".equals(dbProductName) || "Sybase SQL Server".equals(dbProductName)
+                || "sql server".equals(dbProductName) || "ASE".equals(dbProductName);
     }
 
     public String getDefaultDriver(String url) {
@@ -111,7 +108,7 @@ public class SybaseDatabase extends AbstractDatabase {
         if (currentDateTimeFunction != null) {
             return currentDateTimeFunction;
         }
-        
+
         return "GETDATE()";
     }
 
@@ -140,66 +137,67 @@ public class SybaseDatabase extends AbstractDatabase {
         return returnString.toString().replaceFirst(" \\+ $", "");
     }
 
-//    protected void dropForeignKeys(Connection conn) throws JDBCException {
-//        Statement dropStatement = null;
-//        PreparedStatement fkStatement = null;
-//        ResultSet rs = null;
-//        try {
-//            dropStatement = conn.createStatement();
-//
-//            fkStatement = conn.prepareStatement("select TABLE_NAME, CONSTRAINT_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS where CONSTRAINT_TYPE='FOREIGN KEY' AND TABLE_CATALOG=?");
-//            fkStatement.setString(1, getDefaultCatalogName());
-//            rs = fkStatement.executeQuery();
-//            while (rs.next()) {
-//                DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
-//                dropFK.setBaseTableName(rs.getString("TABLE_NAME"));
-//                dropFK.setConstraintName(rs.getString("CONSTRAINT_NAME"));
-//
-//                try {
-//                    dropStatement.execute(dropFK.generateStatements(this)[0]);
-//                } catch (UnsupportedChangeException e) {
-//                    throw new JDBCException(e.getMessage());
-//                }
-//            }
-//        } catch (SQLException e) {
-//            throw new JDBCException(e);
-//        } finally {
-//            try {
-//                if (dropStatement != null) {
-//                    dropStatement.close();
-//                }
-//                if (fkStatement != null) {
-//                    fkStatement.close();
-//                }
-//                if (rs != null) {
-//                    rs.close();
-//                }
-//            } catch (SQLException e) {
-//                throw new JDBCException(e);
-//            }
-//        }
-//
-//    }
+    // protected void dropForeignKeys(Connection conn) throws JDBCException {
+    // Statement dropStatement = null;
+    // PreparedStatement fkStatement = null;
+    // ResultSet rs = null;
+    // try {
+    // dropStatement = conn.createStatement();
+    //
+    // fkStatement =
+    // conn.prepareStatement("select TABLE_NAME, CONSTRAINT_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS where CONSTRAINT_TYPE='FOREIGN KEY' AND TABLE_CATALOG=?");
+    // fkStatement.setString(1, getDefaultCatalogName());
+    // rs = fkStatement.executeQuery();
+    // while (rs.next()) {
+    // DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
+    // dropFK.setBaseTableName(rs.getString("TABLE_NAME"));
+    // dropFK.setConstraintName(rs.getString("CONSTRAINT_NAME"));
+    //
+    // try {
+    // dropStatement.execute(dropFK.generateStatements(this)[0]);
+    // } catch (UnsupportedChangeException e) {
+    // throw new JDBCException(e.getMessage());
+    // }
+    // }
+    // } catch (SQLException e) {
+    // throw new JDBCException(e);
+    // } finally {
+    // try {
+    // if (dropStatement != null) {
+    // dropStatement.close();
+    // }
+    // if (fkStatement != null) {
+    // fkStatement.close();
+    // }
+    // if (rs != null) {
+    // rs.close();
+    // }
+    // } catch (SQLException e) {
+    // throw new JDBCException(e);
+    // }
+    // }
+    //
+    // }
 
     public boolean supportsTablespaces() {
         return true;
     }
 
-
     @Override
     public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
-        return super.isSystemTable(catalogName, schemaName, tableName) || schemaName.equals("sys") || tableName.toLowerCase().startsWith("sybfi");
+        return super.isSystemTable(catalogName, schemaName, tableName) || schemaName.equals("sys")
+                || tableName.toLowerCase().startsWith("sybfi");
     }
 
     @Override
     public boolean isSystemView(String catalogName, String schemaName, String viewName) {
-        return super.isSystemView(catalogName, schemaName, viewName) || schemaName.equals("sys") || viewName.toLowerCase().equals("sybfi");
+        return super.isSystemView(catalogName, schemaName, viewName) || schemaName.equals("sys")
+                || viewName.toLowerCase().equals("sybfi");
     }
 
     public String generateDefaultConstraintName(String tableName, String columnName) {
         return "DF_" + tableName + "_" + columnName;
     }
-
 
     @Override
     public String convertRequestedSchemaToCatalog(String requestedSchema) throws DatabaseException {
@@ -225,48 +223,49 @@ public class SybaseDatabase extends AbstractDatabase {
 
     @Override
     public String escapeDatabaseObject(String objectName) {
-        return "["+objectName+"]";
+        return "[" + objectName + "]";
     }
 
-	@Override
-	public String getViewDefinition(String schemaName, String viewName) throws DatabaseException {
-        GetViewDefinitionStatement statement = new GetViewDefinitionStatement(convertRequestedSchemaToSchema(schemaName), viewName);
+    @Override
+    public String getViewDefinition(String schemaName, String viewName) throws DatabaseException {
+        GetViewDefinitionStatement statement = new GetViewDefinitionStatement(
+                convertRequestedSchemaToSchema(schemaName), viewName);
         Executor executor = ExecutorService.getInstance().getExecutor(this);
         @SuppressWarnings("unchecked")
         List<String> definitionRows = (List<String>) executor.queryForList(statement, String.class);
         StringBuilder definition = new StringBuilder();
         for (String d : definitionRows) {
-        	definition.append(d);
+            definition.append(d);
         }
         return definition.toString();
-	}
-	
-	/** 
-	 * @return the major version if supported, otherwise -1
-	 * @see liquibase.database.AbstractDatabase#getDatabaseMajorVersion()
-	 */
-	@Override
+    }
+
+    /**
+     * @return the major version if supported, otherwise -1
+     * @see liquibase.database.AbstractDatabase#getDatabaseMajorVersion()
+     */
+    @Override
     public int getDatabaseMajorVersion() throws DatabaseException {
         try {
             return getConnection().getDatabaseMajorVersion();
         } catch (UnsupportedOperationException e) {
-        	LogFactory.getLogger()
-        		.warning("Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
+            LogFactory.getLogger().warning(
+                    "Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
             return -1;
         }
     }
 
-	/**
-	 * @return the minor version if supported, otherwise -1
-	 * @see liquibase.database.AbstractDatabase#getDatabaseMinorVersion()
-	 */
-	@Override
+    /**
+     * @return the minor version if supported, otherwise -1
+     * @see liquibase.database.AbstractDatabase#getDatabaseMinorVersion()
+     */
+    @Override
     public int getDatabaseMinorVersion() throws DatabaseException {
         try {
             return getConnection().getDatabaseMinorVersion();
         } catch (UnsupportedOperationException e) {
-        	LogFactory.getLogger()
-    			.warning("Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
+            LogFactory.getLogger().warning(
+                    "Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
             return -1;
         }
     }

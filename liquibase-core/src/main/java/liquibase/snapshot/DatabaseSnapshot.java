@@ -29,7 +29,6 @@ public class DatabaseSnapshot {
         this.schema = requestedSchema;
     }
 
-
     public Database getDatabase() {
         return database;
     }
@@ -53,7 +52,6 @@ public class DatabaseSnapshot {
     public Set<PrimaryKey> getPrimaryKeys() {
         return primaryKeys;
     }
-
 
     public Set<Sequence> getSequences() {
         return sequences;

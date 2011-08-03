@@ -51,14 +51,16 @@ public class ChangeLogParameters {
 
     /**
      * Return the value of a parameter
-     * @param key Name of the parameter
-     * @return The parameter value or null if not found. (Note that null can also be return if it is the parameter value. For
-     * strict parameter existence use {@link #hasValue(String)))
-     *
+     * 
+     * @param key
+     *            Name of the parameter
+     * @return The parameter value or null if not found. (Note that null can also be return if it is the parameter
+     *         value. For strict parameter existence use {@link #hasValue(String)))
+     * 
      */
     public Object getValue(String key) {
-        ChangeLogParameter parameter=findParameter(key);
-        return parameter!=null?parameter.getValue():null;
+        ChangeLogParameter parameter = findParameter(key);
+        return parameter != null ? parameter.getValue() : null;
     }
 
     private ChangeLogParameter findParameter(String key) {
@@ -71,7 +73,7 @@ public class ChangeLogParameters {
     }
 
     public boolean hasValue(String key) {
-        return findParameter(key)!=null;
+        return findParameter(key) != null;
     }
 
     public String expandExpressions(String string) {
@@ -90,7 +92,8 @@ public class ChangeLogParameters {
         }
 
         public ChangeLogParameter(String key, Object value, String validContexts, String validDatabases) {
-            this(key, value, StringUtils.splitAndTrim(validContexts, ","), StringUtils.splitAndTrim(validDatabases, ","));
+            this(key, value, StringUtils.splitAndTrim(validContexts, ","), StringUtils
+                    .splitAndTrim(validDatabases, ","));
         }
 
         public ChangeLogParameter(String key, Object value, List<String> validContexts, List<String> validDatabases) {
@@ -123,8 +126,9 @@ public class ChangeLogParameters {
 
         public boolean isValid() {
             boolean isValid = true;
-            if (validContexts != null && validContexts.size()  > 0) {
-                if (ChangeLogParameters.this.currentContexts != null && ChangeLogParameters.this.currentContexts.size() > 0) {
+            if (validContexts != null && validContexts.size() > 0) {
+                if (ChangeLogParameters.this.currentContexts != null
+                        && ChangeLogParameters.this.currentContexts.size() > 0) {
                     isValid = false;
                     for (String currentContext : ChangeLogParameters.this.currentContexts) {
                         if (validContexts.contains(currentContext)) {
@@ -134,7 +138,7 @@ public class ChangeLogParameters {
                 }
             }
 
-            if (isValid && validDatabases != null && validDatabases.size()  > 0) {
+            if (isValid && validDatabases != null && validDatabases.size() > 0) {
                 isValid = validDatabases.contains(currentDatabase.getTypeName());
             }
 
@@ -161,7 +165,7 @@ public class ChangeLogParameters {
                 String valueTolookup = expressionString.replaceFirst("\\$\\{", "").replaceFirst("\\}$", "");
 
                 int dotIndex = valueTolookup.indexOf('.');
-                Object value =changeLogParameters.getValue(valueTolookup);
+                Object value = changeLogParameters.getValue(valueTolookup);
 
                 if (value != null) {
                     text = text.replace(expressionString, value.toString());

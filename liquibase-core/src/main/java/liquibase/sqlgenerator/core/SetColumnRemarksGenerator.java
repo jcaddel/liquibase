@@ -21,7 +21,8 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
         return database instanceof OracleDatabase || database instanceof PostgresDatabase;
     }
 
-    public ValidationErrors validate(SetColumnRemarksStatement setColumnRemarksStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(SetColumnRemarksStatement setColumnRemarksStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", setColumnRemarksStatement.getTableName());
         validationErrors.checkRequiredField("columnName", setColumnRemarksStatement.getColumnName());
@@ -30,8 +31,11 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
     }
 
     public Sql[] generateSql(SetColumnRemarksStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        return new Sql[] {
-                new UnparsedSql("COMMENT ON COLUMN "+database.escapeTableName(statement.getSchemaName(), statement.getTableName())+"."+database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName())+" IS '"+database.escapeStringForDatabase(statement.getRemarks())+"'")
-        };
+        return new Sql[] { new UnparsedSql("COMMENT ON COLUMN "
+                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                + "."
+                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                        statement.getColumnName()) + " IS '" + database.escapeStringForDatabase(statement.getRemarks())
+                + "'") };
     }
 }

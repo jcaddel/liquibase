@@ -21,7 +21,7 @@ public class SampleUpdateGenerator extends AbstractSqlGenerator<UpdateStatement>
 
     @Override
     public boolean supports(UpdateStatement statement, Database database) {
-        return false; //normally would want true, but we don't want to have this called in all our tests
+        return false; // normally would want true, but we don't want to have this called in all our tests
     }
 
     public ValidationErrors validate(UpdateStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
@@ -30,7 +30,7 @@ public class SampleUpdateGenerator extends AbstractSqlGenerator<UpdateStatement>
 
     public Sql[] generateSql(UpdateStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         List<Sql> list = new ArrayList<Sql>();
-        list.add(new UnparsedSql("select "+database.getCurrentDateTimeFunction()));
+        list.add(new UnparsedSql("select " + database.getCurrentDateTimeFunction()));
         list.addAll(Arrays.asList(sqlGeneratorChain.generateSql(statement, database)));
 
         return list.toArray(new Sql[list.size()]);

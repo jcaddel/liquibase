@@ -1,8 +1,7 @@
 package liquibase.change;
 
 /**
- * This class is resposible for holding the information about all the
- * constraints imposed on the column.
+ * This class is resposible for holding the information about all the constraints imposed on the column.
  */
 public class ConstraintsConfig {
 
@@ -107,11 +106,11 @@ public class ConstraintsConfig {
         this.deferrable = deferrable;
     }
 
-	public String getPrimaryKeyTablespace() {
-		return primaryKeyTablespace;
-	}
+    public String getPrimaryKeyTablespace() {
+        return primaryKeyTablespace;
+    }
 
-	public void setPrimaryKeyTablespace(String primaryKeyTablespace) {
-		this.primaryKeyTablespace = primaryKeyTablespace;
-	}
+    public void setPrimaryKeyTablespace(String primaryKeyTablespace) {
+        this.primaryKeyTablespace = primaryKeyTablespace;
+    }
 }

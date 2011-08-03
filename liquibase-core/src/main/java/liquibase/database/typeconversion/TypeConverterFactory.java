@@ -51,7 +51,8 @@ public class TypeConverterFactory {
     private TypeConverterFactory() {
         allConverters = new HashSet<TypeConverter>();
         try {
-            for (Class<? extends TypeConverter> converterClass : ServiceLocator.getInstance().findClasses(TypeConverter.class)) {
+            for (Class<? extends TypeConverter> converterClass : ServiceLocator.getInstance().findClasses(
+                    TypeConverter.class)) {
                 register(converterClass.newInstance());
             }
         } catch (Exception e) {
@@ -66,7 +67,7 @@ public class TypeConverterFactory {
             }
         });
 
-        //noinspection unchecked
+        // noinspection unchecked
 
         for (TypeConverter converter : allConverters) {
             if (converter.supports(database)) {

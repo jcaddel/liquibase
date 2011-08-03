@@ -12,8 +12,8 @@ import org.xml.sax.SAXException;
 import org.xml.sax.ext.EntityResolver2;
 
 /**
- * Finds the Liquibase schema from the classpath rather than fetching it over the Internet.
- * Also resolve external entities using a resourceAccessor if it's provided
+ * Finds the Liquibase schema from the classpath rather than fetching it over the Internet. Also resolve external
+ * entities using a resourceAccessor if it's provided
  */
 public class LiquibaseEntityResolver implements EntityResolver2 {
 
@@ -22,7 +22,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
     private ResourceAccessor resourceAccessor;
     private String basePath;
 
-    private Logger log=LogFactory.getLogger();
+    private Logger log = LogFactory.getLogger();
 
     public LiquibaseEntityResolver() {
 
@@ -30,23 +30,27 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
 
     /**
      * Use the resource accessor to resolve external entities
-     * @param resourceAccessor Resource accessor to use
-     * @param basePath Base path to use in the resourceAccessor
+     * 
+     * @param resourceAccessor
+     *            Resource accessor to use
+     * @param basePath
+     *            Base path to use in the resourceAccessor
      */
-    public void useResoureAccessor(ResourceAccessor resourceAccessor,String basePath) {
-        this.resourceAccessor=resourceAccessor;
-        this.basePath=basePath;
+    public void useResoureAccessor(ResourceAccessor resourceAccessor, String basePath) {
+        this.resourceAccessor = resourceAccessor;
+        this.basePath = basePath;
     }
 
-   public InputSource resolveEntity(String name, String publicId, String baseURI, String systemId) throws SAXException, IOException {
-       InputSource resolved=null;
-       if(systemId!=null && systemId.toLowerCase().endsWith(".xsd")) {
-            resolved=tryResolveLiquibaseSchema(systemId, publicId);
-       }
-       if(resolved==null && resourceAccessor!=null && basePath!=null && systemId!=null) {
-            resolved=tryResolveFromResourceAccessor(systemId);
-       }
-       return resolved;
+    public InputSource resolveEntity(String name, String publicId, String baseURI, String systemId)
+            throws SAXException, IOException {
+        InputSource resolved = null;
+        if (systemId != null && systemId.toLowerCase().endsWith(".xsd")) {
+            resolved = tryResolveLiquibaseSchema(systemId, publicId);
+        }
+        if (resolved == null && resourceAccessor != null && basePath != null && systemId != null) {
+            resolved = tryResolveFromResourceAccessor(systemId);
+        }
+        return resolved;
     }
 
     private InputSource tryResolveLiquibaseSchema(String systemId, String publicId) {
@@ -57,10 +61,12 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                 try {
                     InputStream resourceAsStream = null;
                     if (Thread.currentThread().getContextClassLoader() != null) {
-                        resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(SEARCH_PACKAGE + xsdFile);
+                        resourceAsStream = Thread.currentThread().getContextClassLoader()
+                                .getResourceAsStream(SEARCH_PACKAGE + xsdFile);
                     }
                     if (resourceAsStream == null) {
-                        resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(SEARCH_PACKAGE + xsdFile);
+                        resourceAsStream = this.getClass().getClassLoader()
+                                .getResourceAsStream(SEARCH_PACKAGE + xsdFile);
                     }
                     if (resourceAsStream == null) {
                         return null;
@@ -78,10 +84,10 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
     }
 
     private InputSource tryResolveFromResourceAccessor(String systemId) {
-        String path=FilenameUtils.concat(basePath, systemId);
+        String path = FilenameUtils.concat(basePath, systemId);
         try {
             return new InputSource(resourceAccessor.getResourceAsStream(path));
-        }catch(Exception ex) {
+        } catch (Exception ex) {
             return null;
         }
     }

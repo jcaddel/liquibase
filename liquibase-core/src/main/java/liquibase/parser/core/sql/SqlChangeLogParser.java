@@ -21,8 +21,9 @@ public class SqlChangeLogParser implements ChangeLogParser {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
-    
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters,
+            ResourceAccessor resourceAccessor) throws ChangeLogParseException {
 
         RawSQLChange change = new RawSQLChange();
 
@@ -37,7 +38,8 @@ public class SqlChangeLogParser implements ChangeLogParser {
         change.setSplitStatements(false);
         change.setStripComments(false);
 
-        ChangeSet changeSet = new ChangeSet("raw", "includeAll", false, false, physicalChangeLogLocation, null, null, true);
+        ChangeSet changeSet = new ChangeSet("raw", "includeAll", false, false, physicalChangeLogLocation, null, null,
+                true);
         changeSet.addChange(change);
 
         DatabaseChangeLog changeLog = new DatabaseChangeLog();

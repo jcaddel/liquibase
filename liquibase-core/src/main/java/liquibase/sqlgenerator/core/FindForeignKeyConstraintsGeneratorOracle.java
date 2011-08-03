@@ -22,21 +22,28 @@ public class FindForeignKeyConstraintsGeneratorOracle extends AbstractSqlGenerat
         return database instanceof OracleDatabase;
     }
 
-    public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement,
+            Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("baseTableName", findForeignKeyConstraintsStatement.getBaseTableName());
         return validationErrors;
     }
 
-    public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("SELECT ");
-        sb.append("BASE.TABLE_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME).append(", ");
-        sb.append("BCOLS.COLUMN_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_COLUMN_NAME).append(", ");
-        sb.append("FRGN.TABLE_NAME ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_TABLE_NAME).append(", ");
-        sb.append("FCOLS.COLUMN_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_COLUMN_NAME).append(", ");
-        sb.append("BASE.CONSTRAINT_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_CONSTRAINT_NAME).append(" ");
+        sb.append("BASE.TABLE_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME)
+                .append(", ");
+        sb.append("BCOLS.COLUMN_NAME as ")
+                .append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_COLUMN_NAME).append(", ");
+        sb.append("FRGN.TABLE_NAME ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_TABLE_NAME)
+                .append(", ");
+        sb.append("FCOLS.COLUMN_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_COLUMN_NAME)
+                .append(", ");
+        sb.append("BASE.CONSTRAINT_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_CONSTRAINT_NAME)
+                .append(" ");
         sb.append("FROM ALL_CONSTRAINTS BASE,");
         sb.append("     ALL_CONSTRAINTS FRGN,");
         sb.append("     ALL_CONS_COLUMNS BCOLS,");
@@ -50,13 +57,12 @@ public class FindForeignKeyConstraintsGeneratorOracle extends AbstractSqlGenerat
         sb.append("AND BASE.TABLE_NAME =  '").append(statement.getBaseTableName().toUpperCase()).append("' ");
         sb.append("AND BASE.CONSTRAINT_TYPE = 'R' ");
         try {
-            sb.append("AND BASE.OWNER = '").append(database.convertRequestedSchemaToSchema(statement.getBaseTableSchemaName())).append("'");
+            sb.append("AND BASE.OWNER = '")
+                    .append(database.convertRequestedSchemaToSchema(statement.getBaseTableSchemaName())).append("'");
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
 
-        return new Sql[]{
-                new UnparsedSql(sb.toString())
-        };
+        return new Sql[] { new UnparsedSql(sb.toString()) };
     }
 }

@@ -10,35 +10,37 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
 import liquibase.util.StringUtils;
 
-public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerator<SelectFromDatabaseChangeLogLockStatement> {
+public class SelectFromDatabaseChangeLogLockGenerator extends
+        AbstractSqlGenerator<SelectFromDatabaseChangeLogLockStatement> {
 
-    public ValidationErrors validate(SelectFromDatabaseChangeLogLockStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(SelectFromDatabaseChangeLogLockStatement statement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors errors = new ValidationErrors();
         errors.checkRequiredField("columnToSelect", statement.getColumnsToSelect());
 
         return errors;
     }
 
-    public Sql[] generateSql(SelectFromDatabaseChangeLogLockStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	String liquibaseSchema;
-   		liquibaseSchema = database.getLiquibaseSchemaName();
-		
-		String[] columns = statement.getColumnsToSelect();
-		int numberOfColumns = columns.length;
-		String[] escapedColumns = new String[numberOfColumns];
-		for (int i=0; i<numberOfColumns; i++) {
-			escapedColumns[i] = database.escapeColumnName(liquibaseSchema, database.getDatabaseChangeLogLockTableName(), columns[i]);
-		}
-		
-        String sql = "SELECT " + StringUtils.join(escapedColumns, ",") + " FROM " +
-                database.escapeTableName(liquibaseSchema, database.getDatabaseChangeLogLockTableName()) +
-                " WHERE " + database.escapeColumnName(liquibaseSchema, database.getDatabaseChangeLogLockTableName(), "ID") + "=1";
+    public Sql[] generateSql(SelectFromDatabaseChangeLogLockStatement statement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
+        String liquibaseSchema;
+        liquibaseSchema = database.getLiquibaseSchemaName();
+
+        String[] columns = statement.getColumnsToSelect();
+        int numberOfColumns = columns.length;
+        String[] escapedColumns = new String[numberOfColumns];
+        for (int i = 0; i < numberOfColumns; i++) {
+            escapedColumns[i] = database.escapeColumnName(liquibaseSchema,
+                    database.getDatabaseChangeLogLockTableName(), columns[i]);
+        }
+
+        String sql = "SELECT " + StringUtils.join(escapedColumns, ",") + " FROM "
+                + database.escapeTableName(liquibaseSchema, database.getDatabaseChangeLogLockTableName()) + " WHERE "
+                + database.escapeColumnName(liquibaseSchema, database.getDatabaseChangeLogLockTableName(), "ID") + "=1";
 
         if (database instanceof OracleDatabase) {
             sql += " FOR UPDATE";
         }
-        return new Sql[] {
-                new UnparsedSql(sql)
-        };
+        return new Sql[] { new UnparsedSql(sql) };
     }
 }

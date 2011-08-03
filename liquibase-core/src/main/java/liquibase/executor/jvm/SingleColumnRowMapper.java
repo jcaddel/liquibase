@@ -7,24 +7,22 @@ import java.math.BigDecimal;
 import java.sql.*;
 
 /**
- * RowMapper implementation that converts a single column into
- * a single result value per row. Expects to work on a ResultSet
- * that just contains a single column.
+ * RowMapper implementation that converts a single column into a single result value per row. Expects to work on a
+ * ResultSet that just contains a single column.
  * <p/>
- * <p>The type of the result value for each row can be specified.
- * The value for the single column will be extracted from the ResultSet
- * and converted into the specified target type.
- *
+ * <p>
+ * The type of the result value for each row can be specified. The value for the single column will be extracted from
+ * the ResultSet and converted into the specified target type.
+ * 
  * @author Spring Framework
  */
 class SingleColumnRowMapper implements RowMapper {
 
     private Class requiredType;
 
-
     /**
      * Create a new SingleColumnRowMapper.
-     *
+     * 
      * @see #setRequiredType
      */
     public SingleColumnRowMapper() {
@@ -32,8 +30,9 @@ class SingleColumnRowMapper implements RowMapper {
 
     /**
      * Create a new SingleColumnRowMapper.
-     *
-     * @param requiredType the type that each result object is expected to match
+     * 
+     * @param requiredType
+     *            the type that each result object is expected to match
      */
     public SingleColumnRowMapper(Class requiredType) {
         this.requiredType = requiredType;
@@ -41,20 +40,19 @@ class SingleColumnRowMapper implements RowMapper {
 
     /**
      * Set the type that each result object is expected to match.
-     * <p>If not specified, the column value will be exposed as
-     * returned by the JDBC driver.
+     * <p>
+     * If not specified, the column value will be exposed as returned by the JDBC driver.
      */
     public void setRequiredType(Class requiredType) {
         this.requiredType = requiredType;
     }
 
-
     /**
      * Extract a value for the single column in the current row.
-     * <p>Validates that there is only one column selected,
-     * then delegates to <code>getColumnValue()</code> and also
+     * <p>
+     * Validates that there is only one column selected, then delegates to <code>getColumnValue()</code> and also
      * <code>convertValueToRequiredType</code>, if necessary.
-     *
+     * 
      * @see java.sql.ResultSetMetaData#getColumnCount()
      * @see #getColumnValue(java.sql.ResultSet,int,Class)
      * @see #convertValueToRequiredType(Object,Class)
@@ -73,11 +71,9 @@ class SingleColumnRowMapper implements RowMapper {
             // Extracted value does not match already: try to convert it.
             try {
                 return convertValueToRequiredType(result, this.requiredType);
-            }
-            catch (IllegalArgumentException ex) {
-                throw new SQLException(
-                        "Type mismatch affecting row number " + rowNum + " and column type '" +
-                                rsmd.getColumnTypeName(1) + "': " + ex.getMessage());
+            } catch (IllegalArgumentException ex) {
+                throw new SQLException("Type mismatch affecting row number " + rowNum + " and column type '"
+                        + rsmd.getColumnTypeName(1) + "': " + ex.getMessage());
             }
         }
         return result;
@@ -85,22 +81,24 @@ class SingleColumnRowMapper implements RowMapper {
 
     /**
      * Retrieve a JDBC object value for the specified column.
-     * <p>The default implementation calls <code>ResultSet.getString(index)</code> etc
-     * for all standard value types (String, Boolean, number types, date types, etc).
-     * It calls <code>ResultSet.getObject(index)</code> else.
-     * <p>If no required type has been specified, this method delegates to
-     * <code>getColumnValue(rs, index)</code>, which basically calls
-     * <code>ResultSet.getObject(index)</code> but applies some additional
-     * default conversion to appropriate value types.
-     * <p>Explicit extraction of a String is necessary to properly extract an Oracle
-     * RAW value as a String, for example. For the other given types, it is also
-     * recommendable to extract the desired types explicitly, to let the JDBC driver
-     * perform appropriate (potentially database-specific) conversion.
-     *
-     * @param rs           is the ResultSet holding the data
-     * @param index        is the column index
-     * @param requiredType the type that each result object is expected to match
-     *                     (or <code>null</code> if none specified)
+     * <p>
+     * The default implementation calls <code>ResultSet.getString(index)</code> etc for all standard value types
+     * (String, Boolean, number types, date types, etc). It calls <code>ResultSet.getObject(index)</code> else.
+     * <p>
+     * If no required type has been specified, this method delegates to <code>getColumnValue(rs, index)</code>, which
+     * basically calls <code>ResultSet.getObject(index)</code> but applies some additional default conversion to
+     * appropriate value types.
+     * <p>
+     * Explicit extraction of a String is necessary to properly extract an Oracle RAW value as a String, for example.
+     * For the other given types, it is also recommendable to extract the desired types explicitly, to let the JDBC
+     * driver perform appropriate (potentially database-specific) conversion.
+     * 
+     * @param rs
+     *            is the ResultSet holding the data
+     * @param index
+     *            is the column index
+     * @param requiredType
+     *            the type that each result object is expected to match (or <code>null</code> if none specified)
      * @return the Object value
      * @see java.sql.ResultSet#getString(int)
      * @see java.sql.ResultSet#getObject(int)
@@ -167,16 +165,18 @@ class SingleColumnRowMapper implements RowMapper {
     }
 
     /**
-     * Retrieve a JDBC object value for the specified column, using the most
-     * appropriate value type. Called if no required type has been specified.
-     * <p>The default implementation delegates to <code>JdbcUtils.getResultSetValue()</code>,
-     * which uses the <code>ResultSet.getObject(index)</code> method. Additionally,
-     * it includes a "hack" to get around Oracle returning a non-standard object for
-     * their TIMESTAMP datatype. See the <code>JdbcUtils#getResultSetValue()</code>
-     * javadoc for details.
-     *
-     * @param rs    is the ResultSet holding the data
-     * @param index is the column index
+     * Retrieve a JDBC object value for the specified column, using the most appropriate value type. Called if no
+     * required type has been specified.
+     * <p>
+     * The default implementation delegates to <code>JdbcUtils.getResultSetValue()</code>, which uses the
+     * <code>ResultSet.getObject(index)</code> method. Additionally, it includes a "hack" to get around Oracle returning
+     * a non-standard object for their TIMESTAMP datatype. See the <code>JdbcUtils#getResultSetValue()</code> javadoc
+     * for details.
+     * 
+     * @param rs
+     *            is the ResultSet holding the data
+     * @param index
+     *            is the column index
      * @return the Object value
      */
     protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
@@ -184,17 +184,17 @@ class SingleColumnRowMapper implements RowMapper {
     }
 
     /**
-     * Convert the given column value to the specified required type.
-     * Only called if the extracted column value does not match already.
-     * <p>If the required type is String, the value will simply get stringified
-     * via <code>toString()</code>. In case of a Number, the value will be
-     * converted into a Number, either through number conversion or through
-     * String parsing (depending on the value type).
-     *
-     * @param value        the column value as extracted from <code>getColumnValue()</code>
-     *                     (never <code>null</code>)
-     * @param requiredType the type that each result object is expected to match
-     *                     (never <code>null</code>)
+     * Convert the given column value to the specified required type. Only called if the extracted column value does not
+     * match already.
+     * <p>
+     * If the required type is String, the value will simply get stringified via <code>toString()</code>. In case of a
+     * Number, the value will be converted into a Number, either through number conversion or through String parsing
+     * (depending on the value type).
+     * 
+     * @param value
+     *            the column value as extracted from <code>getColumnValue()</code> (never <code>null</code>)
+     * @param requiredType
+     *            the type that each result object is expected to match (never <code>null</code>)
      * @return the converted value
      * @see #getColumnValue(java.sql.ResultSet,int,Class)
      */
@@ -210,9 +210,8 @@ class SingleColumnRowMapper implements RowMapper {
                 return NumberUtils.parseNumber(value.toString(), this.requiredType);
             }
         } else {
-            throw new IllegalArgumentException(
-                    "Value [" + value + "] is of type [" + value.getClass().getName() +
-                            "] and cannot be converted to required type [" + this.requiredType.getName() + "]");
+            throw new IllegalArgumentException("Value [" + value + "] is of type [" + value.getClass().getName()
+                    + "] and cannot be converted to required type [" + this.requiredType.getName() + "]");
         }
     }
 }

@@ -8,7 +8,8 @@ import liquibase.servicelocator.PrioritizedService;
 
 public interface ChangeLogParser extends PrioritizedService {
 
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException;
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters,
+            ResourceAccessor resourceAccessor) throws ChangeLogParseException;
 
     boolean supports(String changeLogFile, ResourceAccessor resourceAccessor);
 }

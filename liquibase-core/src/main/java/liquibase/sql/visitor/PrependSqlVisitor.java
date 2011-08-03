@@ -5,7 +5,6 @@ import liquibase.database.Database;
 public class PrependSqlVisitor extends AbstractSqlVisitor {
     private String value;
 
-
     public String getName() {
         return "prepend";
     }

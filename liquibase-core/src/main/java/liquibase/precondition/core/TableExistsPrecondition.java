@@ -31,17 +31,22 @@ public class TableExistsPrecondition implements Precondition {
         this.tableName = tableName;
     }
 
-        public Warnings warn(Database database) {
+    public Warnings warn(Database database) {
         return new Warnings();
     }
 
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
+            throws PreconditionFailedException, PreconditionErrorException {
         try {
-            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasTable(getSchemaName(), getTableName(), database)) {
-                throw new PreconditionFailedException("Table "+database.escapeTableName(getSchemaName(), getTableName())+" does not exist", changeLog, this);
+            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database)
+                    .hasTable(getSchemaName(), getTableName(), database)) {
+                throw new PreconditionFailedException("Table "
+                        + database.escapeTableName(getSchemaName(), getTableName()) + " does not exist", changeLog,
+                        this);
             }
         } catch (PreconditionFailedException e) {
             throw e;

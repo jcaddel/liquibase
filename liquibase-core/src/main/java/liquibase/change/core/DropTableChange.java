@@ -20,7 +20,6 @@ public class DropTableChange extends AbstractChange {
         super("dropTable", "Drop Table", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
-
     public String getSchemaName() {
         return schemaName;
     }
@@ -50,10 +49,9 @@ public class DropTableChange extends AbstractChange {
         if (isCascadeConstraints() != null) {
             constraints = isCascadeConstraints();
         }
-        
-        return new SqlStatement[]{
-                new DropTableStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), constraints)
-        };
+
+        return new SqlStatement[] { new DropTableStatement(getSchemaName() == null ? database.getDefaultSchemaName()
+                : getSchemaName(), getTableName(), constraints) };
     }
 
     public String getConfirmationMessage() {

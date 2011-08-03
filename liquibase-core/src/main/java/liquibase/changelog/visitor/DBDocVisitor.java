@@ -57,7 +57,8 @@ public class DBDocVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
-    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
+    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database)
+            throws LiquibaseException {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
         if (rootChangeLogName == null) {
             rootChangeLogName = changeSet.getFilePath();
@@ -74,7 +75,8 @@ public class DBDocVisitor implements ChangeSetVisitor {
             changesToRunByAuthor.put(changeSet.getAuthor(), new ArrayList<Change>());
         }
 
-        boolean toRun = runStatus.equals(ChangeSet.RunStatus.NOT_RAN) || runStatus.equals(ChangeSet.RunStatus.RUN_AGAIN);
+        boolean toRun = runStatus.equals(ChangeSet.RunStatus.NOT_RAN)
+                || runStatus.equals(ChangeSet.RunStatus.RUN_AGAIN);
         for (Change change : changeSet.getChanges()) {
             if (toRun) {
                 changesToRunByAuthor.get(changeSet.getAuthor()).add(change);
@@ -85,8 +87,8 @@ public class DBDocVisitor implements ChangeSetVisitor {
             }
         }
 
-
-        ChangeLogInfo changeLogInfo = new ChangeLogInfo(changeSet.getFilePath(), databaseChangeLog.getPhysicalFilePath());
+        ChangeLogInfo changeLogInfo = new ChangeLogInfo(changeSet.getFilePath(),
+                databaseChangeLog.getPhysicalFilePath());
         if (!changeLogs.contains(changeLogInfo)) {
             changeLogs.add(changeLogInfo);
         }
@@ -111,7 +113,8 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
     }
 
-    public void writeHTML(File rootOutputDir, ResourceAccessor resourceAccessor) throws IOException, DatabaseException, DatabaseHistoryException {
+    public void writeHTML(File rootOutputDir, ResourceAccessor resourceAccessor) throws IOException, DatabaseException,
+            DatabaseHistoryException {
         ChangeLogWriter changeLogWriter = new ChangeLogWriter(resourceAccessor, rootOutputDir);
         HTMLWriter authorWriter = new AuthorWriter(rootOutputDir, database);
         HTMLWriter tableWriter = new TableWriter(rootOutputDir, database);
@@ -132,15 +135,18 @@ public class DBDocVisitor implements ChangeSetVisitor {
         new AuthorListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(changesByAuthor.keySet()));
 
         for (String author : changesByAuthor.keySet()) {
-            authorWriter.writeHTML(author, changesByAuthor.get(author), changesToRunByAuthor.get(author), rootChangeLogName);
+            authorWriter.writeHTML(author, changesByAuthor.get(author), changesToRunByAuthor.get(author),
+                    rootChangeLogName);
         }
 
         for (Table table : snapshot.getTables()) {
-            tableWriter.writeHTML(table, changesByObject.get(table), changesToRunByObject.get(table), rootChangeLogName);
+            tableWriter
+                    .writeHTML(table, changesByObject.get(table), changesToRunByObject.get(table), rootChangeLogName);
         }
 
         for (Column column : snapshot.getColumns()) {
-            columnWriter.writeHTML(column, changesByObject.get(column), changesToRunByObject.get(column), rootChangeLogName);
+            columnWriter.writeHTML(column, changesByObject.get(column), changesToRunByObject.get(column),
+                    rootChangeLogName);
         }
 
         for (ChangeLogInfo changeLog : changeLogs) {
@@ -177,7 +183,6 @@ public class DBDocVisitor implements ChangeSetVisitor {
         public String logicalPath;
         public String physicalPath;
 
-
         private ChangeLogInfo(String logicalPath, String physicalPath) {
             this.logicalPath = logicalPath;
             this.physicalPath = physicalPath;
@@ -185,8 +190,10 @@ public class DBDocVisitor implements ChangeSetVisitor {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
 
             ChangeLogInfo that = (ChangeLogInfo) o;
 

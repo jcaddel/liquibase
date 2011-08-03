@@ -58,9 +58,11 @@ public class IndexExistsPrecondition implements Precondition {
         return validationErrors;
     }
 
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
+            throws PreconditionFailedException, PreconditionErrorException {
         try {
-            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasIndex(getSchemaName(), getTableName(), getIndexName(), database, getColumnNames())) {
+            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database)
+                    .hasIndex(getSchemaName(), getTableName(), getIndexName(), database, getColumnNames())) {
                 String name = "";
 
                 if (getIndexName() != null) {
@@ -68,13 +70,13 @@ public class IndexExistsPrecondition implements Precondition {
                 }
 
                 if (StringUtils.trimToNull(getTableName()) != null) {
-                    name += " on "+database.escapeStringForDatabase(getTableName());
+                    name += " on " + database.escapeStringForDatabase(getTableName());
 
                     if (StringUtils.trimToNull(getColumnNames()) != null) {
-                        name += " columns "+getColumnNames();
+                        name += " columns " + getColumnNames();
                     }
                 }
-                throw new PreconditionFailedException("Index "+ name +" does not exist", changeLog, this);
+                throw new PreconditionFailedException("Index " + name + " does not exist", changeLog, this);
             }
         } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);

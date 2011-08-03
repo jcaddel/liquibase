@@ -40,7 +40,8 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
      * Oracle specific implementation
      */
     @Override
-    protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs, Database database) throws SQLException, DatabaseException {
+    protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs, Database database) throws SQLException,
+            DatabaseException {
         super.getColumnTypeAndDefValue(columnInfo, rs, database);
 
         // Exclusive setting for oracle INTEGER type
@@ -63,7 +64,8 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
     }
 
     @Override
-    protected void readUniqueConstraints(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
+    protected void readUniqueConstraints(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
+            throws DatabaseException, SQLException {
         Database database = snapshot.getDatabase();
         updateListeners("Reading unique constraints for " + database.toString() + " ...");
         List<UniqueConstraint> foundUC = new ArrayList<UniqueConstraint>();
@@ -78,7 +80,8 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
             schema = database.convertRequestedSchemaToSchema(schema);
 
         try {
-            String query = "select uc.constraint_name,uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name from all_constraints uc, all_cons_columns ucc, all_indexes ui where uc.constraint_type='U' and uc.index_name = ui.index_name and uc.constraint_name = ucc.constraint_name and uc.owner = '" + schema + "' and ui.table_owner = '" + schema + "' and ucc.owner = '" + schema + "'";
+            String query = "select uc.constraint_name,uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name from all_constraints uc, all_cons_columns ucc, all_indexes ui where uc.constraint_type='U' and uc.index_name = ui.index_name and uc.constraint_name = ucc.constraint_name and uc.owner = '"
+                    + schema + "' and ui.table_owner = '" + schema + "' and ucc.owner = '" + schema + "'";
             statement = jdbcConnection.prepareStatement(query);
             rs = statement.executeQuery();
             while (rs.next()) {
@@ -94,7 +97,7 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
                 if (!database.isSystemTable(null, schema, tableName) && !database.isLiquibaseTable(tableName)) {
                     Table table = snapshot.getTable(tableName);
                     if (table == null) {
-                        continue; //probably different schema
+                        continue; // probably different schema
                     }
                     constraintInformation.setTable(table);
                     constraintInformation.setDisabled("DISABLED".equals(status));
@@ -110,7 +113,8 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
         } finally {
             try {
                 rs.close();
-            } catch (SQLException ignored) { }
+            } catch (SQLException ignored) {
+            }
             if (statement != null) {
                 statement.close();
             }
@@ -118,11 +122,13 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
         }
     }
 
-    protected void getColumnsForUniqueConstraint(Connection jdbcConnection, UniqueConstraint constraint, String schema) throws SQLException {
+    protected void getColumnsForUniqueConstraint(Connection jdbcConnection, UniqueConstraint constraint, String schema)
+            throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = jdbcConnection.prepareStatement("select ucc.column_name from all_cons_columns ucc where ucc.constraint_name=? and ucc.owner=? order by ucc.position");
+            stmt = jdbcConnection
+                    .prepareStatement("select ucc.column_name from all_cons_columns ucc where ucc.constraint_name=? and ucc.owner=? order by ucc.position");
             stmt.setString(1, constraint.getName());
             stmt.setString(2, schema);
             rs = stmt.executeQuery();
@@ -143,14 +149,14 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
     }
 
     @Override
-    protected void readColumns(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws SQLException, DatabaseException {
+    protected void readColumns(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
+            throws SQLException, DatabaseException {
         findIntegerColumns(snapshot, schema);
         super.readColumns(snapshot, schema, databaseMetaData);
 
         /*
-          * Code Description:
-          * Finding all 'tablespace' attributes of column's PKs
-          * */
+         * Code Description: Finding all 'tablespace' attributes of column's PKs
+         */
         Database database = snapshot.getDatabase();
         Statement statement = null;
         ResultSet rs = null;
@@ -161,14 +167,15 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
             if (schema == null)
                 schema = database.convertRequestedSchemaToSchema(schema);
 
-            String query = "select ui.tablespace_name TABLESPACE, ucc.table_name TABLE_NAME, ucc.column_name COLUMN_NAME FROM all_indexes ui , all_constraints uc , all_cons_columns ucc where uc.constraint_type = 'P' and ucc.constraint_name = uc.constraint_name and uc.index_name = ui.index_name and uc.owner = '" + schema + "' and ui.table_owner = '" + schema + "' and ucc.owner = '" + schema + "'";
+            String query = "select ui.tablespace_name TABLESPACE, ucc.table_name TABLE_NAME, ucc.column_name COLUMN_NAME FROM all_indexes ui , all_constraints uc , all_cons_columns ucc where uc.constraint_type = 'P' and ucc.constraint_name = uc.constraint_name and uc.index_name = ui.index_name and uc.owner = '"
+                    + schema + "' and ui.table_owner = '" + schema + "' and ucc.owner = '" + schema + "'";
             rs = statement.executeQuery(query);
 
             while (rs.next()) {
                 Column column = snapshot.getColumn(rs.getString("TABLE_NAME"), rs.getString("COLUMN_NAME"));
                 // setting up tablespace property to column, to configure it's PK-index
                 if (column == null) {
-                    continue; //probably a different schema
+                    continue; // probably a different schema
                 }
                 column.setTablespace(rs.getString("TABLESPACE"));
             }
@@ -191,12 +198,15 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 
     /**
      * Method finds all INTEGER columns in snapshot's database
-     *
-     * @param snapshot current database snapshot
+     * 
+     * @param snapshot
+     *            current database snapshot
      * @return String list with names of all INTEGER columns
-     * @throws java.sql.SQLException execute statement error
+     * @throws java.sql.SQLException
+     *             execute statement error
      */
-    private List<String> findIntegerColumns(DatabaseSnapshot snapshot, String schema) throws SQLException, DatabaseException {
+    private List<String> findIntegerColumns(DatabaseSnapshot snapshot, String schema) throws SQLException,
+            DatabaseException {
 
         Database database = snapshot.getDatabase();
         // Setting default schema name. Needed for correct statement generation
@@ -207,7 +217,9 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
         ResultSet integerListRS = null;
         // Finding all columns created as 'INTEGER'
         try {
-            integerListRS = statement.executeQuery("select TABLE_NAME, COLUMN_NAME from all_tab_columns where data_precision is null and data_scale = 0 and data_type = 'NUMBER' and owner = '" + schema + "'");
+            integerListRS = statement
+                    .executeQuery("select TABLE_NAME, COLUMN_NAME from all_tab_columns where data_precision is null and data_scale = 0 and data_type = 'NUMBER' and owner = '"
+                            + schema + "'");
             while (integerListRS.next()) {
                 integerList.add(integerListRS.getString("TABLE_NAME") + "." + integerListRS.getString("COLUMN_NAME"));
             }
@@ -227,7 +239,6 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
             }
         }
 
-
         return integerList;
     }
 
@@ -242,11 +253,8 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
         column.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
 
         // Set true, if precision should be initialize
-        column.setInitPrecision(
-                !((column.getDataType() == Types.DECIMAL ||
-                        column.getDataType() == Types.NUMERIC ||
-                        column.getDataType() == Types.REAL) && rs.getString("DECIMAL_DIGITS") == null)
-        );
+        column.setInitPrecision(!((column.getDataType() == Types.DECIMAL || column.getDataType() == Types.NUMERIC || column
+                .getDataType() == Types.REAL) && rs.getString("DECIMAL_DIGITS") == null));
     }
 
     @Override
@@ -259,7 +267,13 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
         }
 
         // Create SQL statement to select all FKs in database which referenced to unique columns
-        String query = "select uc_fk.constraint_name FK_NAME,uc_fk.owner FKTABLE_SCHEM,ucc_fk.table_name FKTABLE_NAME,ucc_fk.column_name FKCOLUMN_NAME,decode(uc_fk.deferrable, 'DEFERRABLE', 5 ,'NOT DEFERRABLE', 7 , 'DEFERRED', 6 ) DEFERRABILITY, decode(uc_fk.delete_rule, 'CASCADE', 0,'NO ACTION', 3) DELETE_RULE,ucc_rf.table_name PKTABLE_NAME,ucc_rf.column_name PKCOLUMN_NAME from all_cons_columns ucc_fk,all_constraints uc_fk,all_cons_columns ucc_rf,all_constraints uc_rf where uc_fk.CONSTRAINT_NAME = ucc_fk.CONSTRAINT_NAME and uc_fk.constraint_type='R' and uc_fk.r_constraint_name=ucc_rf.CONSTRAINT_NAME and uc_rf.constraint_name = ucc_rf.constraint_name and uc_rf.constraint_type = 'U' and uc_fk.owner = '" + schemaName + "' and ucc_fk.owner = '" + schemaName + "' and uc_rf.owner = '" + schemaName + "' and ucc_rf.owner = '" + schemaName + "'";
+        String query = "select uc_fk.constraint_name FK_NAME,uc_fk.owner FKTABLE_SCHEM,ucc_fk.table_name FKTABLE_NAME,ucc_fk.column_name FKCOLUMN_NAME,decode(uc_fk.deferrable, 'DEFERRABLE', 5 ,'NOT DEFERRABLE', 7 , 'DEFERRED', 6 ) DEFERRABILITY, decode(uc_fk.delete_rule, 'CASCADE', 0,'NO ACTION', 3) DELETE_RULE,ucc_rf.table_name PKTABLE_NAME,ucc_rf.column_name PKCOLUMN_NAME from all_cons_columns ucc_fk,all_constraints uc_fk,all_cons_columns ucc_rf,all_constraints uc_rf where uc_fk.CONSTRAINT_NAME = ucc_fk.CONSTRAINT_NAME and uc_fk.constraint_type='R' and uc_fk.r_constraint_name=ucc_rf.CONSTRAINT_NAME and uc_rf.constraint_name = ucc_rf.constraint_name and uc_rf.constraint_type = 'U' and uc_fk.owner = '"
+                + schemaName
+                + "' and ucc_fk.owner = '"
+                + schemaName
+                + "' and uc_rf.owner = '"
+                + schemaName
+                + "' and ucc_rf.owner = '" + schemaName + "'";
         Statement statement = null;
         ResultSet rs = null;
         try {
@@ -294,11 +308,14 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
     }
 
     @Override
-    protected void readIndexes(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
+    protected void readIndexes(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
+            throws DatabaseException, SQLException {
         Database database = snapshot.getDatabase();
         updateListeners("Reading indexes for " + database.toString() + " ...");
 
-        String query = "select aic.index_name, 3 AS TYPE, aic.table_name, aic.column_name, aic.column_position AS ORDINAL_POSITION, null AS FILTER_CONDITION, ai.tablespace_name AS TABLESPACE, ai.uniqueness FROM all_ind_columns aic, all_indexes ai WHERE aic.table_owner='" + database.convertRequestedSchemaToSchema(schema) + "' and aic.index_name = ai.index_name ORDER BY INDEX_NAME, ORDINAL_POSITION";
+        String query = "select aic.index_name, 3 AS TYPE, aic.table_name, aic.column_name, aic.column_position AS ORDINAL_POSITION, null AS FILTER_CONDITION, ai.tablespace_name AS TABLESPACE, ai.uniqueness FROM all_ind_columns aic, all_indexes ai WHERE aic.table_owner='"
+                + database.convertRequestedSchemaToSchema(schema)
+                + "' and aic.index_name = ai.index_name ORDER BY INDEX_NAME, ORDINAL_POSITION";
         Statement statement = null;
         ResultSet rs = null;
         Map<String, Index> indexMap = null;
@@ -313,7 +330,7 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
                 String tableSpace = rs.getString("TABLESPACE");
                 String columnName = convertFromDatabaseName(rs.getString("COLUMN_NAME"));
                 if (columnName == null) {
-                    //nothing to index, not sure why these come through sometimes
+                    // nothing to index, not sure why these come through sometimes
                     continue;
                 }
                 short type = rs.getShort("TYPE");
@@ -342,7 +359,7 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
                     index = new Index();
                     Table table = snapshot.getTable(tableName);
                     if (table == null) {
-                        continue; //probably different schema
+                        continue; // probably different schema
                     }
                     index.setTable(table);
                     index.setTablespace(tableSpace);
@@ -367,23 +384,25 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
         }
 
         /*
-          * marks indexes as "associated with" instead of "remove it"
-          * Index should have associations with:
-          * foreignKey, primaryKey or uniqueConstraint
-          * */
+         * marks indexes as "associated with" instead of "remove it" Index should have associations with: foreignKey,
+         * primaryKey or uniqueConstraint
+         */
         for (Index index : snapshot.getIndexes()) {
             for (PrimaryKey pk : snapshot.getPrimaryKeys()) {
-                if (index.getTable().getName().equalsIgnoreCase(pk.getTable().getName()) && index.getColumnNames().equals(pk.getColumnNames())) {
+                if (index.getTable().getName().equalsIgnoreCase(pk.getTable().getName())
+                        && index.getColumnNames().equals(pk.getColumnNames())) {
                     index.addAssociatedWith(Index.MARK_PRIMARY_KEY);
                 }
             }
             for (ForeignKey fk : snapshot.getForeignKeys()) {
-                if (index.getTable().getName().equalsIgnoreCase(fk.getForeignKeyTable().getName()) && index.getColumnNames().equals(fk.getForeignKeyColumns())) {
+                if (index.getTable().getName().equalsIgnoreCase(fk.getForeignKeyTable().getName())
+                        && index.getColumnNames().equals(fk.getForeignKeyColumns())) {
                     index.addAssociatedWith(Index.MARK_FOREIGN_KEY);
                 }
             }
             for (UniqueConstraint uc : snapshot.getUniqueConstraints()) {
-                if (index.getTable().getName().equalsIgnoreCase(uc.getTable().getName()) && index.getColumnNames().equals(uc.getColumnNames())) {
+                if (index.getTable().getName().equalsIgnoreCase(uc.getTable().getName())
+                        && index.getColumnNames().equals(uc.getColumnNames())) {
                     index.addAssociatedWith(Index.MARK_UNIQUE_CONSTRAINT);
                 }
             }
@@ -391,17 +410,20 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
     }
 
     @Override
-    protected void readPrimaryKeys(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
+    protected void readPrimaryKeys(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
+            throws DatabaseException, SQLException {
         Database database = snapshot.getDatabase();
         updateListeners("Reading primary keys for " + database.toString() + " ...");
 
-        //we can't add directly to the this.primaryKeys hashSet because adding columns to an exising PK changes the hashCode and .contains() fails
+        // we can't add directly to the this.primaryKeys hashSet because adding columns to an exising PK changes the
+        // hashCode and .contains() fails
         List<PrimaryKey> foundPKs = new ArrayList<PrimaryKey>();
         // Setting default schema name. Needed for correct statement generation
         if (schema == null)
             schema = database.convertRequestedSchemaToSchema(schema);
 
-        String query = "select uc.table_name TABLE_NAME,ucc.column_name COLUMN_NAME,ucc.position KEY_SEQ,uc.constraint_name PK_NAME,ui.tablespace_name TABLESPACE from all_constraints uc,all_indexes ui,all_cons_columns ucc where uc.constraint_type = 'P' and uc.index_name = ui.index_name and uc.constraint_name = ucc.constraint_name and uc.owner = '" + schema + "' and ui.table_owner = '" + schema + "' and ucc.owner = '" + schema + "'";
+        String query = "select uc.table_name TABLE_NAME,ucc.column_name COLUMN_NAME,ucc.position KEY_SEQ,uc.constraint_name PK_NAME,ui.tablespace_name TABLESPACE from all_constraints uc,all_indexes ui,all_cons_columns ucc where uc.constraint_type = 'P' and uc.index_name = ui.index_name and uc.constraint_name = ucc.constraint_name and uc.owner = '"
+                + schema + "' and ui.table_owner = '" + schema + "' and ucc.owner = '" + schema + "'";
         Statement statement = null;
         ResultSet rs = null;
         try {
@@ -428,7 +450,7 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
                     primaryKey.setTablespace(tablespace);
                     Table table = snapshot.getTable(tableName);
                     if (table == null) {
-                        continue; //probably a different schema
+                        continue; // probably a different schema
                     }
                     primaryKey.setTable(table);
                     primaryKey.addColumnName(position - 1, columnName);
@@ -443,5 +465,5 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
         }
 
         snapshot.getPrimaryKeys().addAll(foundPKs);
-	}
+    }
 }

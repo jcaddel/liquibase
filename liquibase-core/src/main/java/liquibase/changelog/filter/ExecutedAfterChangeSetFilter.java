@@ -15,16 +15,18 @@ public class ExecutedAfterChangeSetFilter implements ChangeSetFilter {
     public ExecutedAfterChangeSetFilter(Date date, List<RanChangeSet> ranChangeSets) {
         for (RanChangeSet ranChangeSet : ranChangeSets) {
             if (ranChangeSet.getDateExecuted() != null && ranChangeSet.getDateExecuted().getTime() > date.getTime()) {
-                changeLogsAfterDate.add(changeLogToString(ranChangeSet.getId(), ranChangeSet.getAuthor(), ranChangeSet.getChangeLog()));
+                changeLogsAfterDate.add(changeLogToString(ranChangeSet.getId(), ranChangeSet.getAuthor(),
+                        ranChangeSet.getChangeLog()));
             }
         }
     }
 
     private String changeLogToString(String id, String author, String changeLog) {
-        return id+":"+author+":"+changeLog;
+        return id + ":" + author + ":" + changeLog;
     }
 
     public boolean accepts(ChangeSet changeSet) {
-        return changeLogsAfterDate.contains(changeLogToString(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath()));
+        return changeLogsAfterDate.contains(changeLogToString(changeSet.getId(), changeSet.getAuthor(),
+                changeSet.getFilePath()));
     }
 }

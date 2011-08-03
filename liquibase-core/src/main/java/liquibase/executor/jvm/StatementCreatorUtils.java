@@ -8,13 +8,13 @@ import java.sql.Types;
 import java.util.Calendar;
 
 /**
- * Utility methods for PreparedStatementSetter/Creator and CallableStatementCreator
- * implementations, providing sophisticated parameter management (including support
- * for LOB values).
+ * Utility methods for PreparedStatementSetter/Creator and CallableStatementCreator implementations, providing
+ * sophisticated parameter management (including support for LOB values).
  * <p/>
- * <p>Used by PreparedStatementCreatorFactory and CallableStatementCreatorFactory,
- * but also available for direct use in custom setter/creator implementations.
- *
+ * <p>
+ * Used by PreparedStatementCreatorFactory and CallableStatementCreatorFactory, but also available for direct use in
+ * custom setter/creator implementations.
+ * 
  * @author Spring Framework
  * @see PreparedStatementSetter
  * @see SqlParameter
@@ -22,65 +22,76 @@ import java.util.Calendar;
 abstract class StatementCreatorUtils {
 
     /**
-     * Set the value for a parameter. The method used is based on the SQL type
-     * of the parameter and we can handle complex types like arrays and LOBs.
-     *
-     * @param ps         the prepared statement or callable statement
-     * @param paramIndex index of the parameter we are setting
-     * @param param      the parameter as it is declared including type
-     * @param inValue    the value to set
-     * @throws SQLException if thrown by PreparedStatement methods
+     * Set the value for a parameter. The method used is based on the SQL type of the parameter and we can handle
+     * complex types like arrays and LOBs.
+     * 
+     * @param ps
+     *            the prepared statement or callable statement
+     * @param paramIndex
+     *            index of the parameter we are setting
+     * @param param
+     *            the parameter as it is declared including type
+     * @param inValue
+     *            the value to set
+     * @throws SQLException
+     *             if thrown by PreparedStatement methods
      */
-    public static void setParameterValue(
-            PreparedStatement ps, int paramIndex, SqlParameter param, Object inValue)
+    public static void setParameterValue(PreparedStatement ps, int paramIndex, SqlParameter param, Object inValue)
             throws SQLException {
 
         setParameterValueInternal(ps, paramIndex, param.getSqlType(), param.getTypeName(), param.getScale(), inValue);
     }
 
     /**
-     * Set the value for a parameter. The method used is based on the SQL type
-     * of the parameter and we can handle complex types like arrays and LOBs.
-     *
-     * @param ps         the prepared statement or callable statement
-     * @param paramIndex index of the parameter we are setting
-     * @param sqlType    the SQL type of the parameter
-     * @param inValue    the value to set (plain value or a SqlTypeValue)
-     * @throws SQLException if thrown by PreparedStatement methods
+     * Set the value for a parameter. The method used is based on the SQL type of the parameter and we can handle
+     * complex types like arrays and LOBs.
+     * 
+     * @param ps
+     *            the prepared statement or callable statement
+     * @param paramIndex
+     *            index of the parameter we are setting
+     * @param sqlType
+     *            the SQL type of the parameter
+     * @param inValue
+     *            the value to set (plain value or a SqlTypeValue)
+     * @throws SQLException
+     *             if thrown by PreparedStatement methods
      */
-    public static void setParameterValue(
-            PreparedStatement ps, int paramIndex, int sqlType, Object inValue)
+    public static void setParameterValue(PreparedStatement ps, int paramIndex, int sqlType, Object inValue)
             throws SQLException {
 
         setParameterValueInternal(ps, paramIndex, sqlType, null, null, inValue);
     }
 
     /**
-     * Set the value for a parameter. The method used is based on the SQL type
-     * of the parameter and we can handle complex types like arrays and LOBs.
-     *
-     * @param ps         the prepared statement or callable statement
-     * @param paramIndex index of the parameter we are setting
-     * @param sqlType    the SQL type of the parameter
-     * @param typeName   the type name of the parameter
-     *                   (optional, only used for SQL NULL and SqlTypeValue)
-     * @param scale      the number of digits after the decimal point
-     *                   (for DECIMAL and NUMERIC types)
-     * @param inValue    the value to set (plain value or a SqlTypeValue)
-     * @throws SQLException if thrown by PreparedStatement methods
+     * Set the value for a parameter. The method used is based on the SQL type of the parameter and we can handle
+     * complex types like arrays and LOBs.
+     * 
+     * @param ps
+     *            the prepared statement or callable statement
+     * @param paramIndex
+     *            index of the parameter we are setting
+     * @param sqlType
+     *            the SQL type of the parameter
+     * @param typeName
+     *            the type name of the parameter (optional, only used for SQL NULL and SqlTypeValue)
+     * @param scale
+     *            the number of digits after the decimal point (for DECIMAL and NUMERIC types)
+     * @param inValue
+     *            the value to set (plain value or a SqlTypeValue)
+     * @throws SQLException
+     *             if thrown by PreparedStatement methods
      */
-    private static void setParameterValueInternal(
-            PreparedStatement ps, int paramIndex, int sqlType, String typeName, Integer scale, Object inValue)
-            throws SQLException {
+    private static void setParameterValueInternal(PreparedStatement ps, int paramIndex, int sqlType, String typeName,
+            Integer scale, Object inValue) throws SQLException {
 
         if (inValue == null) {
             if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
                 boolean useSetObject = false;
                 try {
                     useSetObject = (ps.getConnection().getMetaData().getDatabaseProductName().indexOf("Informix") != -1);
-                }
-                catch (Throwable ex) {
-//                    logger.debug("Could not check database product name", ex);
+                } catch (Throwable ex) {
+                    // logger.debug("Could not check database product name", ex);
                 }
                 if (useSetObject) {
                     ps.setObject(paramIndex, null);
@@ -92,10 +103,10 @@ abstract class StatementCreatorUtils {
             } else {
                 ps.setNull(paramIndex, sqlType);
             }
-        } else {  // inValue != null
+        } else { // inValue != null
             if (inValue instanceof SqlTypeValue) {
                 ((SqlTypeValue) inValue).setTypeValue(ps, paramIndex, sqlType, typeName);
-            } else if (sqlType == Types.VARCHAR || sqlType == -9 ) { //-9 is Types.NVARCHAR in java 1.6
+            } else if (sqlType == Types.VARCHAR || sqlType == -9) { // -9 is Types.NVARCHAR in java 1.6
                 ps.setString(paramIndex, inValue.toString());
             } else if (sqlType == Types.DECIMAL || sqlType == Types.NUMERIC) {
                 if (inValue instanceof BigDecimal) {
@@ -171,12 +182,11 @@ abstract class StatementCreatorUtils {
     }
 
     /**
-     * Check whether the given value is a <code>java.util.Date</code>
-     * (but not one of the JDBC-specific subclasses).
+     * Check whether the given value is a <code>java.util.Date</code> (but not one of the JDBC-specific subclasses).
      */
     private static boolean isDateValue(Object inValue) {
-        return (inValue instanceof java.util.Date && !(inValue instanceof java.sql.Date ||
-                inValue instanceof java.sql.Time || inValue instanceof java.sql.Timestamp));
+        return (inValue instanceof java.util.Date && !(inValue instanceof java.sql.Date
+                || inValue instanceof java.sql.Time || inValue instanceof java.sql.Timestamp));
     }
 
 }

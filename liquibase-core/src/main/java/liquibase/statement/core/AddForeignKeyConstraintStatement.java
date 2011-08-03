@@ -20,11 +20,13 @@ public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
     private String onDelete;
     private String onUpdate;
 
-	// Some databases supports creation of FK with referention to column marked as unique, not primary
-	// If FK referenced to such unique column this option should be set to false
-	private boolean referencesUniqueColumn = false;
+    // Some databases supports creation of FK with referention to column marked as unique, not primary
+    // If FK referenced to such unique column this option should be set to false
+    private boolean referencesUniqueColumn = false;
 
-    public AddForeignKeyConstraintStatement(String constraintName, String baseTableSchemaName, String baseTableName, String baseColumnNames, String referencedTableSchemaName, String referencedTableName, String referencedColumnNames) {
+    public AddForeignKeyConstraintStatement(String constraintName, String baseTableSchemaName, String baseTableName,
+            String baseColumnNames, String referencedTableSchemaName, String referencedTableName,
+            String referencedColumnNames) {
         this.baseTableSchemaName = baseTableSchemaName;
         this.baseTableName = baseTableName;
         this.baseColumnNames = baseColumnNames;
@@ -98,14 +100,14 @@ public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
         return this;
     }
 
-	public boolean getReferencesUniqueColumn() {
-		return referencesUniqueColumn;
-	}
+    public boolean getReferencesUniqueColumn() {
+        return referencesUniqueColumn;
+    }
 
-	public AddForeignKeyConstraintStatement setReferencesUniqueColumn(Boolean referencesUniqueColumn) {
+    public AddForeignKeyConstraintStatement setReferencesUniqueColumn(Boolean referencesUniqueColumn) {
         if (referencesUniqueColumn != null) {
             this.referencesUniqueColumn = referencesUniqueColumn;
         }
         return this;
-	}
+    }
 }

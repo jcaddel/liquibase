@@ -4,15 +4,15 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class ReindexStatement extends AbstractSqlStatement {
 
-	private String schemaName;
+    private String schemaName;
     private String tableName;
-    
-	public ReindexStatement(String schemaName, String tableName) {
-		this.schemaName = schemaName;
+
+    public ReindexStatement(String schemaName, String tableName) {
+        this.schemaName = schemaName;
         this.tableName = tableName;
-	}
-	
-	public String getSchemaName() {
+    }
+
+    public String getSchemaName() {
         return schemaName;
     }
 

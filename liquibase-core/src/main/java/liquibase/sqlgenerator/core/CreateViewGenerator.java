@@ -11,14 +11,17 @@ import liquibase.statement.core.CreateViewStatement;
 
 public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatement> {
 
-    public ValidationErrors validate(CreateViewStatement createViewStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateViewStatement createViewStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("viewName", createViewStatement.getViewName());
         validationErrors.checkRequiredField("selectQuery", createViewStatement.getSelectQuery());
 
         if (createViewStatement.isReplaceIfExists()) {
-            validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists(), database, HsqlDatabase.class, H2Database.class, DB2Database.class, CacheDatabase.class, MSSQLDatabase.class, DerbyDatabase.class, SybaseASADatabase.class, InformixDatabase.class);
+            validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists(), database,
+                    HsqlDatabase.class, H2Database.class, DB2Database.class, CacheDatabase.class, MSSQLDatabase.class,
+                    DerbyDatabase.class, SybaseASADatabase.class, InformixDatabase.class);
         }
 
         return validationErrors;
@@ -33,17 +36,16 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
             } else {
                 createClause = "RECREATE VIEW";
             }
-        } else if (database instanceof SybaseASADatabase && statement.getSelectQuery().toLowerCase().startsWith("create view")) {
+        } else if (database instanceof SybaseASADatabase
+                && statement.getSelectQuery().toLowerCase().startsWith("create view")) {
             // Sybase ASA saves view definitions with header.
-            return new Sql[]{
-                    new UnparsedSql(statement.getSelectQuery())
-            };
+            return new Sql[] { new UnparsedSql(statement.getSelectQuery()) };
         } else {
             createClause = "CREATE " + (statement.isReplaceIfExists() ? "OR REPLACE " : "") + "VIEW";
         }
 
-        return new Sql[]{
-                new UnparsedSql(createClause + " " + database.escapeViewName(statement.getSchemaName(), statement.getViewName()) + " AS " + statement.getSelectQuery())
-        };
+        return new Sql[] { new UnparsedSql(createClause + " "
+                + database.escapeViewName(statement.getSchemaName(), statement.getViewName()) + " AS "
+                + statement.getSelectQuery()) };
     }
 }

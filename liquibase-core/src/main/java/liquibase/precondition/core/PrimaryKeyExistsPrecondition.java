@@ -46,7 +46,8 @@ public class PrimaryKeyExistsPrecondition implements Precondition {
         return new ValidationErrors();
     }
 
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
+            throws PreconditionFailedException, PreconditionErrorException {
         DatabaseSnapshot snapshot;
         try {
             snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, getSchemaName(), null);
@@ -55,11 +56,13 @@ public class PrimaryKeyExistsPrecondition implements Precondition {
         }
         if (tableName != null) {
             if (snapshot.getPrimaryKeyForTable(getTableName()) == null) {
-                throw new PreconditionFailedException("Primary Key does not exist on "+database.escapeStringForDatabase(getTableName()), changeLog, this);
+                throw new PreconditionFailedException("Primary Key does not exist on "
+                        + database.escapeStringForDatabase(getTableName()), changeLog, this);
             }
         } else if (primaryKeyName != null) {
             if (snapshot.getPrimaryKey(getPrimaryKeyName()) == null) {
-                throw new PreconditionFailedException("Primary Key "+database.escapeStringForDatabase(getPrimaryKeyName())+" does not exist", changeLog, this);
+                throw new PreconditionFailedException("Primary Key "
+                        + database.escapeStringForDatabase(getPrimaryKeyName()) + " does not exist", changeLog, this);
             }
         } else {
             throw new RuntimeException("primaryKeyExists precondition requires a tableName or primaryKeyName");

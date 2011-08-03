@@ -26,7 +26,8 @@ public class LiquibaseStatusServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
+            throws ServletException, IOException {
         httpServletResponse.setContentType("text/html");
 
         String logLevelToDisplay = httpServletRequest.getParameter("logLevel");
@@ -42,17 +43,17 @@ public class LiquibaseStatusServlet extends HttpServlet {
         if (liquibaseRunLog.size() == 0) {
             writer.println("<b>Liquibase did not run</b>");
         } else {
-            writer.println("<b>View level: " + getLevelLink(Level.SEVERE, currentLevel, httpServletRequest)
-                    + " " + getLevelLink(Level.WARNING, currentLevel, httpServletRequest)
-                    + " " + getLevelLink(Level.INFO, currentLevel, httpServletRequest)
-                    + " " + getLevelLink(Level.CONFIG, currentLevel, httpServletRequest)
-                    + " " + getLevelLink(Level.FINE, currentLevel, httpServletRequest)
-                    + " " + getLevelLink(Level.FINER, currentLevel, httpServletRequest)
-                    + " " + getLevelLink(Level.FINEST, currentLevel, httpServletRequest)
-                    + "</b>");
+            writer.println("<b>View level: " + getLevelLink(Level.SEVERE, currentLevel, httpServletRequest) + " "
+                    + getLevelLink(Level.WARNING, currentLevel, httpServletRequest) + " "
+                    + getLevelLink(Level.INFO, currentLevel, httpServletRequest) + " "
+                    + getLevelLink(Level.CONFIG, currentLevel, httpServletRequest) + " "
+                    + getLevelLink(Level.FINE, currentLevel, httpServletRequest) + " "
+                    + getLevelLink(Level.FINER, currentLevel, httpServletRequest) + " "
+                    + getLevelLink(Level.FINEST, currentLevel, httpServletRequest) + "</b>");
 
             writer.println("<hr>");
-            writer.println("<b>Liquibase started at " + DateFormat.getDateTimeInstance().format(new Date(liquibaseRunLog.get(0).getMillis())));
+            writer.println("<b>Liquibase started at "
+                    + DateFormat.getDateTimeInstance().format(new Date(liquibaseRunLog.get(0).getMillis())));
             writer.println("<hr>");
             writer.println("<pre>");
             for (LogRecord record : liquibaseRunLog) {
@@ -68,7 +69,9 @@ public class LiquibaseStatusServlet extends HttpServlet {
 
             writer.println("</pre>");
             writer.println("<hr>");
-            writer.println("<b>Liquibase finished at " + DateFormat.getDateTimeInstance().format(new Date(liquibaseRunLog.get(liquibaseRunLog.size() - 1).getMillis())));
+            writer.println("<b>Liquibase finished at "
+                    + DateFormat.getDateTimeInstance().format(
+                            new Date(liquibaseRunLog.get(liquibaseRunLog.size() - 1).getMillis())));
         }
         writer.println("</body>");
         writer.println("</html>");
@@ -78,7 +81,8 @@ public class LiquibaseStatusServlet extends HttpServlet {
         if (currentLevel.equals(level)) {
             return level.getName();
         } else {
-            return "<a href=" + request.getRequestURI() + "?logLevel=" + level.getName() + ">" + level.getName() + "</a>";
+            return "<a href=" + request.getRequestURI() + "?logLevel=" + level.getName() + ">" + level.getName()
+                    + "</a>";
         }
     }
 }

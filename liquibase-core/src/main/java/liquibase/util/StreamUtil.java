@@ -6,20 +6,22 @@ import java.io.*;
  * Utilities for working with streams.
  */
 public class StreamUtil {
-	
-	final public static String lineSeparator = System.getProperty("line.separator");
-	
+
+    final public static String lineSeparator = System.getProperty("line.separator");
+
     public static String getLineSeparator() {
         return lineSeparator;
     }
 
     /**
-     * Reads a stream until the end of file into a String and uses the machines
-     * default encoding to convert to characters the bytes from the Stream.
-     *
-     * @param ins The InputStream to read.
+     * Reads a stream until the end of file into a String and uses the machines default encoding to convert to
+     * characters the bytes from the Stream.
+     * 
+     * @param ins
+     *            The InputStream to read.
      * @return The contents of the input stream as a String
-     * @throws IOException If there is an error reading the stream.
+     * @throws IOException
+     *             If there is an error reading the stream.
      */
     public static String getStreamContents(InputStream ins) throws IOException {
 
@@ -28,26 +30,32 @@ public class StreamUtil {
     }
 
     /**
-     * Reads a stream until the end of file into a String and uses the machines
-     * default encoding to convert to characters the bytes from the Stream.
-     *
-     * @param ins The InputStream to read.
-     * @param  charsetName The name of a supported {@link java.nio.charset.Charset </code>charset<code>}
+     * Reads a stream until the end of file into a String and uses the machines default encoding to convert to
+     * characters the bytes from the Stream.
+     * 
+     * @param ins
+     *            The InputStream to read.
+     * @param charsetName
+     *            The name of a supported {@link java.nio.charset.Charset </code>charset<code>}
      * @return The contents of the input stream as a String
-     * @throws IOException If there is an error reading the stream.
+     * @throws IOException
+     *             If there is an error reading the stream.
      */
     public static String getStreamContents(InputStream ins, String charsetName) throws IOException {
 
-        InputStreamReader reader = (charsetName != null) ? new InputStreamReader(ins, charsetName) : new InputStreamReader(ins);
+        InputStreamReader reader = (charsetName != null) ? new InputStreamReader(ins, charsetName)
+                : new InputStreamReader(ins);
         return getReaderContents(reader);
     }
-    
+
     /**
      * Reads all the characters into a String.
-     *
-     * @param reader The Reader to read.
+     * 
+     * @param reader
+     *            The Reader to read.
      * @return The contents of the input stream as a String
-     * @throws IOException If there is an error reading the stream.
+     * @throws IOException
+     *             If there is an error reading the stream.
      */
     public static String getReaderContents(Reader reader) throws IOException {
         try {
@@ -62,7 +70,7 @@ public class StreamUtil {
         } finally {
             try {
                 reader.close();
-            } catch (IOException ioe) {//NOPMD
+            } catch (IOException ioe) {// NOPMD
                 // can safely ignore
             }
         }

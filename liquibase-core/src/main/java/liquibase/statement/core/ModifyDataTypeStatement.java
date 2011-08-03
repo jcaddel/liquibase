@@ -45,5 +45,5 @@ public class ModifyDataTypeStatement extends AbstractSqlStatement {
 
     public void setNewDataType(String newDataType) {
         this.newDataType = newDataType;
-    }   
+    }
 }

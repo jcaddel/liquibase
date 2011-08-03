@@ -29,7 +29,7 @@ public class DatabaseSnapshotGeneratorFactory {
 
     public static DatabaseSnapshotGeneratorFactory getInstance() {
         if (instance == null) {
-             instance = new DatabaseSnapshotGeneratorFactory();
+            instance = new DatabaseSnapshotGeneratorFactory();
         }
         return instance;
     }
@@ -38,20 +38,19 @@ public class DatabaseSnapshotGeneratorFactory {
         return getGenerators(database).iterator().next();
     }
 
-
     /**
-     * Get generators supporting database, sorted from highest priority to
-     * lowest.
-     *
+     * Get generators supporting database, sorted from highest priority to lowest.
+     * 
      * @param database
      * @return
      */
     public SortedSet<DatabaseSnapshotGenerator> getGenerators(final Database database) {
-        SortedSet<DatabaseSnapshotGenerator> generators = new TreeSet<DatabaseSnapshotGenerator>(new Comparator<DatabaseSnapshotGenerator>() {
-            public int compare(DatabaseSnapshotGenerator o1, DatabaseSnapshotGenerator o2) {
-                return -1 * Integer.valueOf(o1.getPriority(database)).compareTo(o2.getPriority(database));
-            }
-        });
+        SortedSet<DatabaseSnapshotGenerator> generators = new TreeSet<DatabaseSnapshotGenerator>(
+                new Comparator<DatabaseSnapshotGenerator>() {
+                    public int compare(DatabaseSnapshotGenerator o1, DatabaseSnapshotGenerator o2) {
+                        return -1 * Integer.valueOf(o1.getPriority(database)).compareTo(o2.getPriority(database));
+                    }
+                });
 
         for (DatabaseSnapshotGenerator generator : registry) {
             if (generator.supports(database)) {
@@ -65,7 +64,8 @@ public class DatabaseSnapshotGeneratorFactory {
     /**
      * Get generator for database with highest priority.
      */
-    public DatabaseSnapshot createSnapshot(Database database, String schema, Set<DiffStatusListener> listeners) throws DatabaseException {
+    public DatabaseSnapshot createSnapshot(Database database, String schema, Set<DiffStatusListener> listeners)
+            throws DatabaseException {
         return getGenerator(database).createSnapshot(database, schema, listeners);
     }
 

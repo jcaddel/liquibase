@@ -16,22 +16,35 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class CreateDatabaseChangeLogLockTableGenerator extends AbstractSqlGenerator<CreateDatabaseChangeLogLockTableStatement> {
+public class CreateDatabaseChangeLogLockTableGenerator extends
+        AbstractSqlGenerator<CreateDatabaseChangeLogLockTableStatement> {
 
-    public ValidationErrors validate(CreateDatabaseChangeLogLockTableStatement createDatabaseChangeLogLockTableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(
+            CreateDatabaseChangeLogLockTableStatement createDatabaseChangeLogLockTableStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
 
-    public Sql[] generateSql(CreateDatabaseChangeLogLockTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
-                .addPrimaryKeyColumn("ID", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("INT", false), null, null, null, new NotNullConstraint())
-                .addColumn("LOCKED", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("BOOLEAN", false), null, new NotNullConstraint())
-                .addColumn("LOCKGRANTED", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("DATETIME", false))
-                .addColumn("LOCKEDBY", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("VARCHAR(255)", false));
+    public Sql[] generateSql(CreateDatabaseChangeLogLockTableStatement statement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
+        CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseSchemaName(),
+                database.getDatabaseChangeLogLockTableName())
+                .addPrimaryKeyColumn("ID",
+                        TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("INT", false), null,
+                        null, null, new NotNullConstraint())
+                .addColumn("LOCKED",
+                        TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("BOOLEAN", false),
+                        null, new NotNullConstraint())
+                .addColumn("LOCKGRANTED",
+                        TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("DATETIME", false))
+                .addColumn(
+                        "LOCKEDBY",
+                        TypeConverterFactory.getInstance().findTypeConverter(database)
+                                .getDataType("VARCHAR(255)", false));
 
-        InsertStatement insertStatement = new InsertStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
-                .addColumnValue("ID", 1)
-                .addColumnValue("LOCKED", Boolean.FALSE);
+        InsertStatement insertStatement = new InsertStatement(database.getLiquibaseSchemaName(),
+                database.getDatabaseChangeLogLockTableName()).addColumnValue("ID", 1).addColumnValue("LOCKED",
+                Boolean.FALSE);
 
         List<Sql> sql = new ArrayList<Sql>();
 

@@ -10,9 +10,8 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * This class is the representation of the column tag in the XMl file
- * It has a reference to the Constraints object for getting information
- * about the columns constraints.
+ * This class is the representation of the column tag in the XMl file It has a reference to the Constraints object for
+ * getting information about the columns constraints.
  */
 public class ColumnConfig {
     private String name;
@@ -32,41 +31,39 @@ public class ColumnConfig {
     private ConstraintsConfig constraints;
     private Boolean autoIncrement;
     private String remarks;
-    
-    
+
     public ColumnConfig(Column columnStructure) {
-    	setName(columnStructure.getName());
-		setType(columnStructure.getTypeName());
-		if (columnStructure.getDefaultValue()!=null) {
-			setDefaultValue(columnStructure.getDefaultValue().toString());
-		}
-		setAutoIncrement(columnStructure.isAutoIncrement());
-		ConstraintsConfig constraints = new ConstraintsConfig(); 
-		constraints.setNullable(columnStructure.isNullable());
-		constraints.setPrimaryKey(columnStructure.isPrimaryKey());
-		constraints.setUnique(columnStructure.isUnique());
-		setConstraints(constraints);
+        setName(columnStructure.getName());
+        setType(columnStructure.getTypeName());
+        if (columnStructure.getDefaultValue() != null) {
+            setDefaultValue(columnStructure.getDefaultValue().toString());
+        }
+        setAutoIncrement(columnStructure.isAutoIncrement());
+        ConstraintsConfig constraints = new ConstraintsConfig();
+        constraints.setNullable(columnStructure.isNullable());
+        constraints.setPrimaryKey(columnStructure.isPrimaryKey());
+        constraints.setUnique(columnStructure.isUnique());
+        setConstraints(constraints);
     }
-    
+
     public ColumnConfig(ColumnConfig column) {
-    	setName(column.getName());
-		setType(column.getType());
-		setDefaultValue(column.getDefaultValue());
-		setAutoIncrement(column.isAutoIncrement());
-		if (column.getConstraints()!=null) {
-			ConstraintsConfig constraints = new ConstraintsConfig(); 
-			constraints.setNullable(column.getConstraints().isNullable());
-			constraints.setPrimaryKey(column.getConstraints().isPrimaryKey());
-			constraints.setPrimaryKeyTablespace(column.getConstraints().getPrimaryKeyTablespace());
-			constraints.setUnique(column.getConstraints().isUnique());
-		}
-		setConstraints(constraints);
+        setName(column.getName());
+        setType(column.getType());
+        setDefaultValue(column.getDefaultValue());
+        setAutoIncrement(column.isAutoIncrement());
+        if (column.getConstraints() != null) {
+            ConstraintsConfig constraints = new ConstraintsConfig();
+            constraints.setNullable(column.getConstraints().isNullable());
+            constraints.setPrimaryKey(column.getConstraints().isPrimaryKey());
+            constraints.setPrimaryKeyTablespace(column.getConstraints().getPrimaryKeyTablespace());
+            constraints.setUnique(column.getConstraints().isUnique());
+        }
+        setConstraints(constraints);
     }
-    
+
     public ColumnConfig() {
-    	// do nothing
+        // do nothing
     }
-    
 
     public String getName() {
         return name;
@@ -90,24 +87,22 @@ public class ColumnConfig {
         return value;
     }
 
-
     public void setValue(String value) {
         // Since we have two rules for the value it can either be specifed as an attribute
         // or as the tag body in case of long values then the check is necessary so that it
         // should not override the value specifed as an attribute.
-//        if (StringUtils.trimToNull(value) != null) {
-//            this.value = value;
-//        }
-    	// TODO find where this is being called with the tag body 
-    	// and fix the code there.  this logic does not belong here
-    	// because it prevents a column from being the empty string
-    	this.value = value;
+        // if (StringUtils.trimToNull(value) != null) {
+        // this.value = value;
+        // }
+        // TODO find where this is being called with the tag body
+        // and fix the code there. this logic does not belong here
+        // because it prevents a column from being the empty string
+        this.value = value;
     }
 
     public Number getValueNumeric() {
         return valueNumeric;
     }
-
 
     public ColumnConfig setValueNumeric(String valueNumeric) {
         if (valueNumeric == null || valueNumeric.equalsIgnoreCase("null")) {
@@ -115,11 +110,10 @@ public class ColumnConfig {
         } else {
             valueNumeric = valueNumeric.replaceFirst("^\\(", "");
             valueNumeric = valueNumeric.replaceFirst("\\)$", "");
-            
+
             if (valueNumeric.matches("\\d+\\.?\\d*")) {
                 try {
-                    this.valueNumeric = NumberFormat.getInstance(Locale.US).
-                    	parse(valueNumeric);
+                    this.valueNumeric = NumberFormat.getInstance(Locale.US).parse(valueNumeric);
                 } catch (ParseException e) {
                     throw new RuntimeException(e);
                 }
@@ -174,7 +168,7 @@ public class ColumnConfig {
             try {
                 this.valueDate = new ISODateFormat().parse(valueDate);
             } catch (ParseException e) {
-                //probably a function
+                // probably a function
                 this.valueComputed = new DatabaseFunction(valueDate);
             }
         }
@@ -197,7 +191,6 @@ public class ColumnConfig {
         return null;
     }
 
-
     public String getDefaultValue() {
         return defaultValue;
     }
@@ -207,7 +200,6 @@ public class ColumnConfig {
 
         return this;
     }
-
 
     public Number getDefaultValueNumeric() {
         return defaultValueNumeric;
@@ -231,7 +223,7 @@ public class ColumnConfig {
                 try {
                     this.defaultValueNumeric = NumberFormat.getInstance(Locale.US).parse(defaultValueNumeric);
                 } catch (ParseException e) {
-                    this.defaultValueComputed  = new DatabaseFunction(defaultValueNumeric);
+                    this.defaultValueComputed = new DatabaseFunction(defaultValueNumeric);
                 }
             }
         }
@@ -250,7 +242,7 @@ public class ColumnConfig {
             try {
                 this.defaultValueDate = new ISODateFormat().parse(defaultValueDate);
             } catch (ParseException e) {
-                //probably a computed date
+                // probably a computed date
                 this.defaultValueComputed = new DatabaseFunction(defaultValueDate);
             }
         }
@@ -328,10 +320,8 @@ public class ColumnConfig {
     }
 
     public boolean hasDefaultValue() {
-        return this.getDefaultValue() != null
-                || this.getDefaultValueBoolean() != null
-                || this.getDefaultValueDate() != null
-                || this.getDefaultValueNumeric() != null
+        return this.getDefaultValue() != null || this.getDefaultValueBoolean() != null
+                || this.getDefaultValueDate() != null || this.getDefaultValueNumeric() != null
                 || this.getDefaultValueComputed() != null;
     }
 

@@ -56,14 +56,14 @@ public class AddDefaultValueChange extends AbstractChange {
     public void setColumnName(String columnName) {
         this.columnName = columnName;
     }
-    
+
     public String getColumnDataType() {
-		return columnDataType;
-	}
-    
+        return columnDataType;
+    }
+
     public void setColumnDataType(String columnDataType) {
-		this.columnDataType = columnDataType;
-	}
+        this.columnDataType = columnDataType;
+    }
 
     public String getDefaultValue() {
         return defaultValue;
@@ -72,7 +72,6 @@ public class AddDefaultValueChange extends AbstractChange {
     public void setDefaultValue(String defaultValue) {
         this.defaultValue = defaultValue;
     }
-
 
     public String getDefaultValueNumeric() {
         return defaultValueNumeric;
@@ -89,7 +88,6 @@ public class AddDefaultValueChange extends AbstractChange {
     public void setDefaultValueDate(String defaultValueDate) {
         this.defaultValueDate = defaultValueDate;
     }
-
 
     public Boolean getDefaultValueBoolean() {
         return defaultValueBoolean;
@@ -116,10 +114,9 @@ public class AddDefaultValueChange extends AbstractChange {
             defaultValue = Boolean.valueOf(getDefaultValueBoolean());
         } else if (getDefaultValueNumeric() != null) {
             try {
-                defaultValue = NumberFormat.getInstance(Locale.US).
-                	parse(getDefaultValueNumeric()); 
+                defaultValue = NumberFormat.getInstance(Locale.US).parse(getDefaultValueNumeric());
             } catch (ParseException e) {
-            	defaultValue = new DatabaseFunction(getDefaultValueNumeric());
+                defaultValue = new DatabaseFunction(getDefaultValueNumeric());
             }
         } else if (getDefaultValueDate() != null) {
             try {
@@ -130,10 +127,9 @@ public class AddDefaultValueChange extends AbstractChange {
         } else if (getDefaultValueComputed() != null) {
             defaultValue = getDefaultValueComputed();
         }
-        
-        return new SqlStatement[]{
-                new AddDefaultValueStatement(getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), defaultValue)
-        };
+
+        return new SqlStatement[] { new AddDefaultValueStatement(getSchemaName(), getTableName(), getColumnName(),
+                getColumnDataType(), defaultValue) };
     }
 
     @Override
@@ -144,9 +140,7 @@ public class AddDefaultValueChange extends AbstractChange {
         inverse.setColumnName(getColumnName());
         inverse.setColumnDataType(getColumnDataType());
 
-        return new Change[]{
-                inverse
-        };
+        return new Change[] { inverse };
     }
 
     public String getConfirmationMessage() {

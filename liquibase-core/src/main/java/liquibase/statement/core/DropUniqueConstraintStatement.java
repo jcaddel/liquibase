@@ -18,7 +18,8 @@ public class DropUniqueConstraintStatement extends AbstractSqlStatement {
         this.constraintName = constraintName;
     }
 
-    public DropUniqueConstraintStatement(String schemaName, String tableName, String constraintName, String uniqueColumns) {
+    public DropUniqueConstraintStatement(String schemaName, String tableName, String constraintName,
+            String uniqueColumns) {
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.constraintName = constraintName;
@@ -37,12 +38,12 @@ public class DropUniqueConstraintStatement extends AbstractSqlStatement {
         return constraintName;
     }
 
-	public String getUniqueColumns() {
-		return uniqueColumns;
-	}
+    public String getUniqueColumns() {
+        return uniqueColumns;
+    }
 
-	public void setUniqueColumns(String uniqueColumns) {
-		this.uniqueColumns = uniqueColumns;
-	}
+    public void setUniqueColumns(String uniqueColumns) {
+        this.uniqueColumns = uniqueColumns;
+    }
 
 }

@@ -54,22 +54,24 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
         return changeLogFile.endsWith("xml");
     }
 
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters,
+            ResourceAccessor resourceAccessor) throws ChangeLogParseException {
 
         InputStream inputStream = null;
         try {
             SAXParser parser = saxParserFactory.newSAXParser();
             try {
-                parser.setProperty("http://java.sun.com/xml/jaxp/properties/schemaLanguage", "http://www.w3.org/2001/XMLSchema");
+                parser.setProperty("http://java.sun.com/xml/jaxp/properties/schemaLanguage",
+                        "http://www.w3.org/2001/XMLSchema");
             } catch (SAXNotRecognizedException e) {
-                //ok, parser must not support it
+                // ok, parser must not support it
             } catch (SAXNotSupportedException e) {
-                //ok, parser must not support it
+                // ok, parser must not support it
             }
 
             XMLReader xmlReader = parser.getXMLReader();
-            LiquibaseEntityResolver resolver=new LiquibaseEntityResolver();
-            resolver.useResoureAccessor(resourceAccessor,FilenameUtils.getFullPath(physicalChangeLogLocation));
+            LiquibaseEntityResolver resolver = new LiquibaseEntityResolver();
+            resolver.useResoureAccessor(resourceAccessor, FilenameUtils.getFullPath(physicalChangeLogLocation));
             xmlReader.setEntityResolver(resolver);
             xmlReader.setErrorHandler(new ErrorHandler() {
                 public void warning(SAXParseException exception) throws SAXException {
@@ -87,13 +89,14 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
                     throw exception;
                 }
             });
-        	
+
             inputStream = resourceAccessor.getResourceAsStream(physicalChangeLogLocation);
             if (inputStream == null) {
                 throw new ChangeLogParseException(physicalChangeLogLocation + " does not exist");
             }
 
-            XMLChangeLogSAXHandler contentHandler = new XMLChangeLogSAXHandler(physicalChangeLogLocation, resourceAccessor, changeLogParameters);
+            XMLChangeLogSAXHandler contentHandler = new XMLChangeLogSAXHandler(physicalChangeLogLocation,
+                    resourceAccessor, changeLogParameters);
             xmlReader.setContentHandler(contentHandler);
             xmlReader.parse(new InputSource(inputStream));
 
@@ -103,7 +106,8 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
         } catch (IOException e) {
             throw new ChangeLogParseException("Error Reading Migration File: " + e.getMessage(), e);
         } catch (SAXParseException e) {
-            throw new ChangeLogParseException("Error parsing line " + e.getLineNumber() + " column " + e.getColumnNumber() + " of " + physicalChangeLogLocation +": " + e.getMessage(), e);
+            throw new ChangeLogParseException("Error parsing line " + e.getLineNumber() + " column "
+                    + e.getColumnNumber() + " of " + physicalChangeLogLocation + ": " + e.getMessage(), e);
         } catch (SAXException e) {
             Throwable parentCause = e.getException();
             while (parentCause != null) {
@@ -118,9 +122,9 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
                 causeReason = e.getCause().getMessage();
             }
 
-//            if (reason == null && causeReason==null) {
-//                reason = "Unknown Reason";
-//            }
+            // if (reason == null && causeReason==null) {
+            // reason = "Unknown Reason";
+            // }
             if (reason == null) {
                 if (causeReason != null) {
                     reason = causeReason;

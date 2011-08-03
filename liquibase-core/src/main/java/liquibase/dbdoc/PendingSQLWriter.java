@@ -32,10 +32,12 @@ public class PendingSQLWriter extends HTMLWriter {
     }
 
     @Override
-    protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun) throws IOException, DatabaseHistoryException, DatabaseException {
+    protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun)
+            throws IOException, DatabaseHistoryException, DatabaseException {
 
         Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-        LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), fileWriter, database);
+        LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database),
+                fileWriter, database);
         ExecutorService.getInstance().setExecutor(database, loggingExecutor);
 
         try {
@@ -53,12 +55,13 @@ public class PendingSQLWriter extends HTMLWriter {
                     continue;
                 }
                 lastRunChangeSet = thisChangeSet;
-                String anchor = thisChangeSet.toString(false).replaceAll("\\W","_");
+                String anchor = thisChangeSet.toString(false).replaceAll("\\W", "_");
                 fileWriter.append("<a name='").append(anchor).append("'/>");
                 try {
                     thisChangeSet.execute(databaseChangeLog, this.database);
                 } catch (MigrationFailedException e) {
-                    fileWriter.append("EXECUTION ERROR: ").append(change.getChangeMetaData().getDescription()).append(": ").append(e.getMessage()).append("\n\n");
+                    fileWriter.append("EXECUTION ERROR: ").append(change.getChangeMetaData().getDescription())
+                            .append(": ").append(e.getMessage()).append("\n\n");
                 }
             }
             fileWriter.append("</pre></code>");
@@ -68,6 +71,7 @@ public class PendingSQLWriter extends HTMLWriter {
     }
 
     @Override
-    protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {
+    protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database)
+            throws IOException {
     }
 }

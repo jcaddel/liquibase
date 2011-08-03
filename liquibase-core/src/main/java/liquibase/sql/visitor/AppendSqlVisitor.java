@@ -2,9 +2,8 @@ package liquibase.sql.visitor;
 
 import liquibase.database.Database;
 
-public class AppendSqlVisitor extends AbstractSqlVisitor{
+public class AppendSqlVisitor extends AbstractSqlVisitor {
     private String value;
-
 
     public String getName() {
         return "append";

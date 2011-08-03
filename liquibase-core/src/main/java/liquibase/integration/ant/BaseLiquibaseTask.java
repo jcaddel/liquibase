@@ -30,8 +30,8 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 /**
- * Base class for all Ant Liquibase tasks.  This class sets up Liquibase and defines parameters
- * that are common to all tasks.
+ * Base class for all Ant Liquibase tasks. This class sets up Liquibase and defines parameters that are common to all
+ * tasks.
  */
 public class BaseLiquibaseTask extends Task {
     private String changeLogFile;
@@ -48,7 +48,6 @@ public class BaseLiquibaseTask extends Task {
     private String databaseClass;
     private String databaseChangeLogTableName;
     private String databaseChangeLogLockTableName;
-
 
     private Map<String, Object> changeLogProperties = new HashMap<String, Object>();
 
@@ -172,7 +171,8 @@ public class BaseLiquibaseTask extends Task {
         ResourceAccessor antFO = new AntResourceAccessor(getProject(), classpath);
         ResourceAccessor fsFO = new FileSystemResourceAccessor();
 
-        Database database = createDatabaseObject(getDriver(), getUrl(), getUsername(), getPassword(), getDefaultSchemaName(), getDatabaseClass());
+        Database database = createDatabaseObject(getDriver(), getUrl(), getUsername(), getPassword(),
+                getDefaultSchemaName(), getDatabaseClass());
 
         String changeLogFile = null;
         if (getChangeLogFile() != null) {
@@ -187,12 +187,8 @@ public class BaseLiquibaseTask extends Task {
         return liquibase;
     }
 
-    protected Database createDatabaseObject(String driverClassName,
-                                            String databaseUrl,
-                                            String username,
-                                            String password,
-                                            String defaultSchemaName,
-                                            String databaseClass) throws Exception {
+    protected Database createDatabaseObject(String driverClassName, String databaseUrl, String username,
+            String password, String defaultSchemaName, String databaseClass) throws Exception {
         String[] strings = classpath.list();
 
         final List<URL> taskClassPath = new ArrayList<URL>();
@@ -203,17 +199,18 @@ public class BaseLiquibaseTask extends Task {
 
         URLClassLoader loader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
             public URLClassLoader run() {
-                return new URLClassLoader(taskClassPath.toArray(new URL[taskClassPath.size()]), Database.class.getClassLoader());
+                return new URLClassLoader(taskClassPath.toArray(new URL[taskClassPath.size()]), Database.class
+                        .getClassLoader());
             }
         });
 
         Database database;
 
-
         if (databaseClass != null) {
             try {
-                DatabaseFactory.getInstance().register((Database) Class.forName(databaseClass, true, loader).newInstance());
-            } catch (ClassCastException e) { //fails in Ant in particular
+                DatabaseFactory.getInstance().register(
+                        (Database) Class.forName(databaseClass, true, loader).newInstance());
+            } catch (ClassCastException e) { // fails in Ant in particular
                 DatabaseFactory.getInstance().register((Database) Class.forName(databaseClass).newInstance());
             }
         }
@@ -238,7 +235,8 @@ public class BaseLiquibaseTask extends Task {
         Connection connection = driver.connect(databaseUrl, info);
 
         if (connection == null) {
-            throw new DatabaseException("Connection could not be created to " + databaseUrl + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+            throw new DatabaseException("Connection could not be created to " + databaseUrl + " with driver "
+                    + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
         }
 
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
@@ -261,7 +259,6 @@ public class BaseLiquibaseTask extends Task {
         this.contexts = cntx.trim();
     }
 
-
     /**
      * Redirector of logs from java.util.logging to ANT's loggging
      */
@@ -271,7 +268,7 @@ public class BaseLiquibaseTask extends Task {
 
         /**
          * Constructor
-         *
+         * 
          * @param task
          */
         protected LogRedirector(Task task) {
@@ -286,7 +283,6 @@ public class BaseLiquibaseTask extends Task {
         protected void registerHandler(Handler theHandler) {
             Logger logger = LogFactory.getLogger();
         }
-
 
         protected Handler createHandler() {
             return new Handler() {
@@ -324,7 +320,8 @@ public class BaseLiquibaseTask extends Task {
     protected boolean shouldRun() {
         String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-            log("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+            log("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY
+                    + "' system property was set to false");
             return false;
         }
         return true;
@@ -352,16 +349,13 @@ public class BaseLiquibaseTask extends Task {
         return databaseChangeLogTableName;
     }
 
-
     public void setDatabaseChangeLogTableName(String tableName) {
         this.databaseChangeLogTableName = tableName;
     }
 
-
     public String getDatabaseChangeLogLockTableName() {
         return databaseChangeLogLockTableName;
     }
-
 
     public void setDatabaseChangeLogLockTableName(String tableName) {
         this.databaseChangeLogLockTableName = tableName;

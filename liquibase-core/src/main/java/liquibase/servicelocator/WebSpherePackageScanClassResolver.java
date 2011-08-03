@@ -13,8 +13,9 @@ public class WebSpherePackageScanClassResolver extends DefaultPackageScanClassRe
 
     /**
      * Constructor.
-     *
-     * @param resourcePath  the fixed resource path to use for fetching camel jars in WebSphere.
+     * 
+     * @param resourcePath
+     *            the fixed resource path to use for fetching camel jars in WebSphere.
      */
     public WebSpherePackageScanClassResolver(String resourcePath) {
         this.resourcePath = resourcePath;
@@ -22,9 +23,10 @@ public class WebSpherePackageScanClassResolver extends DefaultPackageScanClassRe
 
     /**
      * Is the classloader from IBM and thus the WebSphere platform?
-     *
-     * @param loader  the classloader
-     * @return  <tt>true</tt> if IBM classloader, <tt>false</tt> otherwise.
+     * 
+     * @param loader
+     *            the classloader
+     * @return <tt>true</tt> if IBM classloader, <tt>false</tt> otherwise.
      */
     public static boolean isWebSphereClassLoader(ClassLoader loader) {
         return loader.getClass().getName().startsWith("com.ibm");
@@ -33,13 +35,16 @@ public class WebSpherePackageScanClassResolver extends DefaultPackageScanClassRe
     /**
      * Overloaded to handle specific problem with getting resources on the IBM WebSphere platform.
      * <p/>
-     * WebSphere can <b>not</b> load resources if the resource to load is a folder name, such as a
-     * packagename, you have to explicit name a resource that is a file.
-     *
-     * @param loader  the classloader
-     * @param packageName   the packagename for the package to load
-     * @return  URL's for the given package
-     * @throws java.io.IOException is thrown by the classloader
+     * WebSphere can <b>not</b> load resources if the resource to load is a folder name, such as a packagename, you have
+     * to explicit name a resource that is a file.
+     * 
+     * @param loader
+     *            the classloader
+     * @param packageName
+     *            the packagename for the package to load
+     * @return URL's for the given package
+     * @throws java.io.IOException
+     *             is thrown by the classloader
      */
     @Override
     protected Enumeration<URL> getResources(ClassLoader loader, String packageName) throws IOException {

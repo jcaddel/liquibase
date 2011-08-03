@@ -6,19 +6,15 @@ import java.util.Map;
 public class SqlVisitorFactory {
 
     @SuppressWarnings("unchecked")
-	private final Map<String, Class> tagToClassMap;
+    private final Map<String, Class> tagToClassMap;
 
     private static final SqlVisitorFactory instance = new SqlVisitorFactory();
 
     @SuppressWarnings("unchecked")
-	private SqlVisitorFactory() {
+    private SqlVisitorFactory() {
         tagToClassMap = new HashMap<String, Class>();
-        Class[] visitors = new Class[]{
-                PrependSqlVisitor.class,
-                AppendSqlVisitor.class,
-                RegExpReplaceSqlVisitor.class,
-                ReplaceSqlVisitor.class,
-        };
+        Class[] visitors = new Class[] { PrependSqlVisitor.class, AppendSqlVisitor.class,
+                RegExpReplaceSqlVisitor.class, ReplaceSqlVisitor.class, };
 
         try {
             for (Class<SqlVisitor> visitorClass : visitors) {
@@ -48,6 +44,5 @@ public class SqlVisitorFactory {
             throw new RuntimeException(e);
         }
     }
-
 
 }

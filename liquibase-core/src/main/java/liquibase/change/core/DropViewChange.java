@@ -35,13 +35,12 @@ public class DropViewChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[]{
-                new DropViewStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getViewName()),
-        };
+        return new SqlStatement[] { new DropViewStatement(getSchemaName() == null ? database.getDefaultSchemaName()
+                : getSchemaName(), getViewName()), };
     }
 
     public String getConfirmationMessage() {
-        return "View "+getViewName()+" dropped";
+        return "View " + getViewName() + " dropped";
     }
 
 }

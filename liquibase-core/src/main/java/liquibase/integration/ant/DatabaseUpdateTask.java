@@ -32,8 +32,7 @@ public class DatabaseUpdateTask extends BaseLiquibaseTask {
         try {
             liquibase = createLiquibase();
 
-            if (isPromptOnNonLocalDatabase()
-                    && !liquibase.isSafeToRunMigration()
+            if (isPromptOnNonLocalDatabase() && !liquibase.isSafeToRunMigration()
                     && UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
                 throw new BuildException("Chose not to run against non-production database");
             }

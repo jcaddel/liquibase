@@ -21,11 +21,13 @@ import java.util.List;
 
 public abstract class AbstractTypeConverter implements TypeConverter {
 
-    public Object convertDatabaseValueToObject(Object value, int databaseDataType, int firstParameter, int secondParameter, Database database) throws ParseException {
+    public Object convertDatabaseValueToObject(Object value, int databaseDataType, int firstParameter,
+            int secondParameter, Database database) throws ParseException {
         if (value == null) {
             return null;
         } else if (value instanceof String) {
-            return convertToCorrectObjectType(((String) value).replaceFirst("^'", "").replaceFirst("'$", ""), databaseDataType, firstParameter, secondParameter, database);
+            return convertToCorrectObjectType(((String) value).replaceFirst("^'", "").replaceFirst("'$", ""),
+                    databaseDataType, firstParameter, secondParameter, database);
         } else {
             return value;
         }
@@ -57,15 +59,17 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         } else if (object instanceof DatabaseFunction) {
             return new DatabaseFunctionType();
         } else {
-            throw new UnexpectedLiquibaseException("Unknown object type "+object.getClass().getName());
+            throw new UnexpectedLiquibaseException("Unknown object type " + object.getClass().getName());
         }
     }
 
-    protected Object convertToCorrectObjectType(String value, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
+    protected Object convertToCorrectObjectType(String value, int dataType, int columnSize, int decimalDigits,
+            Database database) throws ParseException {
         if (value == null) {
             return null;
         }
-        if (dataType == Types.CLOB || dataType == Types.VARCHAR || dataType == Types.CHAR || dataType == Types.LONGVARCHAR) {
+        if (dataType == Types.CLOB || dataType == Types.VARCHAR || dataType == Types.CHAR
+                || dataType == Types.LONGVARCHAR) {
             if (value.equalsIgnoreCase("NULL")) {
                 return null;
             } else {
@@ -88,7 +92,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
             } else if (dataType == Types.BIGINT) {
                 return new BigInteger(value);
             } else if (dataType == Types.BIT) {
-                value = value.replaceFirst("b'", ""); //mysql puts wierd chars in bit field
+                value = value.replaceFirst("b'", ""); // mysql puts wierd chars in bit field
                 if (value.equalsIgnoreCase("true")) {
                     return Boolean.TRUE;
                 } else if (value.equalsIgnoreCase("false")) {
@@ -138,9 +142,8 @@ public abstract class AbstractTypeConverter implements TypeConverter {
     }
 
     /**
-     * Returns the database-specific datatype for the given column configuration.
-     * This method will convert some generic column types (e.g. boolean, currency) to the correct type
-     * for the current database.
+     * Returns the database-specific datatype for the given column configuration. This method will convert some generic
+     * column types (e.g. boolean, currency) to the correct type for the current database.
      */
     public DataType getDataType(String columnTypeString, Boolean autoIncrement) {
         // Parse out data type and precision
@@ -150,7 +153,8 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         String additionalInformation = null;
         if (columnTypeString.startsWith("java.sql.Types") && columnTypeString.contains("(")) {
             precision = columnTypeString.substring(columnTypeString.indexOf("(") + 1, columnTypeString.indexOf(")"));
-            dataTypeName = columnTypeString.substring(columnTypeString.lastIndexOf(".") + 1, columnTypeString.indexOf("("));
+            dataTypeName = columnTypeString.substring(columnTypeString.lastIndexOf(".") + 1,
+                    columnTypeString.indexOf("("));
         } else if (columnTypeString.startsWith("java.sql.Types")) {
             dataTypeName = columnTypeString.substring(columnTypeString.lastIndexOf(".") + 1);
         } else if (columnTypeString.contains("(")) {
@@ -166,7 +170,8 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         return getDataType(columnTypeString, autoIncrement, dataTypeName, precision, additionalInformation);
     }
 
-    protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName, String precision, String additionalInformation) {
+    protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName,
+            String precision, String additionalInformation) {
         // Translate type to database-specific type, if possible
         DataType returnTypeName = null;
         if (dataTypeName.equalsIgnoreCase("BIGINT")) {
@@ -183,9 +188,11 @@ public abstract class AbstractTypeConverter implements TypeConverter {
             returnTypeName = getClobType();
         } else if (dataTypeName.equalsIgnoreCase("CURRENCY")) {
             returnTypeName = getCurrencyType();
-        } else if (dataTypeName.equalsIgnoreCase("DATE") || dataTypeName.equalsIgnoreCase(getDateType().getDataTypeName())) {
+        } else if (dataTypeName.equalsIgnoreCase("DATE")
+                || dataTypeName.equalsIgnoreCase(getDateType().getDataTypeName())) {
             returnTypeName = getDateType();
-        } else if (dataTypeName.equalsIgnoreCase("DATETIME") || dataTypeName.equalsIgnoreCase(getDateTimeType().getDataTypeName())) {
+        } else if (dataTypeName.equalsIgnoreCase("DATETIME")
+                || dataTypeName.equalsIgnoreCase(getDateTimeType().getDataTypeName())) {
             returnTypeName = getDateTimeType();
         } else if (dataTypeName.equalsIgnoreCase("DOUBLE")) {
             returnTypeName = getDoubleType();
@@ -205,7 +212,8 @@ public abstract class AbstractTypeConverter implements TypeConverter {
             returnTypeName = getSmallIntType();
         } else if (dataTypeName.equalsIgnoreCase("TEXT")) {
             returnTypeName = getClobType();
-        } else if (dataTypeName.equalsIgnoreCase("TIME") || dataTypeName.equalsIgnoreCase(getTimeType().getDataTypeName())) {
+        } else if (dataTypeName.equalsIgnoreCase("TIME")
+                || dataTypeName.equalsIgnoreCase(getTimeType().getDataTypeName())) {
             returnTypeName = getTimeType();
         } else if (dataTypeName.toUpperCase().contains("TIMESTAMP")) {
             returnTypeName = getDateTimeType();
@@ -218,16 +226,17 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         } else if (dataTypeName.equalsIgnoreCase("NVARCHAR")) {
             returnTypeName = getNVarcharType();
         } else {
-            return new CustomType(columnTypeString,0,2);
+            return new CustomType(columnTypeString, 0, 2);
         }
 
         if (returnTypeName == null) {
-            throw new UnexpectedLiquibaseException("Could not determine " + dataTypeName + " for " + this.getClass().getName());
+            throw new UnexpectedLiquibaseException("Could not determine " + dataTypeName + " for "
+                    + this.getClass().getName());
         }
         addPrecisionToType(precision, returnTypeName);
         returnTypeName.setAdditionalInformation(additionalInformation);
 
-         return returnTypeName;
+        return returnTypeName;
     }
 
     protected void addPrecisionToType(String precision, DataType returnTypeName) throws NumberFormatException {
@@ -239,7 +248,6 @@ public abstract class AbstractTypeConverter implements TypeConverter {
             }
         }
     }
-
 
     public DataType getDataType(ColumnConfig columnConfig) {
         return getDataType(columnConfig.getType(), columnConfig.isAutoIncrement());
@@ -290,7 +298,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 
     /**
      * Returns the actual database-specific data type to use for a "float" column.
-     *
+     * 
      * @return database-specific type for float
      */
     public FloatType getFloatType() {
@@ -299,7 +307,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 
     /**
      * Returns the actual database-specific data type to use for a "double" column.
-     *
+     * 
      * @return database-specific type for double
      */
     public DoubleType getDoubleType() {
@@ -308,7 +316,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 
     /**
      * Returns the actual database-specific data type to use for a "int" column.
-     *
+     * 
      * @return database-specific type for int
      */
     public IntType getIntType() {
@@ -317,14 +325,15 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 
     /**
      * Returns the actual database-specific data type to use for a "tinyint" column.
-     *
+     * 
      * @return database-specific type for tinyint
      */
     public TinyIntType getTinyIntType() {
         return new TinyIntType();
     }
+
     public SmallIntType getSmallIntType() {
-    	return new SmallIntType();
+        return new SmallIntType();
     }
 
     public BooleanType getBooleanType() {
@@ -354,52 +363,23 @@ public abstract class AbstractTypeConverter implements TypeConverter {
     public BlobType getBlobType() {
         return new BlobType();
     }
-    
+
     public BlobType getLongBlobType() {
-    	return getBlobType();
+        return getBlobType();
     }
 
     public String convertToDatabaseTypeString(Column referenceColumn, Database database) {
 
-        List<Integer> noParens = Arrays.asList(
-                Types.ARRAY,
-                Types.BIGINT,
-                Types.BINARY,
-                Types.BIT,
-                Types.BLOB,
-                Types.BOOLEAN,
-                Types.CLOB,
-                Types.DATALINK,
-                Types.DATE,
-                Types.DISTINCT,
-                Types.INTEGER,
-                Types.JAVA_OBJECT,
-                Types.LONGVARBINARY,
-                Types.NULL,
-                Types.OTHER,
-                Types.REF,
-                Types.SMALLINT,
-                Types.STRUCT,
-                Types.TIME,
-                Types.TIMESTAMP,
-                Types.TINYINT,
-                Types.LONGVARCHAR);
+        List<Integer> noParens = Arrays.asList(Types.ARRAY, Types.BIGINT, Types.BINARY, Types.BIT, Types.BLOB,
+                Types.BOOLEAN, Types.CLOB, Types.DATALINK, Types.DATE, Types.DISTINCT, Types.INTEGER,
+                Types.JAVA_OBJECT, Types.LONGVARBINARY, Types.NULL, Types.OTHER, Types.REF, Types.SMALLINT,
+                Types.STRUCT, Types.TIME, Types.TIMESTAMP, Types.TINYINT, Types.LONGVARCHAR);
 
-        List<Integer> oneParam = Arrays.asList(
-                Types.CHAR,
-                -15, // Types.NCHAR in java 1.6,
-                Types.VARCHAR,
-                -9, //Types.NVARCHAR in java 1.6,
-                Types.VARBINARY,
-                Types.DOUBLE,
-                Types.FLOAT
-        );
+        List<Integer> oneParam = Arrays.asList(Types.CHAR, -15, // Types.NCHAR in java 1.6,
+                Types.VARCHAR, -9, // Types.NVARCHAR in java 1.6,
+                Types.VARBINARY, Types.DOUBLE, Types.FLOAT);
 
-        List<Integer> twoParams = Arrays.asList(
-                Types.DECIMAL,
-                Types.NUMERIC,
-                Types.REAL
-        );
+        List<Integer> twoParams = Arrays.asList(Types.DECIMAL, Types.NUMERIC, Types.REAL);
 
         String translatedTypeName = referenceColumn.getTypeName();
         if (database instanceof PostgresDatabase) {
@@ -408,7 +388,8 @@ public abstract class AbstractTypeConverter implements TypeConverter {
             }
         }
 
-        if (database instanceof HsqlDatabase || database instanceof H2Database || database instanceof DerbyDatabase || database instanceof DB2Database) {
+        if (database instanceof HsqlDatabase || database instanceof H2Database || database instanceof DerbyDatabase
+                || database instanceof DB2Database) {
             if (referenceColumn.getDataType() == Types.FLOAT || referenceColumn.getDataType() == Types.DOUBLE) {
                 return "float";
             }
@@ -416,48 +397,50 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 
         if (database instanceof InformixDatabase) {
             /*
-             * rs.getInt("DATA_TYPE") returns 1 (Types.CHAR) for
-             * interval types (bug in JDBC driver?)
-             * So if you comment this out, the the columnsize will be appended
-             * and the type becomes: "INTERVAL HOUR TO FRACTION(3)(2413)"
+             * rs.getInt("DATA_TYPE") returns 1 (Types.CHAR) for interval types (bug in JDBC driver?) So if you comment
+             * this out, the the columnsize will be appended and the type becomes: "INTERVAL HOUR TO FRACTION(3)(2413)"
              */
-        	if (translatedTypeName.toUpperCase().startsWith("INTERVAL")) {
-        		return translatedTypeName;
-        	}
-        	if (referenceColumn.getDataType() == Types.REAL) {
-        		return "SMALLFLOAT";
-        	}
+            if (translatedTypeName.toUpperCase().startsWith("INTERVAL")) {
+                return translatedTypeName;
+            }
+            if (referenceColumn.getDataType() == Types.REAL) {
+                return "SMALLFLOAT";
+            }
         }
 
         String dataType;
         if (noParens.contains(referenceColumn.getDataType())) {
-	        dataType = translatedTypeName;
+            dataType = translatedTypeName;
         } else if (oneParam.contains(referenceColumn.getDataType())) {
             if (database instanceof PostgresDatabase && translatedTypeName.equalsIgnoreCase("TEXT")) {
                 return translatedTypeName;
             } else if (database instanceof MSSQLDatabase && translatedTypeName.equals("uniqueidentifier")) {
                 return translatedTypeName;
-            } else if (database instanceof MySQLDatabase && (translatedTypeName.startsWith("enum(") || translatedTypeName.startsWith("set("))                   ) {
-              return translatedTypeName;
-            } else if (database instanceof OracleDatabase && (translatedTypeName.equals("VARCHAR2"))                   ) {
-              return translatedTypeName+"("+referenceColumn.getColumnSize()+" "+referenceColumn.getLengthSemantics()+")";
+            } else if (database instanceof MySQLDatabase
+                    && (translatedTypeName.startsWith("enum(") || translatedTypeName.startsWith("set("))) {
+                return translatedTypeName;
+            } else if (database instanceof OracleDatabase && (translatedTypeName.equals("VARCHAR2"))) {
+                return translatedTypeName + "(" + referenceColumn.getColumnSize() + " "
+                        + referenceColumn.getLengthSemantics() + ")";
             } else if (database instanceof MySQLDatabase && translatedTypeName.equalsIgnoreCase("DOUBLE")) {
-              return translatedTypeName;
+                return translatedTypeName;
             }
-            dataType = translatedTypeName+"("+referenceColumn.getColumnSize()+")";
+            dataType = translatedTypeName + "(" + referenceColumn.getColumnSize() + ")";
         } else if (twoParams.contains(referenceColumn.getDataType())) {
-            if (database instanceof PostgresDatabase && referenceColumn.getColumnSize() == 131089 ) {
+            if (database instanceof PostgresDatabase && referenceColumn.getColumnSize() == 131089) {
                 dataType = "DECIMAL";
             } else if (database instanceof MSSQLDatabase && translatedTypeName.toLowerCase().contains("money")) {
                 dataType = translatedTypeName.toUpperCase();
             } else {
-	            dataType = translatedTypeName;
-	            if (referenceColumn.isInitPrecision()) {
-		            dataType += "(" + referenceColumn.getColumnSize() + "," + referenceColumn.getDecimalDigits() + ")";
-	            }
+                dataType = translatedTypeName;
+                if (referenceColumn.isInitPrecision()) {
+                    dataType += "(" + referenceColumn.getColumnSize() + "," + referenceColumn.getDecimalDigits() + ")";
+                }
             }
         } else {
-            LogFactory.getLogger().warning("Unknown Data Type: "+referenceColumn.getDataType()+" ("+referenceColumn.getTypeName()+").  Assuming it does not take parameters");
+            LogFactory.getLogger().warning(
+                    "Unknown Data Type: " + referenceColumn.getDataType() + " (" + referenceColumn.getTypeName()
+                            + ").  Assuming it does not take parameters");
             dataType = referenceColumn.getTypeName();
         }
         return dataType;

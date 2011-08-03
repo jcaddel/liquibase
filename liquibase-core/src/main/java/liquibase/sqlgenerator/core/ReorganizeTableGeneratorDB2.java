@@ -21,7 +21,8 @@ public class ReorganizeTableGeneratorDB2 extends AbstractSqlGenerator<Reorganize
         return database instanceof DB2Database;
     }
 
-    public ValidationErrors validate(ReorganizeTableStatement reorganizeTableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(ReorganizeTableStatement reorganizeTableStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", reorganizeTableStatement.getTableName());
         return validationErrors;
@@ -30,9 +31,8 @@ public class ReorganizeTableGeneratorDB2 extends AbstractSqlGenerator<Reorganize
     public Sql[] generateSql(ReorganizeTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         try {
             if (database.getDatabaseMajorVersion() >= 9) {
-                return new Sql[]{
-                        new UnparsedSql("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + "')")
-                };
+                return new Sql[] { new UnparsedSql("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "
+                        + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + "')") };
             } else {
                 return null;
             }

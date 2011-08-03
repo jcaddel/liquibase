@@ -16,20 +16,20 @@ public class DropSequenceGenerator extends AbstractSqlGenerator<DropSequenceStat
         return database.supportsSequences();
     }
 
-    public ValidationErrors validate(DropSequenceStatement dropSequenceStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DropSequenceStatement dropSequenceStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("sequenceName", dropSequenceStatement.getSequenceName());
         return validationErrors;
     }
 
     public Sql[] generateSql(DropSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        String sql = "DROP SEQUENCE " + database.escapeSequenceName(statement.getSchemaName(), statement.getSequenceName());
+        String sql = "DROP SEQUENCE "
+                + database.escapeSequenceName(statement.getSchemaName(), statement.getSequenceName());
         if (database instanceof PostgresDatabase) {
             sql += " CASCADE";
         }
 
-        return new Sql[] {
-                new UnparsedSql(sql)
-        };
+        return new Sql[] { new UnparsedSql(sql) };
     }
 }

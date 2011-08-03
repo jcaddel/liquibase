@@ -10,44 +10,28 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SelectSequencesStatement;
 
-public class SelectSequencesGeneratorDerby
-extends AbstractSqlGenerator<SelectSequencesStatement>
-{
+public class SelectSequencesGeneratorDerby extends AbstractSqlGenerator<SelectSequencesStatement> {
     @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
     @Override
-    public boolean supports(SelectSequencesStatement statement,
-    		Database database)
-    {
+    public boolean supports(SelectSequencesStatement statement, Database database) {
         return database instanceof DerbyDatabase;
     }
 
-    public ValidationErrors validate(SelectSequencesStatement statement,
-    		Database database, SqlGeneratorChain sqlGeneratorChain)
-    {
+    public ValidationErrors validate(SelectSequencesStatement statement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
 
-    public Sql[] generateSql(SelectSequencesStatement statement,
-    		Database database, SqlGeneratorChain sqlGeneratorChain)
-    {
+    public Sql[] generateSql(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         try {
-        	String schemaName = database.convertRequestedSchemaToSchema(
-        			statement.getSchemaName());
-            return new Sql[] {
-                    new UnparsedSql(
-                    		"SELECT " +
-                    		"  seq.SEQUENCENAME AS SEQUENCE_NAME " +
-                    		"FROM " +
-                    		"  SYS.SYSSEQUENCES seq, " +
-                    		"  SYS.SYSSCHEMAS sch " +
-                    		"WHERE " +
-                    		"  sch.SCHEMANAME = '" + schemaName + "' AND " +
-                    		"  sch.SCHEMAID = seq.SCHEMAID")
-            };
+            String schemaName = database.convertRequestedSchemaToSchema(statement.getSchemaName());
+            return new Sql[] { new UnparsedSql("SELECT " + "  seq.SEQUENCENAME AS SEQUENCE_NAME " + "FROM "
+                    + "  SYS.SYSSEQUENCES seq, " + "  SYS.SYSSCHEMAS sch " + "WHERE " + "  sch.SCHEMANAME = '"
+                    + schemaName + "' AND " + "  sch.SCHEMAID = seq.SCHEMAID") };
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }

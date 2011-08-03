@@ -2,7 +2,7 @@ package liquibase.exception;
 
 public class DatabaseHistoryException extends LiquibaseException {
 
-    private static final long serialVersionUID = 1L;    
+    private static final long serialVersionUID = 1L;
 
     public DatabaseHistoryException(String message) {
         super(message);

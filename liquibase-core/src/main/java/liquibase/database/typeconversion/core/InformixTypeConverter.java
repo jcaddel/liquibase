@@ -16,11 +16,12 @@ public class InformixTypeConverter extends AbstractTypeConverter {
         return database instanceof InformixDatabase;
     }
 
-
     private static final Pattern INTEGER_PATTERN = Pattern.compile("^(int(eger)?)$", Pattern.CASE_INSENSITIVE);
     private static final Pattern INTEGER8_PATTERN = Pattern.compile("^(int(eger)?8)$", Pattern.CASE_INSENSITIVE);
-    private static final Pattern SERIAL_PATTERN = Pattern.compile("^(serial)(\\s*\\(\\d+\\)|)$", Pattern.CASE_INSENSITIVE);
-    private static final Pattern SERIAL8_PATTERN = Pattern.compile("^(serial8)(\\s*\\(\\d+\\)|)$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern SERIAL_PATTERN = Pattern.compile("^(serial)(\\s*\\(\\d+\\)|)$",
+            Pattern.CASE_INSENSITIVE);
+    private static final Pattern SERIAL8_PATTERN = Pattern.compile("^(serial8)(\\s*\\(\\d+\\)|)$",
+            Pattern.CASE_INSENSITIVE);
 
     private static final String INTERVAL_FIELD_QUALIFIER = "HOUR TO FRACTION(5)";
     private static final String DATETIME_FIELD_QUALIFIER = "YEAR TO FRACTION(5)";
@@ -30,9 +31,9 @@ public class InformixTypeConverter extends AbstractTypeConverter {
         DataType type = super.getDataType(columnTypeString, autoIncrement);
         if (autoIncrement != null && autoIncrement) {
             if (isSerial(type)) {
-                return new CustomType("SERIAL",0,0);
+                return new CustomType("SERIAL", 0, 0);
             } else if (isSerial8(type)) {
-                return new CustomType("SERIAL8",0,0);
+                return new CustomType("SERIAL8", 0, 0);
             } else {
                 throw new IllegalArgumentException("Unknown autoincrement type: " + columnTypeString);
             }

@@ -7,10 +7,10 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Factory class for constructing the correct liquibase.change.Change implementation based on the tag name.
- * It is currently implemented by a static array of Change implementations, although that may change in
- * later revisions.  The best way to get an instance of ChangeFactory is off the Liquibase.getChangeFactory() method.
- *
+ * Factory class for constructing the correct liquibase.change.Change implementation based on the tag name. It is
+ * currently implemented by a static array of Change implementations, although that may change in later revisions. The
+ * best way to get an instance of ChangeFactory is off the Liquibase.getChangeFactory() method.
+ * 
  * @see liquibase.change.Change
  */
 public class ChangeFactory {
@@ -25,7 +25,7 @@ public class ChangeFactory {
             classes = ServiceLocator.getInstance().findClasses(Change.class);
 
             for (Class<? extends Change> clazz : classes) {
-                //noinspection unchecked
+                // noinspection unchecked
                 register(clazz);
             }
 
@@ -40,7 +40,7 @@ public class ChangeFactory {
      */
     public static synchronized ChangeFactory getInstance() {
         if (instance == null) {
-             instance = new ChangeFactory();
+            instance = new ChangeFactory();
         }
         return instance;
     }
@@ -49,7 +49,6 @@ public class ChangeFactory {
         instance = new ChangeFactory();
     }
 
-
     public void register(Class<? extends Change> changeClass) {
         try {
             String name = changeClass.newInstance().getChangeMetaData().getName();
@@ -57,7 +56,9 @@ public class ChangeFactory {
                 registry.put(name, new TreeSet<Class<? extends Change>>(new Comparator<Class<? extends Change>>() {
                     public int compare(Class<? extends Change> o1, Class<? extends Change> o2) {
                         try {
-                            return -1 * new Integer(o1.newInstance().getChangeMetaData().getPriority()).compareTo(o2.newInstance().getChangeMetaData().getPriority());
+                            return -1
+                                    * new Integer(o1.newInstance().getChangeMetaData().getPriority()).compareTo(o2
+                                            .newInstance().getChangeMetaData().getPriority());
                         } catch (Exception e) {
                             throw new UnexpectedLiquibaseException(e);
                         }
@@ -79,7 +80,7 @@ public class ChangeFactory {
     }
 
     public Change create(String name) {
-        SortedSet<Class <? extends Change>> classes = registry.get(name);
+        SortedSet<Class<? extends Change>> classes = registry.get(name);
 
         if (classes == null) {
             return null;

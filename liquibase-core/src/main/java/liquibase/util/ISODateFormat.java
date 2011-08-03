@@ -16,7 +16,6 @@ public class ISODateFormat {
     private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE = "yyyy-MM-dd HH:mm:ss";
     private static final String DATE_TIME_FORMAT_STRING_WITH_DECIMAL = "yyyy-MM-dd'T'HH:mm:ss.S";
 
-
     public String format(java.sql.Date date) {
         return dateFormat.format(date);
     }
@@ -37,7 +36,7 @@ public class ISODateFormat {
         } else if (date instanceof java.sql.Timestamp) {
             return format(((java.sql.Timestamp) date));
         } else {
-            throw new RuntimeException("Unknown type: "+date.getClass().getName());
+            throw new RuntimeException("Unknown type: " + date.getClass().getName());
         }
     }
 
@@ -50,7 +49,8 @@ public class ISODateFormat {
             dateTimeFormat = this.dateTimeFormatWithSpace;
         }
 
-        if (dateAsString.length() != dateFormat.toPattern().length() && dateAsString.length() != timeFormat.toPattern().length()) { //subtract 2 to not count the 's
+        if (dateAsString.length() != dateFormat.toPattern().length()
+                && dateAsString.length() != timeFormat.toPattern().length()) { // subtract 2 to not count the 's
             return new java.sql.Timestamp(dateTimeFormat.parse(dateAsString).getTime());
         } else {
             if (dateAsString.indexOf(':') > 0) {

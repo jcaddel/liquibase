@@ -4,7 +4,6 @@ public class Sequence implements DatabaseObject, Comparable<Sequence> {
     private String name;
     private String schema;
 
-
     public DatabaseObject[] getContainingObjects() {
         return null;
     }
@@ -17,16 +16,16 @@ public class Sequence implements DatabaseObject, Comparable<Sequence> {
         this.name = name;
     }
 
-
     public int compareTo(Sequence o) {
         return this.getName().compareTo(o.getName());
     }
 
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         Sequence sequence = (Sequence) o;
 
@@ -39,23 +38,23 @@ public class Sequence implements DatabaseObject, Comparable<Sequence> {
         return (name != null ? name.toUpperCase().hashCode() : 0);
     }
 
-
     @Override
     public String toString() {
         return getName();
     }
 
-	/**
-	 * @return Returns the schema.
-	 */
-	public String getSchema () {
-		return schema;
-	}
+    /**
+     * @return Returns the schema.
+     */
+    public String getSchema() {
+        return schema;
+    }
 
-	/**
-	 * @param schema The schema to set.
-	 */
-	public void setSchema (String schema) {
-		this.schema = schema;
-	}
+    /**
+     * @param schema
+     *            The schema to set.
+     */
+    public void setSchema(String schema) {
+        this.schema = schema;
+    }
 }

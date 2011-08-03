@@ -77,14 +77,15 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                     constraints.add(new NotNullConstraint());
                 }
                 if (aColumn.getConstraints().isUnique() != null && aColumn.getConstraints().isUnique()) {
-                	constraints.add(new UniqueConstraint());
+                    constraints.add(new UniqueConstraint());
                 }
                 if (aColumn.getConstraints().isPrimaryKey() != null && aColumn.getConstraints().isPrimaryKey()) {
                     constraints.add(new PrimaryKeyConstraint(aColumn.getConstraints().getPrimaryKeyName()));
                 }
 
                 if (aColumn.getConstraints().getReferences() != null) {
-                    constraints.add(new ForeignKeyConstraint(aColumn.getConstraints().getForeignKeyName(), aColumn.getConstraints().getReferences()));
+                    constraints.add(new ForeignKeyConstraint(aColumn.getConstraints().getForeignKeyName(), aColumn
+                            .getConstraints().getReferences()));
                 }
 
             }
@@ -93,18 +94,15 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                 constraints.add(new AutoIncrementConstraint(aColumn.getName()));
             }
 
-            AddColumnStatement addColumnStatement = new AddColumnStatement(getSchemaName(),
-                    getTableName(),
-                    aColumn.getName(),
-                    aColumn.getType(),
-                    aColumn.getDefaultValueObject(),
+            AddColumnStatement addColumnStatement = new AddColumnStatement(getSchemaName(), getTableName(),
+                    aColumn.getName(), aColumn.getType(), aColumn.getDefaultValueObject(),
                     constraints.toArray(new ColumnConstraint[constraints.size()]));
 
             sql.add(addColumnStatement);
 
             if (database instanceof DB2Database) {
                 sql.add(new ReorganizeTableStatement(getSchemaName(), getTableName()));
-            }            
+            }
 
             if (aColumn.getValueObject() != null) {
                 UpdateStatement updateStatement = new UpdateStatement(getSchemaName(), getTableName());
@@ -113,18 +111,18 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             }
         }
 
-//        for (ColumnConfig aColumn : columns) {
-//            if (aColumn.getConstraints() != null) {
-//                if (aColumn.getConstraints().isPrimaryKey() != null && aColumn.getConstraints().isPrimaryKey()) {
-//                    AddPrimaryKeyChange change = new AddPrimaryKeyChange();
-//                    change.setSchemaName(schemaName);
-//                    change.setTableName(getTableName());
-//                    change.setColumnNames(aColumn.getName());
-//
-//                    sql.addAll(Arrays.asList(change.generateStatements(database)));
-//                }
-//            }
-//        }
+        // for (ColumnConfig aColumn : columns) {
+        // if (aColumn.getConstraints() != null) {
+        // if (aColumn.getConstraints().isPrimaryKey() != null && aColumn.getConstraints().isPrimaryKey()) {
+        // AddPrimaryKeyChange change = new AddPrimaryKeyChange();
+        // change.setSchemaName(schemaName);
+        // change.setTableName(getTableName());
+        // change.setColumnNames(aColumn.getName());
+        //
+        // sql.addAll(Arrays.asList(change.generateStatements(database)));
+        // }
+        // }
+        // }
 
         return sql.toArray(new SqlStatement[sql.size()]);
     }
@@ -141,7 +139,6 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
                 inverses.add(dropChange);
             }
-
 
             DropColumnChange inverse = new DropColumnChange();
             inverse.setSchemaName(getSchemaName());

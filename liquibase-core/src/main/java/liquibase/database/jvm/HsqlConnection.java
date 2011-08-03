@@ -12,7 +12,6 @@ public class HsqlConnection extends JdbcConnection {
         super(connection);
     }
 
-
     @Override
     public void commit() throws DatabaseException {
         super.commit();

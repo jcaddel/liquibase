@@ -8,11 +8,11 @@ import liquibase.exception.UnexpectedLiquibaseException;
 public class BooleanType extends DataType {
 
     public BooleanType() {
-        super("BOOLEAN",0,0);
+        super("BOOLEAN", 0, 0);
     }
 
     public BooleanType(String dataTypeName) {
-        super(dataTypeName,0,0);
+        super(dataTypeName, 0, 0);
     }
 
     @Override
@@ -27,12 +27,14 @@ public class BooleanType extends DataType {
         TypeConverter converter = TypeConverterFactory.getInstance().findTypeConverter(database);
         BooleanType booleanType = converter.getBooleanType();
         if (value instanceof String) {
-            if (((String) value).equalsIgnoreCase("true") || value.equals("1") || ((String) value).equalsIgnoreCase(booleanType.getTrueBooleanValue())) {
+            if (((String) value).equalsIgnoreCase("true") || value.equals("1")
+                    || ((String) value).equalsIgnoreCase(booleanType.getTrueBooleanValue())) {
                 returnValue = booleanType.getTrueBooleanValue();
-            } else if (((String) value).equalsIgnoreCase("false") || value.equals("0") || ((String) value).equalsIgnoreCase(booleanType.getFalseBooleanValue())) {
+            } else if (((String) value).equalsIgnoreCase("false") || value.equals("0")
+                    || ((String) value).equalsIgnoreCase(booleanType.getFalseBooleanValue())) {
                 returnValue = booleanType.getTrueBooleanValue();
             } else {
-                throw new UnexpectedLiquibaseException("Unknown boolean value: "+value);
+                throw new UnexpectedLiquibaseException("Unknown boolean value: " + value);
             }
         } else if (value instanceof Long) {
             if (Long.valueOf(1).equals(value)) {

@@ -4,7 +4,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogLevel;
 import liquibase.logging.Logger;
 
-public abstract class AbstractLogger  implements Logger {
+public abstract class AbstractLogger implements Logger {
     private LogLevel logLevel;
 
     public LogLevel getLogLevel() {
@@ -23,7 +23,8 @@ public abstract class AbstractLogger  implements Logger {
         } else if ("off".equalsIgnoreCase(logLevel)) {
             setLogLevel(LogLevel.OFF);
         } else {
-            throw new UnexpectedLiquibaseException("Unknown log level: " + logLevel+".  Valid levels are: debug, info, warning, severe, off");
+            throw new UnexpectedLiquibaseException("Unknown log level: " + logLevel
+                    + ".  Valid levels are: debug, info, warning, severe, off");
         }
     }
 

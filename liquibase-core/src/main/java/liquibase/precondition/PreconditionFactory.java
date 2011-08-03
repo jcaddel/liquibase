@@ -20,7 +20,7 @@ public class PreconditionFactory {
             classes = ServiceLocator.getInstance().findClasses(Precondition.class);
 
             for (Class<? extends Precondition> clazz : classes) {
-                    register(clazz);
+                register(clazz);
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
@@ -29,7 +29,7 @@ public class PreconditionFactory {
 
     public static PreconditionFactory getInstance() {
         if (instance == null) {
-             instance = new PreconditionFactory();
+            instance = new PreconditionFactory();
         }
         return instance;
     }

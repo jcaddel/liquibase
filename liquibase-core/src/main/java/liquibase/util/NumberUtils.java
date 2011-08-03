@@ -6,10 +6,9 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 
 /**
- * Miscellaneous utility methods for number conversion and parsing.
- * Mainly for internal use within the framework; consider Jakarta's
- * Commons Lang for a more comprehensive suite of string utilities.
- *
+ * Miscellaneous utility methods for number conversion and parsing. Mainly for internal use within the framework;
+ * consider Jakarta's Commons Lang for a more comprehensive suite of string utilities.
+ * 
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 1.1.2
@@ -18,12 +17,14 @@ public abstract class NumberUtils {
 
     /**
      * Convert the given number into an instance of the given target class.
-     *
-     * @param number      the number to convert
-     * @param targetClass the target class to convert to
+     * 
+     * @param number
+     *            the number to convert
+     * @param targetClass
+     *            the target class to convert to
      * @return the converted number
-     * @throws IllegalArgumentException if the target class is not supported
-     *                                  (i.e. not a standard Number subclass as included in the JDK)
+     * @throws IllegalArgumentException
+     *             if the target class is not supported (i.e. not a standard Number subclass as included in the JDK)
      * @see java.lang.Byte
      * @see java.lang.Short
      * @see java.lang.Integer
@@ -33,8 +34,7 @@ public abstract class NumberUtils {
      * @see java.lang.Double
      * @see java.math.BigDecimal
      */
-    public static Number convertNumberToTargetClass(Number number, Class targetClass)
-            throws IllegalArgumentException {
+    public static Number convertNumberToTargetClass(Number number, Class targetClass) throws IllegalArgumentException {
 
         if (targetClass.isInstance(number)) {
             return number;
@@ -69,33 +69,36 @@ public abstract class NumberUtils {
             // (see BigDecimal javadoc for details)
             return new BigDecimal(number.toString());
         } else {
-            throw new IllegalArgumentException("Could not convert number [" + number + "] of type [" +
-                    number.getClass().getName() + "] to unknown target class [" + targetClass.getName() + "]");
+            throw new IllegalArgumentException("Could not convert number [" + number + "] of type ["
+                    + number.getClass().getName() + "] to unknown target class [" + targetClass.getName() + "]");
         }
     }
 
     /**
      * Raise an overflow exception for the given number and target class.
-     *
-     * @param number      the number we tried to convert
-     * @param targetClass the target class we tried to convert to
+     * 
+     * @param number
+     *            the number we tried to convert
+     * @param targetClass
+     *            the target class we tried to convert to
      */
     private static void raiseOverflowException(Number number, Class targetClass) {
-        throw new IllegalArgumentException("Could not convert number [" + number + "] of type [" +
-                number.getClass().getName() + "] to target class [" + targetClass.getName() + "]: overflow");
+        throw new IllegalArgumentException("Could not convert number [" + number + "] of type ["
+                + number.getClass().getName() + "] to target class [" + targetClass.getName() + "]: overflow");
     }
 
     /**
-     * Parse the given text into a number instance of the given target class,
-     * using the corresponding default <code>decode</code> methods. Trims the
-     * input <code>String</code> before attempting to parse the number. Supports
+     * Parse the given text into a number instance of the given target class, using the corresponding default
+     * <code>decode</code> methods. Trims the input <code>String</code> before attempting to parse the number. Supports
      * numbers in hex format (with leading 0x) and in octal format (with leading 0).
-     *
-     * @param text        the text to convert
-     * @param targetClass the target class to parse into
+     * 
+     * @param text
+     *            the text to convert
+     * @param targetClass
+     *            the target class to parse into
      * @return the parsed number
-     * @throws IllegalArgumentException if the target class is not supported
-     *                                  (i.e. not a standard Number subclass as included in the JDK)
+     * @throws IllegalArgumentException
+     *             if the target class is not supported (i.e. not a standard Number subclass as included in the JDK)
      * @see java.lang.Byte#decode
      * @see java.lang.Short#decode
      * @see java.lang.Integer#decode
@@ -125,23 +128,25 @@ public abstract class NumberUtils {
         } else if (targetClass.equals(BigDecimal.class) || targetClass.equals(Number.class)) {
             return new BigDecimal(trimmed);
         } else {
-            throw new IllegalArgumentException(
-                    "Cannot convert String [" + text + "] to target class [" + targetClass.getName() + "]");
+            throw new IllegalArgumentException("Cannot convert String [" + text + "] to target class ["
+                    + targetClass.getName() + "]");
         }
     }
 
     /**
-     * Parse the given text into a number instance of the given target class,
-     * using the given NumberFormat. Trims the input <code>String</code>
-     * before attempting to parse the number.
-     *
-     * @param text         the text to convert
-     * @param targetClass  the target class to parse into
-     * @param numberFormat the NumberFormat to use for parsing (if <code>null</code>,
-     *                     this method falls back to <code>parseNumber(String, Class)</code>)
+     * Parse the given text into a number instance of the given target class, using the given NumberFormat. Trims the
+     * input <code>String</code> before attempting to parse the number.
+     * 
+     * @param text
+     *            the text to convert
+     * @param targetClass
+     *            the target class to parse into
+     * @param numberFormat
+     *            the NumberFormat to use for parsing (if <code>null</code>, this method falls back to
+     *            <code>parseNumber(String, Class)</code>)
      * @return the parsed number
-     * @throws IllegalArgumentException if the target class is not supported
-     *                                  (i.e. not a standard Number subclass as included in the JDK)
+     * @throws IllegalArgumentException
+     *             if the target class is not supported (i.e. not a standard Number subclass as included in the JDK)
      * @see java.text.NumberFormat#parse
      * @see #convertNumberToTargetClass
      * @see #parseNumber(String,Class)
@@ -151,8 +156,7 @@ public abstract class NumberUtils {
             try {
                 Number number = numberFormat.parse(text.trim());
                 return convertNumberToTargetClass(number, targetClass);
-            }
-            catch (ParseException ex) {
+            } catch (ParseException ex) {
                 throw new IllegalArgumentException(ex.getMessage());
             }
         } else {
@@ -161,9 +165,8 @@ public abstract class NumberUtils {
     }
 
     /**
-     * Decode a {@link java.math.BigInteger} from a {@link String} value.
-     * Supports decimal, hex and octal notation.
-     *
+     * Decode a {@link java.math.BigInteger} from a {@link String} value. Supports decimal, hex and octal notation.
+     * 
      * @see BigInteger#BigInteger(String,int)
      */
     private static BigInteger decodeBigInteger(String value) {
@@ -185,12 +188,12 @@ public abstract class NumberUtils {
             index++;
             radix = 16;
         } else if (value.startsWith("0", index) && value.length() > 1 + index) {
-			index++;
-			radix = 8;
-		}
+            index++;
+            radix = 8;
+        }
 
-		BigInteger result = new BigInteger(value.substring(index), radix);
-		return (negative ? result.negate() : result);
-	}
+        BigInteger result = new BigInteger(value.substring(index), radix);
+        return (negative ? result.negate() : result);
+    }
 
 }

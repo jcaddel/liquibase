@@ -29,21 +29,16 @@ import java.sql.Date;
 import java.util.*;
 
 /**
- * Common Utilitiy methods used in the CommandLine application and the Maven plugin.
- * These methods were orignally moved from {@link Main} so they could be shared.
- *
+ * Common Utilitiy methods used in the CommandLine application and the Maven plugin. These methods were orignally moved
+ * from {@link Main} so they could be shared.
+ * 
  * @author Peter Murray
  */
 public class CommandLineUtils {
 
-    public static Database createDatabaseObject(ClassLoader classLoader,
-                                                String url,
-                                                String username,
-                                                String password,
-                                                String driver,
-                                                String defaultSchemaName,
-                                                String databaseClass,
-                                                String driverPropertiesFile) throws DatabaseException {
+    public static Database createDatabaseObject(ClassLoader classLoader, String url, String username, String password,
+            String driver, String defaultSchemaName, String databaseClass, String driverPropertiesFile)
+            throws DatabaseException {
         if (driver == null) {
             driver = DatabaseFactory.getInstance().findDefaultDriver(url);
         }
@@ -62,14 +57,14 @@ public class CommandLineUtils {
                 }
 
                 if (driver == null) {
-                    throw new RuntimeException("Driver class was not specified and could not be determined from the url (" + url + ")");
+                    throw new RuntimeException(
+                            "Driver class was not specified and could not be determined from the url (" + url + ")");
                 }
 
                 driverObject = (Driver) Class.forName(driver, true, classLoader).newInstance();
             } catch (Exception e) {
                 throw new RuntimeException("Cannot find database driver: " + e.getMessage());
             }
-
 
             Properties driverProperties = new Properties();
 
@@ -82,26 +77,25 @@ public class CommandLineUtils {
             if (null != driverPropertiesFile) {
                 File propertiesFile = new File(driverPropertiesFile);
                 if (propertiesFile.exists()) {
-//                    System.out.println("Loading properties from the file:'" + driverPropertiesFile + "'");
+                    // System.out.println("Loading properties from the file:'" + driverPropertiesFile + "'");
                     driverProperties.load(new FileInputStream(propertiesFile));
                 } else {
-                  throw new RuntimeException("Can't open JDBC Driver specific properties from the file: '"
-                      + driverPropertiesFile + "'");
+                    throw new RuntimeException("Can't open JDBC Driver specific properties from the file: '"
+                            + driverPropertiesFile + "'");
                 }
             }
 
+            // System.out.println("Properties:");
+            // for (Map.Entry entry : driverProperties.entrySet()) {
+            // System.out.println("Key:'"+entry.getKey().toString()+"' Value:'"+entry.getValue().toString()+"'");
+            // }
 
-//            System.out.println("Properties:");
-//            for (Map.Entry entry : driverProperties.entrySet()) {
-//                System.out.println("Key:'"+entry.getKey().toString()+"' Value:'"+entry.getValue().toString()+"'");
-//            }
-            
-
-//            System.out.println("Connecting to the URL:'"+url+"' using driver:'"+driverObject.getClass().getName()+"'");
+            // System.out.println("Connecting to the URL:'"+url+"' using driver:'"+driverObject.getClass().getName()+"'");
             Connection connection = driverObject.connect(url, driverProperties);
-//            System.out.println("Connection has been created");
+            // System.out.println("Connection has been created");
             if (connection == null) {
-                throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+                throw new DatabaseException("Connection could not be created to " + url + " with driver "
+                        + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
             }
 
             Database database = databaseFactory.findCorrectDatabaseImplementation(new JdbcConnection(connection));
@@ -122,9 +116,7 @@ public class CommandLineUtils {
         diffResult.printResult(System.out);
     }
 
-    public static void doDiffToChangeLog(String changeLogFile,
-                                         Database referenceDatabase,
-                                         Database targetDatabase)
+    public static void doDiffToChangeLog(String changeLogFile, Database referenceDatabase, Database targetDatabase)
             throws DatabaseException, IOException, ParserConfigurationException {
         Diff diff = new Diff(referenceDatabase, targetDatabase);
         diff.addStatusListener(new OutDiffStatusListener());
@@ -137,7 +129,9 @@ public class CommandLineUtils {
         }
     }
 
-    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String defaultSchemaName, String diffTypes, String author, String context, String dataDir) throws DatabaseException, IOException, ParserConfigurationException {
+    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String defaultSchemaName,
+            String diffTypes, String author, String context, String dataDir) throws DatabaseException, IOException,
+            ParserConfigurationException {
         Diff diff = new Diff(originalDatabase, defaultSchemaName);
         diff.setDiffTypes(diffTypes);
 

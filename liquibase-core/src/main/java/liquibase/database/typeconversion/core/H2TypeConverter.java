@@ -21,7 +21,8 @@ public class H2TypeConverter extends AbstractTypeConverter {
     }
 
     @Override
-    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
+    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits,
+            Database database) throws ParseException {
         if (defaultValue != null && defaultValue instanceof String) {
             if (StringUtils.trimToEmpty(((String) defaultValue)).startsWith("(NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_")) {
                 return null;

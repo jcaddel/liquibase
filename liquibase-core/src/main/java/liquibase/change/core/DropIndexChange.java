@@ -49,9 +49,9 @@ public class DropIndexChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[] {
-            new DropIndexStatement(getIndexName(), getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getAssociatedWith())
-        };
+        return new SqlStatement[] { new DropIndexStatement(getIndexName(),
+                getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName(), getTableName(),
+                getAssociatedWith()) };
     }
 
     public String getConfirmationMessage() {

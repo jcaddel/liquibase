@@ -30,45 +30,43 @@ import org.springframework.core.io.ResourceLoader;
 
 /**
  * A Spring-ified wrapper for Liquibase.
- *
+ * 
  * Example Configuration:
  * <p>
  * <p>
- * This Spring configuration example will cause liquibase to run
- * automatically when the Spring context is initialized. It will load
- * <code>db-changelog.xml</code> from the classpath and apply it against
- * <code>myDataSource</code>.
+ * This Spring configuration example will cause liquibase to run automatically when the Spring context is initialized.
+ * It will load <code>db-changelog.xml</code> from the classpath and apply it against <code>myDataSource</code>.
  * <p>
- *
+ * 
  * <pre>
  * &lt;bean id=&quot;myLiquibase&quot;
  *          class=&quot;liquibase.spring.SpringLiquibase&quot;
  *          &gt;
- *
+ * 
  *      &lt;property name=&quot;dataSource&quot; ref=&quot;myDataSource&quot; /&gt;
- *
+ * 
  *      &lt;property name=&quot;changeLog&quot; value=&quot;classpath:db-changelog.xml&quot; /&gt;
- *
+ * 
  *      &lt;!-- The following configuration options are optional --&gt;
- *
+ * 
  *      &lt;property name=&quot;executeEnabled&quot; value=&quot;true&quot; /&gt;
- *
+ * 
  *      &lt;!--
  *      If set to true, writeSqlFileEnabled will write the generated
  *      SQL to a file before executing it.
  *      --&gt;
  *      &lt;property name=&quot;writeSqlFileEnabled&quot; value=&quot;true&quot; /&gt;
- *
+ * 
  *      &lt;!--
  *      sqlOutputDir specifies the directory into which the SQL file
  *      will be written, if so configured.
  *      --&gt;
  *      &lt;property name=&quot;sqlOutputDir&quot; value=&quot;c:\sql&quot; /&gt;
- *
+ * 
  * &lt;/bean&gt;
- *
+ * 
  * </pre>
- *
+ * 
  * @author Rob Schoening
  */
 public class SpringLiquibase implements InitializingBean, BeanNameAware, ResourceLoaderAware {
@@ -79,13 +77,11 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             this.parentFile = parentFile;
         }
 
-
         public InputStream getResourceAsStream(String file) throws IOException {
             try {
                 Resource resource = getResource(file);
                 return resource.getInputStream();
-            }
-            catch ( FileNotFoundException ex ) {
+            } catch (FileNotFoundException ex) {
                 return null;
             }
         }
@@ -103,8 +99,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         }
 
         private String adjustClasspath(String file) {
-            return isClasspathPrefixPresent(parentFile) && !isClasspathPrefixPresent(file)
-                    ? ResourceLoader.CLASSPATH_URL_PREFIX + file
+            return isClasspathPrefixPresent(parentFile) && !isClasspathPrefixPresent(file) ? ResourceLoader.CLASSPATH_URL_PREFIX
+                    + file
                     : file;
         }
 
@@ -129,7 +125,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     private String contexts;
 
-     private Map<String, String> parameters;
+    private Map<String, String> parameters;
 
     private String defaultSchema;
 
@@ -142,17 +138,16 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         String name = "unknown";
         try {
             connection = getDataSource().getConnection();
-            Database database =
-                    DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(dataSource.getConnection()));
+            Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(
+                    new JdbcConnection(dataSource.getConnection()));
             name = database.getDatabaseProductName();
         } catch (SQLException e) {
             throw new DatabaseException(e);
         } finally {
             if (connection != null) {
                 try {
-                    if (!connection.getAutoCommit())
-                    {
-                      connection.rollback();
+                    if (!connection.getAutoCommit()) {
+                        connection.rollback();
                     }
                     connection.close();
                 } catch (Exception e) {
@@ -165,7 +160,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     /**
      * The DataSource that liquibase will use to perform the migration.
-     *
+     * 
      * @return
      */
     public DataSource getDataSource() {
@@ -181,7 +176,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     /**
      * Returns a Resource that is able to resolve to a file or classpath resource.
-     *
+     * 
      * @return
      */
     public String getChangeLog() {
@@ -189,8 +184,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     }
 
     /**
-     * Sets a Spring Resource that is able to resolve to a file or classpath resource.
-     * An example might be <code>classpath:db-changelog.xml</code>.
+     * Sets a Spring Resource that is able to resolve to a file or classpath resource. An example might be
+     * <code>classpath:db-changelog.xml</code>.
      */
     public void setChangeLog(String dataModel) {
 
@@ -219,7 +214,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     public void afterPropertiesSet() throws LiquibaseException {
         String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-            System.out.println("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+            System.out.println("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY
+                    + "' system property was set to false");
             return;
         }
 
@@ -240,7 +236,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                     c.rollback();
                     c.close();
                 } catch (SQLException e) {
-                    //nothing to do
+                    // nothing to do
                 }
             }
         }
@@ -250,7 +246,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
         Liquibase liquibase = new Liquibase(getChangeLog(), createResourceOpener(), createDatabase(c));
         if (parameters != null) {
-            for(Map.Entry<String, String> entry: parameters.entrySet()) {
+            for (Map.Entry<String, String> entry : parameters.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
             }
         }
@@ -259,8 +255,9 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     }
 
     /**
-     * Subclasses may override this method add change some database settings such as
-     * default schema before returning the database object.
+     * Subclasses may override this method add change some database settings such as default schema before returning the
+     * database object.
+     * 
      * @param c
      * @return a Database implementation retrieved from the {@link DatabaseFactory}.
      * @throws DatabaseException
@@ -293,7 +290,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     /**
      * Gets the Spring-name of this instance.
-     *
+     * 
      * @return
      */
     public String getBeanName() {
@@ -310,6 +307,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     @Override
     public String toString() {
-        return getClass().getName()+"("+this.getResourceLoader().toString()+")";
+        return getClass().getName() + "(" + this.getResourceLoader().toString() + ")";
     }
 }

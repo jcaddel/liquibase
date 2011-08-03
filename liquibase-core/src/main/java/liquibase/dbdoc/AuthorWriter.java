@@ -16,10 +16,11 @@ public class AuthorWriter extends HTMLWriter {
 
     @Override
     protected String createTitle(Object object) {
-        return "Changes created by author "+object.toString();
+        return "Changes created by author " + object.toString();
     }
 
     @Override
-    protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {
+    protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database)
+            throws IOException {
     }
 }

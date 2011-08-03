@@ -18,7 +18,6 @@ public class MySQLTypeConverter extends AbstractTypeConverter {
         return database instanceof MySQLDatabase;
     }
 
-
     @Override
     public BooleanType getBooleanType() {
         return new BooleanType.NumericBooleanType("TINYINT(1)");
@@ -31,11 +30,12 @@ public class MySQLTypeConverter extends AbstractTypeConverter {
 
     @Override
     public BlobType getLongBlobType() {
-    	return new BlobType("LONGBLOB");
+        return new BlobType("LONGBLOB");
     }
 
     @Override
-    protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName, String precision, String additionalInformation) {
+    protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName,
+            String precision, String additionalInformation) {
         if (columnTypeString.equalsIgnoreCase("timestamp")) {
             return new DateTimeType("TIMESTAMP");
         }

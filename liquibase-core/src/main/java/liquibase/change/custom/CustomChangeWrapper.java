@@ -14,9 +14,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * Adapts CustomChange implementations to the standard change system used by Liquibase.
- * Custom change implementations should implement CustomSqlChange or CustomTaskChange
- *
+ * Adapts CustomChange implementations to the standard change system used by Liquibase. Custom change implementations
+ * should implement CustomSqlChange or CustomTaskChange
+ * 
  * @see liquibase.change.custom.CustomSqlChange
  * @see liquibase.change.custom.CustomTaskChange
  */
@@ -24,7 +24,7 @@ public class CustomChangeWrapper extends AbstractChange {
 
     @ChangeProperty(includeInSerialization = false)
     private CustomChange customChange;
-    
+
     private String className;
 
     @ChangeProperty(includeInSerialization = false)
@@ -53,16 +53,17 @@ public class CustomChangeWrapper extends AbstractChange {
 
     public void setClass(String className) throws CustomChangeException {
         this.className = className;
+        try {
             try {
+                customChange = (CustomChange) Class.forName(className, true, classLoader).newInstance();
+            } catch (ClassCastException e) { // fails in Ant in particular
                 try {
-                    customChange = (CustomChange) Class.forName(className, true, classLoader).newInstance();
-                } catch (ClassCastException e) { //fails in Ant in particular
-                    try {
-                        customChange = (CustomChange) Thread.currentThread().getContextClassLoader().loadClass(className).newInstance();
-                    } catch (ClassNotFoundException e1) {
-                        customChange = (CustomChange) Class.forName(className).newInstance();
-                    }
+                    customChange = (CustomChange) Thread.currentThread().getContextClassLoader().loadClass(className)
+                            .newInstance();
+                } catch (ClassNotFoundException e1) {
+                    customChange = (CustomChange) Class.forName(className).newInstance();
                 }
+            }
         } catch (Exception e) {
             throw new CustomChangeException(e);
         }
@@ -90,13 +91,13 @@ public class CustomChangeWrapper extends AbstractChange {
         try {
             return customChange.validate(database);
         } catch (AbstractMethodError e) {
-            return new ValidationErrors(); //old interface, //todo: be smarter about handling upgrade            
+            return new ValidationErrors(); // old interface, //todo: be smarter about handling upgrade
         }
     }
 
     @Override
     public Warnings warn(Database database) {
-        //does not support warns
+        // does not support warns
         return new Warnings();
     }
 
@@ -109,7 +110,8 @@ public class CustomChangeWrapper extends AbstractChange {
             } else if (customChange instanceof CustomTaskChange) {
                 ((CustomTaskChange) customChange).execute(database);
             } else {
-                throw new UnexpectedLiquibaseException(customChange.getClass().getName() + " does not implement " + CustomSqlChange.class.getName() + " or " + CustomTaskChange.class.getName());
+                throw new UnexpectedLiquibaseException(customChange.getClass().getName() + " does not implement "
+                        + CustomSqlChange.class.getName() + " or " + CustomTaskChange.class.getName());
             }
         } catch (CustomChangeException e) {
             throw new UnexpectedLiquibaseException(e);
@@ -122,7 +124,8 @@ public class CustomChangeWrapper extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException, RollbackImpossibleException {
+    public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException,
+            RollbackImpossibleException {
         SqlStatement[] statements = null;
         try {
             configureCustomChange();
@@ -131,7 +134,7 @@ public class CustomChangeWrapper extends AbstractChange {
             } else if (customChange instanceof CustomTaskRollback) {
                 ((CustomTaskRollback) customChange).rollback(database);
             } else {
-                throw new UnsupportedChangeException("Unknown rollback type: "+customChange.getClass().getName());
+                throw new UnsupportedChangeException("Unknown rollback type: " + customChange.getClass().getName());
             }
         } catch (CustomChangeException e) {
             throw new UnsupportedChangeException(e);
@@ -143,7 +146,6 @@ public class CustomChangeWrapper extends AbstractChange {
         return statements;
 
     }
-
 
     @Override
     public boolean supportsRollback(Database database) {

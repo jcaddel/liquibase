@@ -22,21 +22,28 @@ public class FindForeignKeyConstraintsGeneratorMySQL extends AbstractSqlGenerato
         return database instanceof MySQLDatabase;
     }
 
-    public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement,
+            Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("baseTableName", findForeignKeyConstraintsStatement.getBaseTableName());
         return validationErrors;
     }
 
-    public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("SELECT ");
-        sb.append("RC.TABLE_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME).append(", ");
-        sb.append("KCU.COLUMN_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_COLUMN_NAME).append(", ");
-        sb.append("RC.REFERENCED_TABLE_NAME ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_TABLE_NAME).append(", ");
-        sb.append("KCU.REFERENCED_COLUMN_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_COLUMN_NAME).append(", ");
-        sb.append("RC.CONSTRAINT_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_CONSTRAINT_NAME).append(" ");
+        sb.append("RC.TABLE_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME)
+                .append(", ");
+        sb.append("KCU.COLUMN_NAME as ")
+                .append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_COLUMN_NAME).append(", ");
+        sb.append("RC.REFERENCED_TABLE_NAME ")
+                .append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_TABLE_NAME).append(", ");
+        sb.append("KCU.REFERENCED_COLUMN_NAME as ")
+                .append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_COLUMN_NAME).append(", ");
+        sb.append("RC.CONSTRAINT_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_CONSTRAINT_NAME)
+                .append(" ");
         sb.append("FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS RC,");
         sb.append("     INFORMATION_SCHEMA.KEY_COLUMN_USAGE KCU ");
         sb.append("WHERE RC.TABLE_NAME = KCU.TABLE_NAME ");
@@ -49,8 +56,6 @@ public class FindForeignKeyConstraintsGeneratorMySQL extends AbstractSqlGenerato
             throw new UnexpectedLiquibaseException(e);
         }
         sb.append("LIMIT 1");
-        return new Sql[]{
-                new UnparsedSql(sb.toString())
-        };
+        return new Sql[] { new UnparsedSql(sb.toString()) };
     }
 }

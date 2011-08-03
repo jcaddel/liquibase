@@ -13,26 +13,25 @@ import liquibase.exception.LiquibaseException;
  */
 public class LiquibaseDropAll extends AbstractLiquibaseMojo {
 
-	/**
-	 * The schemas to be dropped. Comma separated list.
-	 * 
-	 * @parameter expression="${liquibase.schemas}"
-	 */
-	protected String schemas;
+    /**
+     * The schemas to be dropped. Comma separated list.
+     * 
+     * @parameter expression="${liquibase.schemas}"
+     */
+    protected String schemas;
 
-	@Override
-	protected void performLiquibaseTask(Liquibase liquibase)
-			throws LiquibaseException {
-		if (null != schemas) {
-			liquibase.dropAll(schemas.split(","));
-		} else {
-			liquibase.dropAll();
-		}
-	}
+    @Override
+    protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
+        if (null != schemas) {
+            liquibase.dropAll(schemas.split(","));
+        } else {
+            liquibase.dropAll();
+        }
+    }
 
-	@Override
-	protected void printSettings(String indent) {
-		super.printSettings(indent);
-		getLog().info(indent + "schemas: " + schemas);
-	}
+    @Override
+    protected void printSettings(String indent) {
+        super.printSettings(indent);
+        getLog().info(indent + "schemas: " + schemas);
+    }
 }

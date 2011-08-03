@@ -13,14 +13,13 @@ public class ChangeLogSerializerFactory {
 
     private Map<String, ChangeLogSerializer> serializers = new HashMap<String, ChangeLogSerializer>();
 
-
     public static void reset() {
         instance = new ChangeLogSerializerFactory();
     }
 
     public static ChangeLogSerializerFactory getInstance() {
         if (instance == null) {
-             instance = new ChangeLogSerializerFactory();
+            instance = new ChangeLogSerializerFactory();
         }
 
         return instance;
@@ -32,7 +31,7 @@ public class ChangeLogSerializerFactory {
             classes = ServiceLocator.getInstance().findClasses(ChangeLogSerializer.class);
 
             for (Class<? extends ChangeLogSerializer> clazz : classes) {
-                    register((ChangeLogSerializer) clazz.getConstructor().newInstance());
+                register((ChangeLogSerializer) clazz.getConstructor().newInstance());
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
@@ -45,7 +44,7 @@ public class ChangeLogSerializerFactory {
     }
 
     public ChangeLogSerializer getSerializer(String fileNameOrExtension) {
-        fileNameOrExtension = fileNameOrExtension.replaceAll(".*\\.", ""); //just need the extension
+        fileNameOrExtension = fileNameOrExtension.replaceAll(".*\\.", ""); // just need the extension
         return serializers.get(fileNameOrExtension);
     }
 

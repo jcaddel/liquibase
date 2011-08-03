@@ -21,11 +21,12 @@ public class GetViewDefinitionGeneratorMaxDB extends GetViewDefinitionGenerator 
     }
 
     @Override
-    public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(GetViewDefinitionStatement statement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         try {
-            return new Sql[] {
-                    new UnparsedSql("SELECT DEFINITION FROM DOMAIN.VIEWDEFS WHERE upper(VIEWNAME)='" + statement.getViewName().toUpperCase() + "' AND OWNER='" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'")
-            };
+            return new Sql[] { new UnparsedSql("SELECT DEFINITION FROM DOMAIN.VIEWDEFS WHERE upper(VIEWNAME)='"
+                    + statement.getViewName().toUpperCase() + "' AND OWNER='"
+                    + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'") };
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }

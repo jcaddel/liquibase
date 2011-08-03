@@ -19,15 +19,11 @@ public class View implements DatabaseObject, Comparable<View> {
         this.name = name;
     }
 
-
     public View() {
     }
 
-
     public DatabaseObject[] getContainingObjects() {
-        return new DatabaseObject[] {
-                getDatabase()
-        };
+        return new DatabaseObject[] { getDatabase() };
     }
 
     public Database getDatabase() {
@@ -46,7 +42,6 @@ public class View implements DatabaseObject, Comparable<View> {
         this.name = name;
     }
 
-
     public List<Column> getColumns() {
         return columns;
     }
@@ -54,7 +49,6 @@ public class View implements DatabaseObject, Comparable<View> {
     public void addColumn(Column column) {
         columns.add(column);
     }
-
 
     public String getDefinition() {
         return definition;
@@ -66,8 +60,10 @@ public class View implements DatabaseObject, Comparable<View> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         View view = (View) o;
 
@@ -86,33 +82,32 @@ public class View implements DatabaseObject, Comparable<View> {
 
     @Override
     public String toString() {
-    	String viewStr = getName()+" (";
-    	for (int i=0;i<columns.size();i++) {
-    		if (i>0) {
-    			viewStr += ","+columns.get(i);
-    		} else {
-    			viewStr += columns.get(i);
-    		}
-    	}
-    	viewStr += ")";
+        String viewStr = getName() + " (";
+        for (int i = 0; i < columns.size(); i++) {
+            if (i > 0) {
+                viewStr += "," + columns.get(i);
+            } else {
+                viewStr += columns.get(i);
+            }
+        }
+        viewStr += ")";
         return viewStr;
     }
 
+    /**
+     * @return Returns the schema.
+     */
+    public String getSchema() {
+        return schema;
+    }
 
-	/**
-	 * @return Returns the schema.
-	 */
-	public String getSchema () {
-		return schema;
-	}
-
-
-	/**
-	 * @param schema The schema to set.
-	 */
-	public void setSchema (String schema) {
-		this.schema = schema;
-	}
+    /**
+     * @param schema
+     *            The schema to set.
+     */
+    public void setSchema(String schema) {
+        this.schema = schema;
+    }
 
     public String getRawCatalogName() {
         return rawCatalogName;

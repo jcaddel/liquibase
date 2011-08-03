@@ -15,7 +15,7 @@ import liquibase.statement.core.AddForeignKeyConstraintStatement;
 public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddForeignKeyConstraintStatement> {
 
     @Override
-    @SuppressWarnings({"SimplifiableIfStatement"})
+    @SuppressWarnings({ "SimplifiableIfStatement" })
     public boolean supports(AddForeignKeyConstraintStatement statement, Database database) {
         if (statement.getReferencesUniqueColumn() && !(database instanceof OracleDatabase)) {
             return false;
@@ -23,60 +23,68 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
         return (!(database instanceof SQLiteDatabase));
     }
 
-    public ValidationErrors validate(AddForeignKeyConstraintStatement addForeignKeyConstraintStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(AddForeignKeyConstraintStatement addForeignKeyConstraintStatement,
+            Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
-        if ((addForeignKeyConstraintStatement.isInitiallyDeferred() || addForeignKeyConstraintStatement.isDeferrable()) && !database.supportsInitiallyDeferrableColumns()) {
-            validationErrors.checkDisallowedField("initiallyDeferred", addForeignKeyConstraintStatement.isInitiallyDeferred(), database);
-            validationErrors.checkDisallowedField("deferrable", addForeignKeyConstraintStatement.isDeferrable(), database);
+        if ((addForeignKeyConstraintStatement.isInitiallyDeferred() || addForeignKeyConstraintStatement.isDeferrable())
+                && !database.supportsInitiallyDeferrableColumns()) {
+            validationErrors.checkDisallowedField("initiallyDeferred",
+                    addForeignKeyConstraintStatement.isInitiallyDeferred(), database);
+            validationErrors.checkDisallowedField("deferrable", addForeignKeyConstraintStatement.isDeferrable(),
+                    database);
         }
 
         validationErrors.checkRequiredField("baseColumnNames", addForeignKeyConstraintStatement.getBaseColumnNames());
         validationErrors.checkRequiredField("baseTableNames", addForeignKeyConstraintStatement.getBaseTableName());
-        validationErrors.checkRequiredField("referencedColumnNames", addForeignKeyConstraintStatement.getReferencedColumnNames());
-        validationErrors.checkRequiredField("referencedTableName", addForeignKeyConstraintStatement.getReferencedTableName());
+        validationErrors.checkRequiredField("referencedColumnNames",
+                addForeignKeyConstraintStatement.getReferencedColumnNames());
+        validationErrors.checkRequiredField("referencedTableName",
+                addForeignKeyConstraintStatement.getReferencedTableName());
 
         return validationErrors;
     }
 
-    public Sql[] generateSql(AddForeignKeyConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-	    StringBuilder sb = new StringBuilder();
-	    sb.append("ALTER TABLE ")
-			    .append(database.escapeTableName(statement.getBaseTableSchemaName(), statement.getBaseTableName()))
-			    .append(" ADD CONSTRAINT ");
-	    if (!(database instanceof InformixDatabase)) {
-		    sb.append(database.escapeConstraintName(statement.getConstraintName()));
-	    }
-	    sb.append(" FOREIGN KEY (")
-			    .append(database.escapeColumnNameList(statement.getBaseColumnNames()))
-			    .append(") REFERENCES ")
-			    .append(database.escapeTableName(statement.getReferencedTableSchemaName(), statement.getReferencedTableName()))
-			    .append(" (")
-			    .append(database.escapeColumnNameList(statement.getReferencedColumnNames()))
-			    .append(")");
+    public Sql[] generateSql(AddForeignKeyConstraintStatement statement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ALTER TABLE ")
+                .append(database.escapeTableName(statement.getBaseTableSchemaName(), statement.getBaseTableName()))
+                .append(" ADD CONSTRAINT ");
+        if (!(database instanceof InformixDatabase)) {
+            sb.append(database.escapeConstraintName(statement.getConstraintName()));
+        }
+        sb.append(" FOREIGN KEY (")
+                .append(database.escapeColumnNameList(statement.getBaseColumnNames()))
+                .append(") REFERENCES ")
+                .append(database.escapeTableName(statement.getReferencedTableSchemaName(),
+                        statement.getReferencedTableName())).append(" (")
+                .append(database.escapeColumnNameList(statement.getReferencedColumnNames())).append(")");
 
-	    if (statement.getOnUpdate() != null) {
-		    if ((database instanceof OracleDatabase) && statement.getOnUpdate().equalsIgnoreCase("RESTRICT")) {
-			    //don't use
-		    } else if (database instanceof InformixDatabase) {
-			    //TODO don't know if correct
-		    } else {
-			    sb.append(" ON UPDATE ").append(statement.getOnUpdate());
-		    }
-	    }
+        if (statement.getOnUpdate() != null) {
+            if ((database instanceof OracleDatabase) && statement.getOnUpdate().equalsIgnoreCase("RESTRICT")) {
+                // don't use
+            } else if (database instanceof InformixDatabase) {
+                // TODO don't know if correct
+            } else {
+                sb.append(" ON UPDATE ").append(statement.getOnUpdate());
+            }
+        }
 
-	    if (statement.getOnDelete() != null) {
-            if ((database instanceof OracleDatabase) && (statement.getOnDelete().equalsIgnoreCase("RESTRICT") || statement.getOnDelete().equalsIgnoreCase("NO ACTION"))) {
-                //don't use
+        if (statement.getOnDelete() != null) {
+            if ((database instanceof OracleDatabase)
+                    && (statement.getOnDelete().equalsIgnoreCase("RESTRICT") || statement.getOnDelete()
+                            .equalsIgnoreCase("NO ACTION"))) {
+                // don't use
             } else if ((database instanceof MSSQLDatabase) && statement.getOnDelete().equalsIgnoreCase("RESTRICT")) {
-                //don't use                        
-		    } else if (database instanceof InformixDatabase && !(statement.getOnDelete().equalsIgnoreCase("CASCADE"))) {
-			    //TODO Informix can handle ON DELETE CASCADE only, but I don't know if this is really correct
-		    	// see "REFERENCES Clause" in manual
-		    } else {
-			    sb.append(" ON DELETE ").append(statement.getOnDelete());
-		    }
-	    }
+                // don't use
+            } else if (database instanceof InformixDatabase && !(statement.getOnDelete().equalsIgnoreCase("CASCADE"))) {
+                // TODO Informix can handle ON DELETE CASCADE only, but I don't know if this is really correct
+                // see "REFERENCES Clause" in manual
+            } else {
+                sb.append(" ON DELETE ").append(statement.getOnDelete());
+            }
+        }
 
         if (statement.isDeferrable() || statement.isInitiallyDeferred()) {
             if (statement.isDeferrable()) {
@@ -88,13 +96,11 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
             }
         }
 
-	    if (database instanceof InformixDatabase) {
-		    sb.append(" CONSTRAINT ");
-		    sb.append(database.escapeConstraintName(statement.getConstraintName()));
-	    }
+        if (database instanceof InformixDatabase) {
+            sb.append(" CONSTRAINT ");
+            sb.append(database.escapeConstraintName(statement.getConstraintName()));
+        }
 
-	    return new Sql[]{
-			    new UnparsedSql(sb.toString())
-	    };
+        return new Sql[] { new UnparsedSql(sb.toString()) };
     }
 }

@@ -5,7 +5,7 @@ import liquibase.servicelocator.PrioritizedService;
 public interface Logger extends PrioritizedService {
 
     void setName(String name);
-    
+
     void setLogLevel(String level);
 
     void setLogLevel(LogLevel level);

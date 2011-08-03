@@ -27,10 +27,13 @@ public class HTMLListWriter {
         try {
             fileWriter.append("<HTML>\n" + "<HEAD>\n" + "<TITLE>\n");
             fileWriter.append(title);
-            fileWriter.append("\n" + "</TITLE>\n" + "<LINK REL =\"stylesheet\" TYPE=\"text/css\" HREF=\"stylesheet.css\" TITLE=\"Style\">\n" + "</HEAD>\n" + "<BODY BGCOLOR=\"white\">\n" + "<FONT size=\"+1\" CLASS=\"FrameHeadingFont\">\n" + "<B>");
+            fileWriter.append("\n" + "</TITLE>\n"
+                    + "<LINK REL =\"stylesheet\" TYPE=\"text/css\" HREF=\"stylesheet.css\" TITLE=\"Style\">\n"
+                    + "</HEAD>\n" + "<BODY BGCOLOR=\"white\">\n" + "<FONT size=\"+1\" CLASS=\"FrameHeadingFont\">\n"
+                    + "<B>");
             fileWriter.append(title);
-            fileWriter.append("</B></FONT>\n" + "<BR>\n" + "<TABLE BORDER=\"0\" WIDTH=\"100%\" SUMMARY=\"\">" + "<TR>\n" + "<TD NOWRAP><FONT CLASS=\"FrameItemFont\">");
-
+            fileWriter.append("</B></FONT>\n" + "<BR>\n" + "<TABLE BORDER=\"0\" WIDTH=\"100%\" SUMMARY=\"\">"
+                    + "<TR>\n" + "<TD NOWRAP><FONT CLASS=\"FrameItemFont\">");
 
             for (Object object : objects) {
                 fileWriter.append("<A HREF=\"");
@@ -43,12 +46,7 @@ public class HTMLListWriter {
                 fileWriter.append("</A><BR>\n");
             }
 
-            fileWriter.append("</FONT></TD>\n" +
-                    "</TR>\n" +
-                    "</TABLE>\n" +
-                    "\n" +
-                    "</BODY>\n" +
-                    "</HTML>");
+            fileWriter.append("</FONT></TD>\n" + "</TR>\n" + "</TABLE>\n" + "\n" + "</BODY>\n" + "</HTML>");
         } finally {
             fileWriter.close();
         }

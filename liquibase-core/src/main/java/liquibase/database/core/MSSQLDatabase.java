@@ -43,11 +43,10 @@ public class MSSQLDatabase extends AbstractDatabase {
         systemTablesAndViews.add("sysconstraints");
     }
 
-
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
-    
+
     @Override
     public Set<String> getSystemTablesAndViews() {
         return systemTablesAndViews;
@@ -64,8 +63,7 @@ public class MSSQLDatabase extends AbstractDatabase {
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         String databaseProductName = conn.getDatabaseProductName();
-        return PRODUCT_NAME.equalsIgnoreCase(databaseProductName)
-                || "SQLOLEDB".equalsIgnoreCase(databaseProductName);
+        return PRODUCT_NAME.equalsIgnoreCase(databaseProductName) || "SQLOLEDB".equalsIgnoreCase(databaseProductName);
     }
 
     public String getDefaultDriver(String url) {
@@ -89,6 +87,7 @@ public class MSSQLDatabase extends AbstractDatabase {
     public String getAutoIncrementClause() {
         return "IDENTITY";
     }
+
     @Override
     protected String getDefaultDatabaseSchemaName() throws DatabaseException {
         return null;
@@ -96,7 +95,7 @@ public class MSSQLDatabase extends AbstractDatabase {
 
     @Override
     public String getDefaultCatalogName() throws DatabaseException {
-            return getConnection().getCatalog();
+        return getConnection().getCatalog();
     }
 
     @Override
@@ -115,51 +114,51 @@ public class MSSQLDatabase extends AbstractDatabase {
         return super.escapeIndexName(null, indexName);
     }
 
-    //    protected void dropForeignKeys(Connection conn) throws DatabaseException {
-//        Statement dropStatement = null;
-//        PreparedStatement fkStatement = null;
-//        ResultSet rs = null;
-//        try {
-//            dropStatement = conn.createStatement();
-//
-//            fkStatement = conn.prepareStatement("select TABLE_NAME, CONSTRAINT_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS where CONSTRAINT_TYPE='FOREIGN KEY' AND TABLE_CATALOG=?");
-//            fkStatement.setString(1, getDefaultCatalogName());
-//            rs = fkStatement.executeQuery();
-//            while (rs.next()) {
-//                DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
-//                dropFK.setBaseTableName(rs.getString("TABLE_NAME"));
-//                dropFK.setConstraintName(rs.getString("CONSTRAINT_NAME"));
-//
-//                try {
-//                    dropStatement.execute(dropFK.generateStatements(this)[0]);
-//                } catch (UnsupportedChangeException e) {
-//                    throw new DatabaseException(e.getMessage());
-//                }
-//            }
-//        } catch (SQLException e) {
-//            throw new DatabaseException(e);
-//        } finally {
-//            try {
-//                if (dropStatement != null) {
-//                    dropStatement.close();
-//                }
-//                if (fkStatement != null) {
-//                    fkStatement.close();
-//                }
-//                if (rs != null) {
-//                    rs.close();
-//                }
-//            } catch (SQLException e) {
-//                throw new DatabaseException(e);
-//            }
-//        }
-//
-//    }
+    // protected void dropForeignKeys(Connection conn) throws DatabaseException {
+    // Statement dropStatement = null;
+    // PreparedStatement fkStatement = null;
+    // ResultSet rs = null;
+    // try {
+    // dropStatement = conn.createStatement();
+    //
+    // fkStatement =
+    // conn.prepareStatement("select TABLE_NAME, CONSTRAINT_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS where CONSTRAINT_TYPE='FOREIGN KEY' AND TABLE_CATALOG=?");
+    // fkStatement.setString(1, getDefaultCatalogName());
+    // rs = fkStatement.executeQuery();
+    // while (rs.next()) {
+    // DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
+    // dropFK.setBaseTableName(rs.getString("TABLE_NAME"));
+    // dropFK.setConstraintName(rs.getString("CONSTRAINT_NAME"));
+    //
+    // try {
+    // dropStatement.execute(dropFK.generateStatements(this)[0]);
+    // } catch (UnsupportedChangeException e) {
+    // throw new DatabaseException(e.getMessage());
+    // }
+    // }
+    // } catch (SQLException e) {
+    // throw new DatabaseException(e);
+    // } finally {
+    // try {
+    // if (dropStatement != null) {
+    // dropStatement.close();
+    // }
+    // if (fkStatement != null) {
+    // fkStatement.close();
+    // }
+    // if (rs != null) {
+    // rs.close();
+    // }
+    // } catch (SQLException e) {
+    // throw new DatabaseException(e);
+    // }
+    // }
+    //
+    // }
 
     public boolean supportsTablespaces() {
         return true;
     }
-
 
     @Override
     public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
@@ -175,10 +174,9 @@ public class MSSQLDatabase extends AbstractDatabase {
         return "DF_" + tableName + "_" + columnName;
     }
 
-
     @Override
     public String escapeDatabaseObject(String objectName) {
-        return "["+objectName+"]";
+        return "[" + objectName + "]";
     }
 
     @Override
@@ -198,19 +196,18 @@ public class MSSQLDatabase extends AbstractDatabase {
         return requestedSchema;
     }
 
-
     @Override
     public String getDateLiteral(String isoDate) {
         return super.getDateLiteral(isoDate).replace(' ', 'T');
     }
 
-	@Override
+    @Override
     public boolean supportsRestrictForeignKeys() {
         return false;
     }
 
     @Override
-	public String getDefaultSchemaName() {
+    public String getDefaultSchemaName() {
         String defaultSchemaName = super.getDefaultSchemaName();
         if (defaultSchemaName == null) {
             return "dbo";
@@ -218,5 +215,5 @@ public class MSSQLDatabase extends AbstractDatabase {
             return defaultSchemaName;
         }
 
-	}
+    }
 }

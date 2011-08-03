@@ -60,15 +60,14 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
 
     public SqlStatement[] generateStatements(Database database) {
 
-        InsertStatement statement = new InsertStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName());
+        InsertStatement statement = new InsertStatement(getSchemaName() == null ? database.getDefaultSchemaName()
+                : getSchemaName(), getTableName());
 
         for (ColumnConfig column : columns) {
             statement.addColumnValue(column.getName(), column.getValueObject());
         }
 
-        return new SqlStatement[]{
-                statement
-        };
+        return new SqlStatement[] { statement };
     }
 
     /**

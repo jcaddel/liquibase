@@ -83,7 +83,7 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
             throw new BuildException("diffDatabase requires referenceUrl to be set");
         }
 
-        super.execute();    
+        super.execute();
 
         Liquibase liquibase = null;
         Database referenceDatabase = null;
@@ -95,14 +95,14 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
 
             liquibase = createLiquibase();
 
-            referenceDatabase = createDatabaseObject(getReferenceDriver(), getReferenceUrl(), getReferenceUsername(), getReferencePassword(), getReferenceDefaultSchemaName(), getDatabaseClass());
-
+            referenceDatabase = createDatabaseObject(getReferenceDriver(), getReferenceUrl(), getReferenceUsername(),
+                    getReferencePassword(), getReferenceDefaultSchemaName(), getDatabaseClass());
 
             Diff diff = new Diff(referenceDatabase, liquibase.getDatabase());
             if (getDiffTypes() != null) {
                 diff.setDiffTypes(getDiffTypes());
             }
-//            diff.addStatusListener(new OutDiffStatusListener());
+            // diff.addStatusListener(new OutDiffStatusListener());
             DiffResult diffResult = diff.compare();
             if (getDataDir() != null) {
                 diffResult.setDataDir(getDataDir());

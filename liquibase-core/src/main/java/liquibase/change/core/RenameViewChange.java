@@ -45,7 +45,8 @@ public class RenameViewChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[]{new RenameViewStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getOldViewName(), getNewViewName())};
+        return new SqlStatement[] { new RenameViewStatement(getSchemaName() == null ? database.getDefaultSchemaName()
+                : getSchemaName(), getOldViewName(), getNewViewName()) };
     }
 
     @Override
@@ -54,9 +55,7 @@ public class RenameViewChange extends AbstractChange {
         inverse.setOldViewName(getNewViewName());
         inverse.setNewViewName(getOldViewName());
 
-        return new Change[]{
-                inverse
-        };
+        return new Change[] { inverse };
     }
 
     public String getConfirmationMessage() {

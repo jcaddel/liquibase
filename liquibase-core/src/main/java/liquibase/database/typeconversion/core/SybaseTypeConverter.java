@@ -16,9 +16,9 @@ public class SybaseTypeConverter extends AbstractTypeConverter {
         return database instanceof SybaseDatabase;
     }
 
-
     @Override
-    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
+    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits,
+            Database database) throws ParseException {
         if (defaultValue == null) {
             return null;
         }

@@ -28,11 +28,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Class to simplify execution of SqlStatements.  Based heavily on <a href="http://static.springframework.org/spring/docs/2.0.x/reference/jdbc.html">Spring's JdbcTemplate</a>.
- * <br><br>
- * <b>Note: This class is currently intended for Liquibase-internal use only and may change without notice in the future</b>
+ * Class to simplify execution of SqlStatements. Based heavily on <a
+ * href="http://static.springframework.org/spring/docs/2.0.x/reference/jdbc.html">Spring's JdbcTemplate</a>. <br>
+ * <br>
+ * <b>Note: This class is currently intended for Liquibase-internal use only and may change without notice in the
+ * future</b>
  */
-@SuppressWarnings({"unchecked"})
+@SuppressWarnings({ "unchecked" })
 public class JdbcExecutor extends AbstractExecutor implements Executor {
 
     private Logger log = LogFactory.getLogger();
@@ -41,9 +43,9 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
         return true;
     }
 
-    //-------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Methods dealing with static SQL (java.sql.Statement)
-    //-------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     public Object execute(StatementCallback action, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         DatabaseConnection con = database.getConnection();
@@ -53,15 +55,15 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
             Statement stmtToUse = stmt;
 
             return action.doInStatement(stmtToUse);
-        }
-        catch (SQLException ex) {
+        } catch (SQLException ex) {
             // Release Connection early, to avoid potential connection pool deadlock
             // in the case when the exception translator hasn't been initialized yet.
             JdbcUtils.closeStatement(stmt);
             stmt = null;
-            throw new DatabaseException("Error executing SQL " + StringUtils.join(applyVisitors(action.getStatement(), sqlVisitors), "; on "+ con.getURL())+": "+ex.getMessage(), ex);
-        }
-        finally {
+            throw new DatabaseException("Error executing SQL "
+                    + StringUtils.join(applyVisitors(action.getStatement(), sqlVisitors), "; on " + con.getURL())
+                    + ": " + ex.getMessage(), ex);
+        } finally {
             JdbcUtils.closeStatement(stmt);
         }
     }
@@ -76,15 +78,14 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
             return;
         }
 
-
         class ExecuteStatementCallback implements StatementCallback {
             public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
                 for (String statement : applyVisitors(sql, sqlVisitors)) {
                     if (database instanceof OracleDatabase) {
-                        statement = statement.replaceFirst("/\\s*/\\s*$", ""); //remove duplicated /'s
+                        statement = statement.replaceFirst("/\\s*/\\s*$", ""); // remove duplicated /'s
                     }
 
-                    log.debug("Executing EXECUTE database command: "+statement);
+                    log.debug("Executing EXECUTE database command: " + statement);
                     if (statement.contains("?")) {
                         stmt.setEscapeProcessing(false);
                     }
@@ -104,12 +105,12 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
         execute(new ExecuteStatementCallback(), sqlVisitors);
     }
 
-
     public Object query(final SqlStatement sql, final ResultSetExtractor rse) throws DatabaseException {
         return query(sql, rse, new ArrayList<SqlVisitor>());
     }
 
-    public Object query(final SqlStatement sql, final ResultSetExtractor rse, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    public Object query(final SqlStatement sql, final ResultSetExtractor rse, final List<SqlVisitor> sqlVisitors)
+            throws DatabaseException {
         if (sql instanceof CallableSqlStatement) {
             throw new DatabaseException("Direct query using CallableSqlStatement not currently implemented");
         }
@@ -123,17 +124,15 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
                     if (sqlToExecute.length != 1) {
                         throw new DatabaseException("Can only query with statements that return one sql statement");
                     }
-                    log.debug("Executing QUERY database command: "+sqlToExecute[0]);
+                    log.debug("Executing QUERY database command: " + sqlToExecute[0]);
 
                     rs = stmt.executeQuery(sqlToExecute[0]);
                     ResultSet rsToUse = rs;
                     return rse.extractData(rsToUse);
-                }
-                finally {
+                } finally {
                     JdbcUtils.closeResultSet(rs);
                 }
             }
-
 
             public SqlStatement getStatement() {
                 return sql;
@@ -154,7 +153,8 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
         return queryForObject(sql, rowMapper, new ArrayList());
     }
 
-    public Object queryForObject(SqlStatement sql, RowMapper rowMapper, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    public Object queryForObject(SqlStatement sql, RowMapper rowMapper, List<SqlVisitor> sqlVisitors)
+            throws DatabaseException {
         List results = query(sql, rowMapper, sqlVisitors);
         return JdbcUtils.requiredSingleResult(results);
     }
@@ -163,7 +163,8 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
         return queryForObject(sql, requiredType, new ArrayList());
     }
 
-    public Object queryForObject(SqlStatement sql, Class requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    public Object queryForObject(SqlStatement sql, Class requiredType, List<SqlVisitor> sqlVisitors)
+            throws DatabaseException {
         return queryForObject(sql, getSingleColumnRowMapper(requiredType), sqlVisitors);
     }
 
@@ -189,7 +190,8 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
         return queryForList(sql, elementType, new ArrayList());
     }
 
-    public List queryForList(SqlStatement sql, Class elementType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    public List queryForList(SqlStatement sql, Class elementType, List<SqlVisitor> sqlVisitors)
+            throws DatabaseException {
         return query(sql, getSingleColumnRowMapper(elementType), sqlVisitors);
     }
 
@@ -198,7 +200,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
     }
 
     public List<Map> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        //noinspection unchecked
+        // noinspection unchecked
         return (List<Map>) query(sql, getColumnMapRowMapper(), sqlVisitors);
     }
 
@@ -215,12 +217,12 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
             public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
                 String[] sqlToExecute = applyVisitors(sql, sqlVisitors);
                 if (sqlToExecute.length != 1) {
-                    throw new DatabaseException("Cannot call update on Statement that returns back multiple Sql objects");
+                    throw new DatabaseException(
+                            "Cannot call update on Statement that returns back multiple Sql objects");
                 }
-                log.debug("Executing UPDATE database command: "+sqlToExecute[0]);                
+                log.debug("Executing UPDATE database command: " + sqlToExecute[0]);
                 return stmt.executeUpdate(sqlToExecute[0]);
             }
-
 
             public SqlStatement getStatement() {
                 return sql;
@@ -228,33 +230,34 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
         }
         return (Integer) execute(new UpdateStatementCallback(), sqlVisitors);
     }
-    //-------------------------------------------------------------------------
-    // Methods dealing with callable statements
-    //-------------------------------------------------------------------------
 
-    public Object execute(CallableSqlStatement csc, CallableStatementCallback action, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    // -------------------------------------------------------------------------
+    // Methods dealing with callable statements
+    // -------------------------------------------------------------------------
+
+    public Object execute(CallableSqlStatement csc, CallableStatementCallback action, List<SqlVisitor> sqlVisitors)
+            throws DatabaseException {
         CallableStatement cs = null;
         try {
             cs = createCallableStatement(((StoredProcedureStatement) csc), database);
             CallableStatement csToUse = cs;
             return action.doInCallableStatement(csToUse);
-        }
-        catch (SQLException ex) {
+        } catch (SQLException ex) {
             throw new DatabaseException("Error executing callable statement", ex);
-        }
-        finally {
+        } finally {
             JdbcUtils.closeStatement(cs);
         }
 
     }
 
-    public CallableStatement createCallableStatement(StoredProcedureStatement statement, Database database) throws SQLException {
+    public CallableStatement createCallableStatement(StoredProcedureStatement statement, Database database)
+            throws SQLException {
         StringBuffer sql = new StringBuffer("{call " + statement.getProcedureName());
 
         List<String> parameters = statement.getParameters();
         if (parameters.size() > 0) {
             sql.append("(");
-            //noinspection UnusedDeclaration
+            // noinspection UnusedDeclaration
             for (Object param : parameters) {
                 sql.append("?,");
             }
@@ -264,11 +267,13 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
 
         sql.append("}");
 
-        CallableStatement pstmt = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().prepareCall(sql.toString());
+        CallableStatement pstmt = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().prepareCall(
+                sql.toString());
 
         for (int i = 0; i < parameters.size(); i++) {
             String param = parameters.get(i);
-            int type = ((JdbcDatabaseSnapshotGenerator) DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database)).getDatabaseType(statement.getParameterType(param), database);
+            int type = ((JdbcDatabaseSnapshotGenerator) DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(
+                    database)).getDatabaseType(statement.getParameterType(param), database);
 
             if (param == null) {
                 pstmt.setNull(i + 1, type);
@@ -280,18 +285,18 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
         return pstmt;
     }
 
-
-    public Map call(CallableSqlStatement csc, final List declaredParameters, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    public Map call(CallableSqlStatement csc, final List declaredParameters, List<SqlVisitor> sqlVisitors)
+            throws DatabaseException {
         return (Map) execute(csc, new CallableStatementCallback() {
             public Object doInCallableStatement(CallableStatement cs) throws SQLException {
-                //not currently doing anything with returned results
-//                boolean retVal = cs.execute();
-//                int updateCount = cs.getUpdateCount();
-//                Map returnedResults = new HashMap();
-//                if (retVal || updateCount != -1) {
-//                    returnedResults.putAll(extractReturnedResultSets(cs, declaredParameters, updateCount));
-//                }
-//                returnedResults.putAll(extractOutputParameters(cs, declaredParameters));
+                // not currently doing anything with returned results
+                // boolean retVal = cs.execute();
+                // int updateCount = cs.getUpdateCount();
+                // Map returnedResults = new HashMap();
+                // if (retVal || updateCount != -1) {
+                // returnedResults.putAll(extractReturnedResultSets(cs, declaredParameters, updateCount));
+                // }
+                // returnedResults.putAll(extractOutputParameters(cs, declaredParameters));
                 cs.execute();
                 return new HashMap();
             }
@@ -300,7 +305,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
 
     /**
      * Create a new RowMapper for reading columns as key-value pairs.
-     *
+     * 
      * @return the RowMapper to use
      * @see ColumnMapRowMapper
      */
@@ -310,8 +315,9 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
 
     /**
      * Create a new RowMapper for reading result objects from a single column.
-     *
-     * @param requiredType the type that each result object is expected to match
+     * 
+     * @param requiredType
+     *            the type that each result object is expected to match
      * @return the RowMapper to use
      * @see SingleColumnRowMapper
      */
@@ -325,8 +331,9 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
 
     /**
      * Adapter to enable use of a RowCallbackHandler inside a ResultSetExtractor.
-     * <p>Uses a regular ResultSet, so we have to be careful when using it:
-     * We don't use it for navigating since this could lead to unpredictable consequences.
+     * <p>
+     * Uses a regular ResultSet, so we have to be careful when using it: We don't use it for navigating since this could
+     * lead to unpredictable consequences.
      */
     private static class RowCallbackHandlerResultSetExtractor implements ResultSetExtractor {
 

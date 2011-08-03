@@ -45,6 +45,7 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
         this.tablespace = tablespace;
         return this;
     }
+
     public boolean isDeferrable() {
         return deferrable;
     }
@@ -64,7 +65,7 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
     }
 
     public AddUniqueConstraintStatement setDisabled(boolean disabled) {
-        this.disabled= disabled;
+        this.disabled = disabled;
         return this;
     }
 

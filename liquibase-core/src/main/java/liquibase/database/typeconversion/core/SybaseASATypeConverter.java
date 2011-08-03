@@ -15,7 +15,6 @@ public class SybaseASATypeConverter extends AbstractTypeConverter {
         return database instanceof SybaseASADatabase;
     }
 
-
     @Override
     public BooleanType getBooleanType() {
 
@@ -27,7 +26,9 @@ public class SybaseASATypeConverter extends AbstractTypeConverter {
         return new ClobType("LONG VARCHAR");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see liquibase.database.Database#getCurrencyType()
      */
     @Override
@@ -40,12 +41,10 @@ public class SybaseASATypeConverter extends AbstractTypeConverter {
     public UUIDType getUUIDType() {
         return new UUIDType("UNIQUEIDENTIFIER");
     }
-    
+
     @Override
     public BlobType getBlobType() {
         return new BlobType("LONG BINARY");
     }
 
-
-    
 }

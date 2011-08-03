@@ -16,7 +16,8 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
         return (!(database instanceof SQLiteDatabase));
     }
 
-    public ValidationErrors validate(AddPrimaryKeyStatement addPrimaryKeyStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(AddPrimaryKeyStatement addPrimaryKeyStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("columnNames", addPrimaryKeyStatement.getColumnNames());
         validationErrors.checkRequiredField("tableName", addPrimaryKeyStatement.getTableName());
@@ -25,24 +26,26 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
 
     public Sql[] generateSql(AddPrimaryKeyStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
-        if (statement.getConstraintName() == null  || database instanceof MySQLDatabase || database instanceof SybaseASADatabase) {
-            sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ADD PRIMARY KEY (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";
+        if (statement.getConstraintName() == null || database instanceof MySQLDatabase
+                || database instanceof SybaseASADatabase) {
+            sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " ADD PRIMARY KEY (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";
         } else {
-            sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ADD CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName()) + " PRIMARY KEY (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";
+            sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " ADD CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName())
+                    + " PRIMARY KEY (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";
         }
 
         if (StringUtils.trimToNull(statement.getTablespace()) != null && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {
-                sql += " ON "+statement.getTablespace();
+                sql += " ON " + statement.getTablespace();
             } else if (database instanceof DB2Database || database instanceof SybaseASADatabase) {
-                ; //not supported
+                ; // not supported
             } else {
-                sql += " USING INDEX TABLESPACE "+statement.getTablespace();
+                sql += " USING INDEX TABLESPACE " + statement.getTablespace();
             }
         }
 
-        return new Sql[] {
-                new UnparsedSql(sql)
-        };
+        return new Sql[] { new UnparsedSql(sql) };
     }
 }

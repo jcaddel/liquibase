@@ -7,8 +7,6 @@ import liquibase.exception.DatabaseException;
 public class CacheDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "cache";
 
-
-
     public String getCurrentDateTimeFunction() {
         if (currentDateTimeFunction != null) {
             return currentDateTimeFunction;
@@ -27,14 +25,12 @@ public class CacheDatabase extends AbstractDatabase {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
-    
 
     public String getTypeName() {
         return "cache";
     }
 
-    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn)
-            throws DatabaseException {
+    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName());
     }
 
@@ -46,7 +42,6 @@ public class CacheDatabase extends AbstractDatabase {
     public String getLineComment() {
         return "--";
     }
-
 
     @Override
     protected String getDefaultDatabaseSchemaName() throws DatabaseException {
@@ -66,7 +61,6 @@ public class CacheDatabase extends AbstractDatabase {
     public boolean supportsAutoIncrement() {
         return false;
     }
-
 
     @Override
     public String getViewDefinition(String schemaName, String viewName) throws DatabaseException {

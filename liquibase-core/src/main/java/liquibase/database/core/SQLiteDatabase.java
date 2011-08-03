@@ -32,10 +32,9 @@ public class SQLiteDatabase extends AbstractDatabase {
         if (currentDateTimeFunction != null) {
             return currentDateTimeFunction;
         }
-        
+
         return "CURRENT_TIMESTAMP";
     }
-
 
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:sqlite:")) {
@@ -47,14 +46,12 @@ public class SQLiteDatabase extends AbstractDatabase {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
-    
 
     public String getTypeName() {
         return "sqlite";
     }
 
-    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn)
-            throws DatabaseException {
+    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return "SQLite".equalsIgnoreCase(conn.getDatabaseProductName());
     }
 
@@ -82,9 +79,8 @@ public class SQLiteDatabase extends AbstractDatabase {
     }
 
     public String getTrigger(String table, String column) {
-        return "CREATE TRIGGER insert_" + table + "_timeEnter AFTER  INSERT ON " + table + " BEGIN" +
-                " UPDATE " + table + " SET " + column + " = DATETIME('NOW')" +
-                " WHERE rowid = new.rowid END ";
+        return "CREATE TRIGGER insert_" + table + "_timeEnter AFTER  INSERT ON " + table + " BEGIN" + " UPDATE "
+                + table + " SET " + column + " = DATETIME('NOW')" + " WHERE rowid = new.rowid END ";
     }
 
     @Override
@@ -92,11 +88,8 @@ public class SQLiteDatabase extends AbstractDatabase {
         return "AUTOINCREMENT";
     }
 
-
-    public static List<SqlStatement> getAlterTableStatements(
-            AlterTableVisitor alterTableVisitor,
-            Database database, String schemaName, String tableName)
-            throws UnsupportedChangeException, DatabaseException {
+    public static List<SqlStatement> getAlterTableStatements(AlterTableVisitor alterTableVisitor, Database database,
+            String schemaName, String tableName) throws UnsupportedChangeException, DatabaseException {
 
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
@@ -156,18 +149,14 @@ public class SQLiteDatabase extends AbstractDatabase {
         statements.add(new ReindexStatement(schemaName, tableName));
         // add remaining indices
         for (Index index_config : newIndices) {
-            statements.add(new CreateIndexStatement(
-                    index_config.getName(),
-                    schemaName, tableName,
-                    index_config.isUnique(),
-		            index_config.getAssociatedWithAsString(),
-                    index_config.getColumns().
-                            toArray(new String[index_config.getColumns().size()])));
+            statements.add(new CreateIndexStatement(index_config.getName(), schemaName, tableName, index_config
+                    .isUnique(), index_config.getAssociatedWithAsString(), index_config.getColumns().toArray(
+                    new String[index_config.getColumns().size()])));
         }
 
         return statements;
     }
-    
+
     @Override
     protected Set<String> getSystemTablesAndViews() {
         return systemTables;
@@ -177,7 +166,6 @@ public class SQLiteDatabase extends AbstractDatabase {
     public String getDateTimeLiteral(java.sql.Timestamp date) {
         return getDateLiteral(new ISODateFormat().format(date).replaceFirst("^'", "").replaceFirst("'$", ""));
     }
-
 
     public interface AlterTableVisitor {
         public ColumnConfig[] getColumnsToAdd();

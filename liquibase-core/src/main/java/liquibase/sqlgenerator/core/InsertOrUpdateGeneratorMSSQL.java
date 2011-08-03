@@ -9,14 +9,16 @@ import liquibase.statement.core.InsertOrUpdateStatement;
 
 public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
     public boolean supports(InsertOrUpdateStatement statement, Database database) {
-         return database instanceof MSSQLDatabase;
+        return database instanceof MSSQLDatabase;
     }
 
-    protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause) {
+    protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database,
+            String whereClause) {
         StringBuffer recordCheck = new StringBuffer();
         recordCheck.append("DECLARE @reccount integer\n");
         recordCheck.append("SELECT @reccount = count(*) FROM ");
-        recordCheck.append(database.escapeTableName(insertOrUpdateStatement.getSchemaName(),insertOrUpdateStatement.getTableName()));
+        recordCheck.append(database.escapeTableName(insertOrUpdateStatement.getSchemaName(),
+                insertOrUpdateStatement.getTableName()));
         recordCheck.append(" WHERE ");
         recordCheck.append(whereClause);
         recordCheck.append("\n");
@@ -26,13 +28,14 @@ public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
     }
 
     @Override
-    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer insertBlock = new StringBuffer();
         insertBlock.append("BEGIN\n");
         insertBlock.append(super.getInsertStatement(insertOrUpdateStatement, database, sqlGeneratorChain));
         insertBlock.append("END\n");
 
-        return insertBlock.toString(); 
+        return insertBlock.toString();
     }
 
     protected String getElse(Database database) {
@@ -40,7 +43,8 @@ public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
     }
 
     @Override
-    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {
+    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database,
+            String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {
         StringBuffer updateBlock = new StringBuffer();
         updateBlock.append("BEGIN\n");
         updateBlock.append(super.getUpdateStatement(insertOrUpdateStatement, database, whereClause, sqlGeneratorChain));
@@ -49,9 +53,12 @@ public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
     }
 
     @Override
-    public Sql[] generateSql(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(InsertOrUpdateStatement insertOrUpdateStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         System.out.println("generating");
 
-        return super.generateSql(insertOrUpdateStatement, database, sqlGeneratorChain);    //To change body of overridden methods use File | Settings | File Templates.
+        return super.generateSql(insertOrUpdateStatement, database, sqlGeneratorChain); // To change body of overridden
+                                                                                        // methods use File | Settings |
+                                                                                        // File Templates.
     }
 }

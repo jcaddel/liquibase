@@ -15,10 +15,8 @@ public class MD5Util {
     /**
      * Used to build output as Hex
      */
-    private static final char[] DIGITS_LOWER = {
-        '0', '1', '2', '3', '4', '5', '6', '7',
-           '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
-    };
+    private static final char[] DIGITS_LOWER = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd',
+            'e', 'f' };
 
     public static String computeMD5(String input) {
         if (input == null) {
@@ -34,7 +32,7 @@ public class MD5Util {
         byte[] digestBytes = digest.digest();
 
         String returnString = new String(encodeHex(digestBytes));
-        LogFactory.getLogger().debug("Computed checksum for "+input+" as "+returnString);
+        LogFactory.getLogger().debug("Computed checksum for " + input + " as " + returnString);
         return returnString;
 
     }
@@ -46,7 +44,7 @@ public class MD5Util {
 
             DigestInputStream digestStream = new DigestInputStream(stream, digest);
             while (digestStream.read() != -1) {
-                ; //digest is updating
+                ; // digest is updating
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -55,7 +53,7 @@ public class MD5Util {
 
         String returnString = new String(encodeHex(digestBytes));
 
-        LogFactory.getLogger().debug("Computed checksum for "+returnString+" as "+returnString);
+        LogFactory.getLogger().debug("Computed checksum for " + returnString + " as " + returnString);
         return returnString;
     }
 
@@ -63,7 +61,7 @@ public class MD5Util {
      * Converts an array of bytes into an array of characters representing the hexadecimal values of each byte in order.
      * The returned array will be double the length of the passed array, as it takes two characters to represent any
      * given byte.
-     *
+     * 
      * @param data
      *            a byte[] to convert to Hex characters
      * @return A char[] containing hexadecimal characters

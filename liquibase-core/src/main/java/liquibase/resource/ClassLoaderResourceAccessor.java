@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  * An implementation of liquibase.FileOpener that opens file from the class loader.
- *
+ * 
  * @see ResourceAccessor
  */
 public class ClassLoaderResourceAccessor implements ResourceAccessor {
@@ -50,7 +50,7 @@ public class ClassLoaderResourceAccessor implements ResourceAccessor {
         } else {
             description = classLoader.getClass().getName();
         }
-        return getClass().getName()+"("+ description +")";
+        return getClass().getName() + "(" + description + ")";
 
     }
 }

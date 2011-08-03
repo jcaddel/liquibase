@@ -16,7 +16,6 @@ import liquibase.precondition.Precondition;
 public class DBMSPrecondition implements Precondition {
     private String type;
 
-
     public DBMSPrecondition() {
     }
 
@@ -28,7 +27,6 @@ public class DBMSPrecondition implements Precondition {
         this.type = atype.toLowerCase();
     }
 
-
     public Warnings warn(Database database) {
         return new Warnings();
     }
@@ -36,12 +34,14 @@ public class DBMSPrecondition implements Precondition {
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
-    
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
+            throws PreconditionFailedException, PreconditionErrorException {
         try {
             String dbType = database.getTypeName();
             if (!type.equals(dbType)) {
-                throw new PreconditionFailedException("DBMS Precondition failed: expected "+type+", got "+dbType, changeLog, this);
+                throw new PreconditionFailedException("DBMS Precondition failed: expected " + type + ", got " + dbType,
+                        changeLog, this);
             }
         } catch (PreconditionFailedException e) {
             throw e;

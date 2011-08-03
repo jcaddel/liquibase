@@ -8,7 +8,7 @@ public class ForeignKeyConstraint implements ColumnConstraint {
     private boolean initiallyDeferred = false;
     private boolean deferrable = false;
 
-    public ForeignKeyConstraint(String foreignKeyName,String references) {
+    public ForeignKeyConstraint(String foreignKeyName, String references) {
         this.foreignKeyName = foreignKeyName;
         this.references = references;
     }
@@ -25,7 +25,6 @@ public class ForeignKeyConstraint implements ColumnConstraint {
         this.column = column;
         return this;
     }
-
 
     public String getReferences() {
         return references;

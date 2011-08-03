@@ -16,7 +16,7 @@ public class DatabaseFactory {
         try {
             Class[] classes = ServiceLocator.getInstance().findClasses(Database.class);
 
-            //noinspection unchecked
+            // noinspection unchecked
             for (Class<? extends Database> clazz : classes) {
                 register(clazz.getConstructor().newInstance());
             }
@@ -29,7 +29,7 @@ public class DatabaseFactory {
 
     public static DatabaseFactory getInstance() {
         if (instance == null) {
-             instance = new DatabaseFactory();
+            instance = new DatabaseFactory();
         }
         return instance;
     }
@@ -91,7 +91,7 @@ public class DatabaseFactory {
     }
 
     /**
-     * Removes all registered databases, even built in ones.  Useful for forcing a particular database implementation
+     * Removes all registered databases, even built in ones. Useful for forcing a particular database implementation
      */
     public void clearRegistry() {
         implementedDatabases.clear();

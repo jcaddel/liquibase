@@ -75,7 +75,8 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
             return Collections.EMPTY_SET;
         }
 
-        log.debug("Searching for implementations of " + parent.getName() + " in packages: " + Arrays.asList(packageNames));
+        log.debug("Searching for implementations of " + parent.getName() + " in packages: "
+                + Arrays.asList(packageNames));
 
         PackageScanFilter test = getCompositeFilter(new AssignableToPackageScanFilter(parent));
         Set<Class<?>> classes = new LinkedHashSet<Class<?>>();
@@ -138,14 +139,14 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 url = customResourceLocator(url);
 
                 String urlPath = url.getFile();
-				String host = null;
+                String host = null;
                 urlPath = URLDecoder.decode(urlPath, "UTF-8");
 
                 if (url.getProtocol().equals("vfs") && !urlPath.startsWith("vfs")) {
-                    urlPath = "vfs:"+urlPath;
+                    urlPath = "vfs:" + urlPath;
                 }
                 if (url.getProtocol().equals("vfszip") && !urlPath.startsWith("vfszip")) {
-                    urlPath = "vfszip:"+urlPath;
+                    urlPath = "vfszip:" + urlPath;
                 }
 
                 log.debug("Decoded urlPath: " + urlPath + " with protocol: " + url.getProtocol());
@@ -157,8 +158,8 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                     // to remedy this then create new path without using the URLDecoder
                     try {
                         URI uri = new URI(url.getFile());
-						host = uri.getHost();
-						urlPath = uri.getPath();
+                        host = uri.getHost();
+                        urlPath = uri.getPath();
                     } catch (URISyntaxException e) {
                         // fallback to use as it was given from the URLDecoder
                         // this allows us to work on Windows if users have spaces in paths
@@ -183,17 +184,17 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 if (urlPath.indexOf('!') > 0) {
                     urlPath = urlPath.substring(0, urlPath.indexOf('!'));
                 }
-				
-				// If a host component was given prepend it to the decoded path.
-				// This still has its problems as we silently skip user and password
-				// information etc. but it fixes UNC urls on windows.
-				if (host != null) {
-					if (urlPath.startsWith("/")) {
-						urlPath = "//" + host + urlPath;
-					} else {
-						urlPath = "//" + host + "/" + urlPath;
-					}
-				}
+
+                // If a host component was given prepend it to the decoded path.
+                // This still has its problems as we silently skip user and password
+                // information etc. but it fixes UNC urls on windows.
+                if (host != null) {
+                    if (urlPath.startsWith("/")) {
+                        urlPath = "//" + host + urlPath;
+                    } else {
+                        urlPath = "//" + host + "/" + urlPath;
+                    }
+                }
 
                 log.debug("Scanning for classes in [" + urlPath + "] matching criteria: " + test);
 
@@ -203,12 +204,12 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                     loadImplementationsInDirectory(test, packageName, file, classes);
                 } else {
                     InputStream stream;
-                    if (urlPath.startsWith("http:") || urlPath.startsWith("https:")
-                            || urlPath.startsWith("sonicfs:") || urlPath.startsWith("vfs:") || urlPath.startsWith("vfszip:")) {
+                    if (urlPath.startsWith("http:") || urlPath.startsWith("https:") || urlPath.startsWith("sonicfs:")
+                            || urlPath.startsWith("vfs:") || urlPath.startsWith("vfszip:")) {
                         // load resources using http/https
                         // sonic ESB requires to be loaded using a regular URLConnection
                         URL urlStream = new URL(urlPath);
-                        log.debug("Loading from jar using "+urlStream.getProtocol()+": " + urlPath);
+                        log.debug("Loading from jar using " + urlStream.getProtocol() + ": " + urlPath);
                         URLConnection con = urlStream.openConnection();
                         // disable cache mainly to avoid jar file locking on Windows
                         con.setUseCaches(false);
@@ -237,18 +238,21 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
     /**
      * Strategy to get the resources by the given classloader.
      * <p/>
-     * Notice that in WebSphere platforms there is a {@link WebSpherePackageScanClassResolver}
-     * to take care of WebSphere's odditiy of resource loading.
-     *
-     * @param loader      the classloader
-     * @param packageName the packagename for the package to load
+     * Notice that in WebSphere platforms there is a {@link WebSpherePackageScanClassResolver} to take care of
+     * WebSphere's odditiy of resource loading.
+     * 
+     * @param loader
+     *            the classloader
+     * @param packageName
+     *            the packagename for the package to load
      * @return URL's for the given package
-     * @throws IOException is thrown by the classloader
+     * @throws IOException
+     *             is thrown by the classloader
      */
     protected Enumeration<URL> getResources(ClassLoader loader, String packageName) throws IOException {
         log.debug("Getting resource URL for package: " + packageName + " with classloader: " + loader);
 
-        // If the URL is a jar, the URLClassloader.getResources() seems to require a trailing slash.  The
+        // If the URL is a jar, the URLClassloader.getResources() seems to require a trailing slash. The
         // trailing slash is harmless for other URLs
         if (!packageName.endsWith("/")) {
             packageName = packageName + "/";
@@ -266,20 +270,22 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
     }
 
     /**
-     * Finds matches in a physical directory on a filesystem. Examines all files
-     * within a directory - if the File object is not a directory, and ends with
-     * <i>.class</i> the file is loaded and tested to see if it is acceptable
-     * according to the Test. Operates recursively to find classes within a
-     * folder structure matching the package structure.
-     *
-     * @param test     a Test used to filter the classes that are discovered
-     * @param parent   the package name up to this directory in the package
-     *                 hierarchy. E.g. if /classes is in the classpath and we wish to
-     *                 examine files in /classes/org/apache then the values of
-     *                 <i>parent</i> would be <i>org/apache</i>
-     * @param location a File object representing a directory
+     * Finds matches in a physical directory on a filesystem. Examines all files within a directory - if the File object
+     * is not a directory, and ends with <i>.class</i> the file is loaded and tested to see if it is acceptable
+     * according to the Test. Operates recursively to find classes within a folder structure matching the package
+     * structure.
+     * 
+     * @param test
+     *            a Test used to filter the classes that are discovered
+     * @param parent
+     *            the package name up to this directory in the package hierarchy. E.g. if /classes is in the classpath
+     *            and we wish to examine files in /classes/org/apache then the values of <i>parent</i> would be
+     *            <i>org/apache</i>
+     * @param location
+     *            a File object representing a directory
      */
-    private void loadImplementationsInDirectory(PackageScanFilter test, String parent, File location, Set<Class<?>> classes) {
+    private void loadImplementationsInDirectory(PackageScanFilter test, String parent, File location,
+            Set<Class<?>> classes) {
         File[] files = location.listFiles();
         StringBuilder builder = null;
 
@@ -301,17 +307,20 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
     }
 
     /**
-     * Finds matching classes within a jar files that contains a folder
-     * structure matching the package structure. If the File is not a JarFile or
-     * does not exist a warning will be logged, but no error will be raised.
-     *
-     * @param test    a Test used to filter the classes that are discovered
-     * @param parent  the parent package under which classes must be in order to
-     *                be considered
-     * @param stream  the inputstream of the jar file to be examined for classes
-     * @param urlPath the url of the jar file to be examined for classes
+     * Finds matching classes within a jar files that contains a folder structure matching the package structure. If the
+     * File is not a JarFile or does not exist a warning will be logged, but no error will be raised.
+     * 
+     * @param test
+     *            a Test used to filter the classes that are discovered
+     * @param parent
+     *            the parent package under which classes must be in order to be considered
+     * @param stream
+     *            the inputstream of the jar file to be examined for classes
+     * @param urlPath
+     *            the url of the jar file to be examined for classes
      */
-    protected void loadImplementationsInJar(PackageScanFilter test, String parent, InputStream stream, String urlPath, Set<Class<?>> classes) {
+    protected void loadImplementationsInJar(PackageScanFilter test, String parent, InputStream stream, String urlPath,
+            Set<Class<?>> classes) {
         JarInputStream jarStream = null;
         try {
 
@@ -357,12 +366,13 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
     }
 
     /**
-     * Add the class designated by the fully qualified class name provided to
-     * the set of resolved classes if and only if it is approved by the Test
-     * supplied.
-     *
-     * @param test the test used to determine if the class matches
-     * @param fqn  the fully qualified name of a class
+     * Add the class designated by the fully qualified class name provided to the set of resolved classes if and only if
+     * it is approved by the Test supplied.
+     * 
+     * @param test
+     *            the test used to determine if the class matches
+     * @param fqn
+     *            the fully qualified name of a class
      */
     protected void addIfMatching(PackageScanFilter test, String fqn, Set<Class<?>> classes) {
         try {
@@ -370,7 +380,8 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
             Set<ClassLoader> set = getClassLoaders();
             boolean found = false;
             for (ClassLoader classLoader : set) {
-                log.debug("Testing that class " + externalName + " matches criteria [" + test + "] using classloader:" + classLoader);
+                log.debug("Testing that class " + externalName + " matches criteria [" + test + "] using classloader:"
+                        + classLoader);
                 try {
                     Class<?> type = classLoader.loadClass(externalName);
                     log.debug("Loaded the class: " + type + " in classloader: " + classLoader);
@@ -381,13 +392,12 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                     found = true;
                     break;
                 } catch (ClassNotFoundException e) {
-                    log.debug("Cannot find class '" + fqn + "' in classloader: " + classLoader
-                            + ". Reason: " + e, e);
+                    log.debug("Cannot find class '" + fqn + "' in classloader: " + classLoader + ". Reason: " + e, e);
                 } catch (NoClassDefFoundError e) {
                     log.debug("Cannot find the class definition '" + fqn + "' in classloader: " + classLoader
                             + ". Reason: " + e, e);
                 } catch (Throwable e) {
-                    log.severe("Cannot load class '"+fqn+"' in classloader: "+classLoader+".  Reason: "+e, e);
+                    log.severe("Cannot load class '" + fqn + "' in classloader: " + classLoader + ".  Reason: " + e, e);
                 }
             }
             if (!found) {
@@ -395,8 +405,9 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 log.debug("Cannot find class '" + fqn + "' in any classloaders: " + set);
             }
         } catch (Exception e) {
-            log.warning("Cannot examine class '" + fqn + "' due to a " + e.getClass().getName()
-                    + " with message: " + e.getMessage(), e);
+            log.warning(
+                    "Cannot examine class '" + fqn + "' due to a " + e.getClass().getName() + " with message: "
+                            + e.getMessage(), e);
         }
     }
 

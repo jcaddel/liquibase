@@ -10,7 +10,7 @@ import liquibase.util.StringUtils;
 
 public class StopChange extends AbstractChange {
 
-    private String message ="Stop command in changelog file";
+    private String message = "Stop command in changelog file";
 
     public StopChange() {
         super("stop", "Stop Execution", ChangeMetaData.PRIORITY_DEFAULT);
@@ -30,7 +30,7 @@ public class StopChange extends AbstractChange {
             public Sql[] generate(Database database) {
                 throw new StopChangeException(getMessage());
             }
-        }};
+        } };
 
     }
 

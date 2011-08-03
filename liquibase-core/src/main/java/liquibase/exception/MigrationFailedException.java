@@ -6,7 +6,7 @@ public class MigrationFailedException extends LiquibaseException {
 
     private static final long serialVersionUID = 1L;
     private ChangeSet failedChangeSet;
-    
+
     public MigrationFailedException() {
     }
 
@@ -14,7 +14,6 @@ public class MigrationFailedException extends LiquibaseException {
         super(message);
         this.failedChangeSet = failedChangeSet;
     }
-
 
     public MigrationFailedException(ChangeSet failedChangeSet, String message, Throwable cause) {
         super(message, cause);
@@ -26,17 +25,16 @@ public class MigrationFailedException extends LiquibaseException {
         this.failedChangeSet = failedChangeSet;
     }
 
-
     @Override
     public String getMessage() {
         String message = "Migration failed";
         if (failedChangeSet != null) {
-            message += " for change set "+failedChangeSet.toString(false);
+            message += " for change set " + failedChangeSet.toString(false);
         }
-        message += ":\n     Reason: "+super.getMessage();
+        message += ":\n     Reason: " + super.getMessage();
         Throwable cause = this.getCause();
         while (cause != null) {
-            message += ":\n          Caused By: "+cause.getMessage();            
+            message += ":\n          Caused By: " + cause.getMessage();
             cause = cause.getCause();
         }
 

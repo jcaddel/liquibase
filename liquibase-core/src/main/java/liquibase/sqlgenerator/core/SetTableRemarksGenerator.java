@@ -15,10 +15,12 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
 
     @Override
     public boolean supports(SetTableRemarksStatement statement, Database database) {
-        return database instanceof MySQLDatabase || database instanceof OracleDatabase || database instanceof PostgresDatabase;
+        return database instanceof MySQLDatabase || database instanceof OracleDatabase
+                || database instanceof PostgresDatabase;
     }
 
-    public ValidationErrors validate(SetTableRemarksStatement setTableRemarksStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(SetTableRemarksStatement setTableRemarksStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", setTableRemarksStatement.getTableName());
         validationErrors.checkRequiredField("remarks", setTableRemarksStatement.getRemarks());
@@ -29,13 +31,13 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
         String sql;
         String remarks = database.escapeStringForDatabase(statement.getRemarks());
         if (database instanceof MySQLDatabase) {
-            sql = "ALTER TABLE "+database.escapeTableName(statement.getSchemaName(), statement.getTableName())+" COMMENT = '"+remarks+"'";
+            sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " COMMENT = '" + remarks + "'";
         } else {
-            sql = "COMMENT ON TABLE "+database.escapeTableName(statement.getSchemaName(), statement.getTableName())+" IS '"+remarks+"'";
+            sql = "COMMENT ON TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " IS '" + remarks + "'";
         }
 
-        return new Sql[] {
-                new UnparsedSql(sql)
-        };
+        return new Sql[] { new UnparsedSql(sql) };
     }
 }

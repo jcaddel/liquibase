@@ -19,7 +19,6 @@ public class CreateTableStatement extends AbstractSqlStatement {
     private Set<ForeignKeyConstraint> foreignKeyConstraints = new HashSet<ForeignKeyConstraint>();
     private Set<UniqueConstraint> uniqueConstraints = new HashSet<UniqueConstraint>();
 
-
     public CreateTableStatement(String schemaName, String tableName) {
         this.schemaName = schemaName;
         this.tableName = tableName;
@@ -46,7 +45,6 @@ public class CreateTableStatement extends AbstractSqlStatement {
         return this;
     }
 
-
     public PrimaryKeyConstraint getPrimaryKeyConstraint() {
         return primaryKeyConstraint;
     }
@@ -59,27 +57,27 @@ public class CreateTableStatement extends AbstractSqlStatement {
         return uniqueConstraints;
     }
 
-
     public Set<String> getNotNullColumns() {
         return notNullColumns;
     }
 
-    public CreateTableStatement addPrimaryKeyColumn(String columnName, DataType columnType, Object defaultValue, String keyName, String tablespace, ColumnConstraint... constraints) {
-//        String pkName = "PK_" + getTableName().toUpperCase();
-////        if (pkName.length() > 18) {
-////            pkName = pkName.substring(0, 17);
-////        }
+    public CreateTableStatement addPrimaryKeyColumn(String columnName, DataType columnType, Object defaultValue,
+            String keyName, String tablespace, ColumnConstraint... constraints) {
+        // String pkName = "PK_" + getTableName().toUpperCase();
+        // // if (pkName.length() > 18) {
+        // // pkName = pkName.substring(0, 17);
+        // // }
         PrimaryKeyConstraint pkConstraint = new PrimaryKeyConstraint(keyName);
         pkConstraint.addColumns(columnName);
-	    pkConstraint.setTablespace(tablespace);
+        pkConstraint.setTablespace(tablespace);
 
         List<ColumnConstraint> allConstraints = new ArrayList<ColumnConstraint>();
         allConstraints.addAll(Arrays.asList(constraints));
         allConstraints.add(new NotNullConstraint(columnName));
         allConstraints.add(pkConstraint);
 
-
-        addColumn(columnName, columnType, defaultValue, allConstraints.toArray(new ColumnConstraint[allConstraints.size()]));
+        addColumn(columnName, columnType, defaultValue,
+                allConstraints.toArray(new ColumnConstraint[allConstraints.size()]));
 
         return this;
     }
@@ -90,7 +88,7 @@ public class CreateTableStatement extends AbstractSqlStatement {
 
     public CreateTableStatement addColumn(String columnName, DataType columnType, Object defaultValue) {
         if (defaultValue instanceof ColumnConstraint) {
-            return addColumn(columnName,  columnType, null, (ColumnConstraint) defaultValue);
+            return addColumn(columnName, columnType, null, (ColumnConstraint) defaultValue);
         }
         return addColumn(columnName, columnType, defaultValue, new ColumnConstraint[0]);
     }
@@ -99,7 +97,8 @@ public class CreateTableStatement extends AbstractSqlStatement {
         return addColumn(columnName, columnType, null, constraints);
     }
 
-    public CreateTableStatement addColumn(String columnName, DataType columnType, Object defaultValue, ColumnConstraint... constraints) {
+    public CreateTableStatement addColumn(String columnName, DataType columnType, Object defaultValue,
+            ColumnConstraint... constraints) {
         this.getColumns().add(columnName);
         this.columnTypes.put(columnName, columnType);
         if (defaultValue != null) {
@@ -175,7 +174,7 @@ public class CreateTableStatement extends AbstractSqlStatement {
         return defaultValues;
     }
 
-	public void setSchemaName(String schemaName) {
-		this.schemaName = schemaName;
-	}
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
+    }
 }

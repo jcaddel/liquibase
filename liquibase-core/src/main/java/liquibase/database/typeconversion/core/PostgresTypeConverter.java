@@ -17,15 +17,15 @@ public class PostgresTypeConverter extends AbstractTypeConverter {
         return database instanceof PostgresDatabase;
     }
 
-
     @Override
-    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
+    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits,
+            Database database) throws ParseException {
         if (defaultValue != null) {
             if (defaultValue instanceof String) {
                 defaultValue = ((String) defaultValue).replaceAll("'::[\\w\\s]+$", "'");
 
                 if (dataType == Types.DATE || dataType == Types.TIME || dataType == Types.TIMESTAMP) {
-                    //remove trailing time zone info
+                    // remove trailing time zone info
                     defaultValue = ((String) defaultValue).replaceFirst("-\\d+$", "");
                 }
             }
@@ -46,11 +46,11 @@ public class PostgresTypeConverter extends AbstractTypeConverter {
             type.setDataTypeName("FLOAT4");
         }
 
-
         if (autoIncrement != null && autoIncrement) {
             if ("integer".equals(type.getDataTypeName().toLowerCase())) {
                 type.setDataTypeName("serial");
-            } else if ("bigint".equals(type.getDataTypeName().toLowerCase()) || "bigserial".equals(type.getDataTypeName().toLowerCase())) {
+            } else if ("bigint".equals(type.getDataTypeName().toLowerCase())
+                    || "bigserial".equals(type.getDataTypeName().toLowerCase())) {
                 type.setDataTypeName("bigserial");
             } else {
                 // Unknown integer type, default to "serial"
@@ -61,9 +61,9 @@ public class PostgresTypeConverter extends AbstractTypeConverter {
         return type;
     }
 
-
     @Override
-    protected Object convertToCorrectObjectType(String value, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
+    protected Object convertToCorrectObjectType(String value, int dataType, int columnSize, int decimalDigits,
+            Database database) throws ParseException {
         Object returnValue = super.convertToCorrectObjectType(value, dataType, columnSize, decimalDigits, database);
         if (returnValue != null && returnValue instanceof String) {
             if (((String) returnValue).startsWith("NULL::")) {

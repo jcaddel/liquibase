@@ -10,12 +10,10 @@ public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
     private List<String> columnNames = new ArrayList<String>();
     private Table table;
     private boolean certainName = true;
-	private String tablespace;
+    private String tablespace;
 
     public DatabaseObject[] getContainingObjects() {
-        return new DatabaseObject[] {
-                table
-        };
+        return new DatabaseObject[] { table };
     }
 
     public String getName() {
@@ -32,7 +30,7 @@ public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
 
     public void addColumnName(int position, String columnName) {
         if (position >= columnNames.size()) {
-            for (int i = columnNames.size()-1; i < position; i++) {
+            for (int i = columnNames.size() - 1; i < position; i++) {
                 this.columnNames.add(null);
             }
         }
@@ -47,28 +45,31 @@ public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
         this.table = table;
     }
 
-
     public int compareTo(PrimaryKey o) {
         int returnValue = this.getTable().getName().compareTo(o.getTable().getName());
         if (returnValue == 0) {
             returnValue = this.getColumnNames().compareTo(o.getColumnNames());
         }
-//        if (returnValue == 0) {
-//            returnValue = this.getName().compareTo(o.getName());
-//        }
+        // if (returnValue == 0) {
+        // returnValue = this.getName().compareTo(o.getName());
+        // }
 
         return returnValue;
     }
 
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         PrimaryKey that = (PrimaryKey) o;
 
-        return !(getColumnNames() != null ? !getColumnNames().equalsIgnoreCase(that.getColumnNames()) : that.getColumnNames() != null) && !(getTable().getName() != null ? !getTable().getName().equalsIgnoreCase(that.getTable().getName()) : that.getTable().getName() != null);
+        return !(getColumnNames() != null ? !getColumnNames().equalsIgnoreCase(that.getColumnNames()) : that
+                .getColumnNames() != null)
+                && !(getTable().getName() != null ? !getTable().getName().equalsIgnoreCase(that.getTable().getName())
+                        : that.getTable().getName() != null);
 
     }
 
@@ -97,11 +98,11 @@ public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
         this.certainName = certainName;
     }
 
-	public String getTablespace() {
-		return tablespace;
-	}
+    public String getTablespace() {
+        return tablespace;
+    }
 
-	public void setTablespace(String tablespace) {
-		this.tablespace = tablespace;
-	}
+    public void setTablespace(String tablespace) {
+        this.tablespace = tablespace;
+    }
 }

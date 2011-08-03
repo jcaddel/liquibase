@@ -3,14 +3,14 @@ package liquibase.database.structure.type;
 import liquibase.statement.DatabaseFunction;
 import liquibase.database.Database;
 
-public class TimeType  extends DataType {
+public class TimeType extends DataType {
 
     public TimeType() {
-        super("TIME",0,0);
+        super("TIME", 0, 0);
     }
 
     public TimeType(String dataTypeName) {
-        super(dataTypeName,0,0);
+        super(dataTypeName, 0, 0);
     }
 
     @Override
@@ -18,17 +18,16 @@ public class TimeType  extends DataType {
         if (value == null) {
             return null;
         } else if (value.toString().equalsIgnoreCase("null")) {
-            return "null";            
-        }  else if (value instanceof DatabaseFunction) {
+            return "null";
+        } else if (value instanceof DatabaseFunction) {
             return ((DatabaseFunction) value).getValue();
         } else if (value.toString().equals("CURRENT_TIMESTAMP()")) {
-              return database.getCurrentDateTimeFunction();
+            return database.getCurrentDateTimeFunction();
         } else if (value instanceof java.sql.Time) {
             return database.getTimeLiteral(((java.sql.Time) value));
         } else {
-            return "'"+((String) value).replaceAll("'","''")+"'";
+            return "'" + ((String) value).replaceAll("'", "''") + "'";
         }
     }
-
 
 }

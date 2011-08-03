@@ -8,13 +8,11 @@ public class FailedPrecondition {
     private Precondition precondition;
     private DatabaseChangeLog changeLog;
 
-
     public FailedPrecondition(String message, DatabaseChangeLog changeLog, Precondition precondition) {
         this.message = message;
         this.changeLog = changeLog;
         this.precondition = precondition;
     }
-
 
     public String getMessage() {
         return message;
@@ -24,13 +22,12 @@ public class FailedPrecondition {
         return precondition;
     }
 
-
     @Override
     public String toString() {
         if (changeLog == null) {
             return message;
         } else {
-            return changeLog.toString()+" : "+message;
+            return changeLog.toString() + " : " + message;
         }
     }
 }

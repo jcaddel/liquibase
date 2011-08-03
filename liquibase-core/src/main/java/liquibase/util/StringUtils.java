@@ -28,22 +28,25 @@ public class StringUtils {
             return returnString;
         }
     }
-    
+
     /**
-     * Removes any comments from multiple line SQL using {@link #stripComments(String)}
-     *  and then extracts each individual statement using {@link #splitSQL(String, String)}.
+     * Removes any comments from multiple line SQL using {@link #stripComments(String)} and then extracts each
+     * individual statement using {@link #splitSQL(String, String)}.
      * 
-     * @param multiLineSQL A String containing all the SQL statements
-     * @param stripComments If true then comments will be stripped, if false then they will be left in the code
+     * @param multiLineSQL
+     *            A String containing all the SQL statements
+     * @param stripComments
+     *            If true then comments will be stripped, if false then they will be left in the code
      */
-    public static String[] processMutliLineSQL(String multiLineSQL,boolean stripComments, boolean splitStatements, String endDelimiter) {
-        
+    public static String[] processMutliLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements,
+            String endDelimiter) {
+
         String stripped = stripComments ? stripComments(multiLineSQL) : multiLineSQL;
-	if (splitStatements) {
-	    return splitSQL(stripped, endDelimiter);
-	} else {
-	    return new String[]{stripped};
-	}
+        if (splitStatements) {
+            return splitSQL(stripped, endDelimiter);
+        } else {
+            return new String[] { stripped };
+        }
     }
 
     /**
@@ -70,10 +73,8 @@ public class StringUtils {
     }
 
     /**
-     * Searches through a String which contains SQL code and strips out
-     * any comments that are between \/**\/ or anything that matches
-     * SP--SP<text>\n (to support the ANSI standard commenting of --
-     * at the end of a line).
+     * Searches through a String which contains SQL code and strips out any comments that are between \/**\/ or anything
+     * that matches SP--SP<text>\n (to support the ANSI standard commenting of -- at the end of a line).
      * 
      * @return The String without the comments in
      */
@@ -95,14 +96,14 @@ public class StringUtils {
         if (collection.size() == 0) {
             return "";
         }
-        
+
         StringBuffer buffer = new StringBuffer();
         for (String val : collection) {
             buffer.append(val).append(delimiter);
         }
 
         String returnString = buffer.toString();
-        return returnString.substring(0, returnString.length()-delimiter.length());
+        return returnString.substring(0, returnString.length() - delimiter.length());
     }
 
     public static List<String> splitAndTrim(String s, String regex) {
@@ -116,12 +117,11 @@ public class StringUtils {
 
         return returnList;
 
-
     }
 
     public static String repeat(String string, int times) {
         String returnString = "";
-        for (int i=0; i<times; i++) {
+        for (int i = 0; i < times; i++) {
             returnString += string;
         }
 
@@ -134,11 +134,10 @@ public class StringUtils {
         }
 
         int[] ints = new int[array.length];
-        for (int i=0; i < ints.length; i++)
-        {
+        for (int i = 0; i < ints.length; i++) {
             ints[i] = array[i];
         }
-	return StringUtils.join(ints, delimiter);
+        return StringUtils.join(ints, delimiter);
     }
 
     public static String join(int[] array, String delimiter) {
@@ -156,6 +155,6 @@ public class StringUtils {
         }
 
         String returnString = buffer.toString();
-        return returnString.substring(0, returnString.length()-delimiter.length());
+        return returnString.substring(0, returnString.length() - delimiter.length());
     }
 }

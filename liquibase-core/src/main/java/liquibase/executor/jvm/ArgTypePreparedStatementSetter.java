@@ -8,9 +8,8 @@ import java.sql.Types;
 import java.util.Collection;
 
 /**
- * Simple adapter for PreparedStatementSetter that applies
- * given arrays of arguments and JDBC argument types.
- *
+ * Simple adapter for PreparedStatementSetter that applies given arrays of arguments and JDBC argument types.
+ * 
  * @author Spring Framework
  */
 class ArgTypePreparedStatementSetter implements PreparedStatementSetter {
@@ -19,22 +18,22 @@ class ArgTypePreparedStatementSetter implements PreparedStatementSetter {
 
     private final int[] argTypes;
 
-
     /**
      * Create a new ArgTypePreparedStatementSetter for the given arguments.
-     *
-     * @param args     the arguments to set
-     * @param argTypes the corresponding SQL types of the arguments
+     * 
+     * @param args
+     *            the arguments to set
+     * @param argTypes
+     *            the corresponding SQL types of the arguments
      */
     public ArgTypePreparedStatementSetter(Object[] args, int[] argTypes) throws DatabaseException {
-        if ((args != null && argTypes == null) || (args == null && argTypes != null) ||
-                (args != null && args.length != argTypes.length)) {
+        if ((args != null && argTypes == null) || (args == null && argTypes != null)
+                || (args != null && args.length != argTypes.length)) {
             throw new DatabaseException("args and argTypes parameters must match");
         }
         this.args = args;
         this.argTypes = argTypes;
     }
-
 
     public void setValues(PreparedStatement ps) throws SQLException {
         int argIndx = 1;
@@ -52,6 +51,5 @@ class ArgTypePreparedStatementSetter implements PreparedStatementSetter {
             }
         }
     }
-
 
 }

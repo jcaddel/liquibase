@@ -36,7 +36,8 @@ public class DropSequenceChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[]{new DropSequenceStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getSequenceName())};
+        return new SqlStatement[] { new DropSequenceStatement(getSchemaName() == null ? database.getDefaultSchemaName()
+                : getSchemaName(), getSequenceName()) };
     }
 
     public String getConfirmationMessage() {

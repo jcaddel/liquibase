@@ -25,7 +25,6 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
     @ChangeProperty(includeInSerialization = false)
     private List<DropForeignKeyConstraintChange> childDropChanges;
 
-
     public DropAllForeignKeyConstraintsChange() {
         super("dropAllForeignKeyConstraints", "Drop All Foreign Key Constraints", ChangeMetaData.PRIORITY_DEFAULT);
     }
@@ -72,23 +71,20 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
 
         Executor executor = ExecutorService.getInstance().getExecutor(database);
 
-        FindForeignKeyConstraintsStatement sql = new FindForeignKeyConstraintsStatement(
-                getBaseTableSchemaName(),
-                getBaseTableName()
-        );
+        FindForeignKeyConstraintsStatement sql = new FindForeignKeyConstraintsStatement(getBaseTableSchemaName(),
+                getBaseTableName());
 
         try {
             List<Map> results = executor.queryForList(sql);
 
             if (results != null && results.size() > 0) {
                 for (Map result : results) {
-                    String baseTableName =
-                            (String) result.get(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME);
-                    String constraintName =
-                            (String) result.get(FindForeignKeyConstraintsStatement.RESULT_COLUMN_CONSTRAINT_NAME);
+                    String baseTableName = (String) result
+                            .get(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME);
+                    String constraintName = (String) result
+                            .get(FindForeignKeyConstraintsStatement.RESULT_COLUMN_CONSTRAINT_NAME);
                     if (getBaseTableName().equalsIgnoreCase(baseTableName)) {
-                        DropForeignKeyConstraintChange dropForeignKeyConstraintChange =
-                                new DropForeignKeyConstraintChange();
+                        DropForeignKeyConstraintChange dropForeignKeyConstraintChange = new DropForeignKeyConstraintChange();
 
                         dropForeignKeyConstraintChange.setBaseTableSchemaName(getBaseTableSchemaName());
                         dropForeignKeyConstraintChange.setBaseTableName(baseTableName);
@@ -96,8 +92,8 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
 
                         childDropChanges.add(dropForeignKeyConstraintChange);
                     } else {
-                        throw new IllegalStateException("Expected to return only foreign keys for base table name: " +
-                                getBaseTableName() + " and got results for table: " + baseTableName);
+                        throw new IllegalStateException("Expected to return only foreign keys for base table name: "
+                                + getBaseTableName() + " and got results for table: " + baseTableName);
                     }
                 }
             }

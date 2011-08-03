@@ -25,7 +25,8 @@ public class ValidationErrors {
         }
     }
 
-    public void checkDisallowedField(String disallowedFieldName, Object value, Database database, Class<? extends Database>... disallowedDatabases) {
+    public void checkDisallowedField(String disallowedFieldName, Object value, Database database,
+            Class<? extends Database>... disallowedDatabases) {
         boolean isDisallowed = false;
         if (disallowedDatabases == null || disallowedDatabases.length == 0) {
             isDisallowed = true;
@@ -38,7 +39,7 @@ public class ValidationErrors {
         }
 
         if (isDisallowed && value != null) {
-            addError(disallowedFieldName + " is not allowed on "+database.getTypeName());
+            addError(disallowedFieldName + " is not allowed on " + database.getTypeName());
         }
     }
 
@@ -56,7 +57,7 @@ public class ValidationErrors {
 
     public void addAll(ValidationErrors validationErrors, ChangeSet changeSet) {
         for (String message : validationErrors.getErrorMessages()) {
-            this.errorMessages.add(message+", "+changeSet);
+            this.errorMessages.add(message + ", " + changeSet);
         }
     }
 }

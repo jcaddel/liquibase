@@ -14,10 +14,11 @@ public interface TypeConverter extends PrioritizedService {
 
     boolean supports(Database database);
 
-    Object convertDatabaseValueToObject(Object defaultValue, int dataType, int firstParameter, int secondParameter, Database database) throws ParseException;
+    Object convertDatabaseValueToObject(Object defaultValue, int dataType, int firstParameter, int secondParameter,
+            Database database) throws ParseException;
 
     String convertToDatabaseTypeString(Column referenceColumn, Database database);
-    
+
     DataType getDataType(Object object);
 
     DataType getDataType(String columnTypeString, Boolean autoIncrement);
@@ -39,7 +40,7 @@ public interface TypeConverter extends PrioritizedService {
     ClobType getClobType();
 
     BlobType getBlobType();
-    
+
     BlobType getLongBlobType();
 
     DateType getDateType();

@@ -19,18 +19,25 @@ public class DropForeignKeyConstraintGenerator extends AbstractSqlGenerator<Drop
         return (!(database instanceof SQLiteDatabase));
     }
 
-    public ValidationErrors validate(DropForeignKeyConstraintStatement dropForeignKeyConstraintStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DropForeignKeyConstraintStatement dropForeignKeyConstraintStatement,
+            Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("baseTableName", dropForeignKeyConstraintStatement.getBaseTableName());
         validationErrors.checkRequiredField("constraintName", dropForeignKeyConstraintStatement.getConstraintName());
         return validationErrors;
     }
 
-    public Sql[] generateSql(DropForeignKeyConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        if (database instanceof MySQLDatabase || database instanceof MaxDBDatabase || database instanceof SybaseASADatabase) {
-            return new Sql[] { new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getBaseTableSchemaName(), statement.getBaseTableName()) + " DROP FOREIGN KEY " + database.escapeConstraintName(statement.getConstraintName())) };
+    public Sql[] generateSql(DropForeignKeyConstraintStatement statement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
+        if (database instanceof MySQLDatabase || database instanceof MaxDBDatabase
+                || database instanceof SybaseASADatabase) {
+            return new Sql[] { new UnparsedSql("ALTER TABLE "
+                    + database.escapeTableName(statement.getBaseTableSchemaName(), statement.getBaseTableName())
+                    + " DROP FOREIGN KEY " + database.escapeConstraintName(statement.getConstraintName())) };
         } else {
-            return new Sql[] { new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getBaseTableSchemaName(), statement.getBaseTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName())) };
+            return new Sql[] { new UnparsedSql("ALTER TABLE "
+                    + database.escapeTableName(statement.getBaseTableSchemaName(), statement.getBaseTableName())
+                    + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName())) };
         }
 
     }

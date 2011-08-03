@@ -10,7 +10,8 @@ public class RenameColumnStatement extends AbstractSqlStatement {
     private String newColumnName;
     private String columnDataType;
 
-    public RenameColumnStatement(String schemaName, String tableName, String oldColumnName, String newColumnName, String columnDataType) {
+    public RenameColumnStatement(String schemaName, String tableName, String oldColumnName, String newColumnName,
+            String columnDataType) {
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.oldColumnName = oldColumnName;
@@ -58,4 +59,3 @@ public class RenameColumnStatement extends AbstractSqlStatement {
         this.columnDataType = columnDataType;
     }
 }
-

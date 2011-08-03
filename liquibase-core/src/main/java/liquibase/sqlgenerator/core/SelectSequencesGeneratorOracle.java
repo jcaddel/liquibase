@@ -22,15 +22,15 @@ public class SelectSequencesGeneratorOracle extends AbstractSqlGenerator<SelectS
         return database instanceof OracleDatabase;
     }
 
-    public ValidationErrors validate(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(SelectSequencesStatement statement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
 
     public Sql[] generateSql(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         try {
-            return new Sql[] {
-                    new UnparsedSql("SELECT SEQUENCE_NAME FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'")
-            };
+            return new Sql[] { new UnparsedSql("SELECT SEQUENCE_NAME FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '"
+                    + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'") };
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }

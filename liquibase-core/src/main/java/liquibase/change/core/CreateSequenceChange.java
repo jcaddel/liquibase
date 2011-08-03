@@ -93,15 +93,10 @@ public class CreateSequenceChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[] {
-                new CreateSequenceStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getSequenceName())
-                .setIncrementBy(getIncrementBy())
-                .setMaxValue(getMaxValue())
-                .setMinValue(getMinValue())
-                .setOrdered(isOrdered())
-                .setStartValue(getStartValue())
-                .setCycle(getCycle())
-        };
+        return new SqlStatement[] { new CreateSequenceStatement(
+                getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName(), getSequenceName())
+                .setIncrementBy(getIncrementBy()).setMaxValue(getMaxValue()).setMinValue(getMinValue())
+                .setOrdered(isOrdered()).setStartValue(getStartValue()).setCycle(getCycle()) };
     }
 
     @Override
@@ -110,9 +105,7 @@ public class CreateSequenceChange extends AbstractChange {
         inverse.setSequenceName(getSequenceName());
         inverse.setSchemaName(getSchemaName());
 
-        return new Change[]{
-                inverse
-        };
+        return new Change[] { inverse };
     }
 
     public String getConfirmationMessage() {

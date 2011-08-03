@@ -45,20 +45,26 @@ public class ForeignKeyExistsPrecondition implements Precondition {
         return new ValidationErrors();
     }
 
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
+            throws PreconditionFailedException, PreconditionErrorException {
         try {
             boolean checkPassed;
             if (getForeignKeyTableName() == null) {
-                checkPassed = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, getSchemaName(), null).getForeignKey(getForeignKeyName()) != null;
-            } else { //much faster if we can limit to correct table
-                 checkPassed = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).getForeignKeyByForeignKeyTable(getSchemaName(), getForeignKeyTableName(), getForeignKeyName(), database) != null;
+                checkPassed = DatabaseSnapshotGeneratorFactory.getInstance()
+                        .createSnapshot(database, getSchemaName(), null).getForeignKey(getForeignKeyName()) != null;
+            } else { // much faster if we can limit to correct table
+                checkPassed = DatabaseSnapshotGeneratorFactory
+                        .getInstance()
+                        .getGenerator(database)
+                        .getForeignKeyByForeignKeyTable(getSchemaName(), getForeignKeyTableName(), getForeignKeyName(),
+                                database) != null;
             }
             if (!checkPassed) {
                 String message = "Foreign Key " + database.escapeStringForDatabase(getForeignKeyName());
                 if (getForeignKeyTableName() != null) {
-                    message += " on table "+ getForeignKeyTableName();
+                    message += " on table " + getForeignKeyTableName();
                 }
-                message +=  " does not exist";
+                message += " does not exist";
                 throw new PreconditionFailedException(message, changeLog, this);
             }
         } catch (DatabaseException e) {

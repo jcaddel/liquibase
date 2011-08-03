@@ -30,7 +30,7 @@ public class DB2Database extends AbstractDatabase {
     }
 
     @Override
-    protected String getDefaultDatabaseSchemaName() throws DatabaseException {//NOPMD
+    protected String getDefaultDatabaseSchemaName() throws DatabaseException {// NOPMD
         return super.getDefaultDatabaseSchemaName().toUpperCase();
     }
 
@@ -54,14 +54,10 @@ public class DB2Database extends AbstractDatabase {
     /**
      * Return an DB2 date literal with the same value as a string formatted using ISO 8601.
      * <p/>
-     * Convert an ISO8601 date string to one of the following results:
-     * to_date('1995-05-23', 'YYYY-MM-DD')
+     * Convert an ISO8601 date string to one of the following results: to_date('1995-05-23', 'YYYY-MM-DD')
      * to_date('1995-05-23 09:23:59', 'YYYY-MM-DD HH24:MI:SS')
      * <p/>
-     * Implementation restriction:
-     * Currently, only the following subsets of ISO8601 are supported:
-     * YYYY-MM-DD
-     * hh:mm:ss
+     * Implementation restriction: Currently, only the following subsets of ISO8601 are supported: YYYY-MM-DD hh:mm:ss
      * YYYY-MM-DDThh:mm:ss
      */
     @Override
@@ -93,10 +89,8 @@ public class DB2Database extends AbstractDatabase {
 
     @Override
     public boolean shouldQuoteValue(String value) {
-        return super.shouldQuoteValue(value)
-                && !value.startsWith("\"SYSIBM\"");
+        return super.shouldQuoteValue(value) && !value.startsWith("\"SYSIBM\"");
     }
-
 
     public boolean supportsTablespaces() {
         return true;
@@ -104,9 +98,10 @@ public class DB2Database extends AbstractDatabase {
 
     @Override
     public String getViewDefinition(String schemaName, String name) throws DatabaseException {
-        return super.getViewDefinition(schemaName, name).replaceFirst("CREATE VIEW \\w+ AS ", ""); //db2 returns "create view....as select
+        return super.getViewDefinition(schemaName, name).replaceFirst("CREATE VIEW \\w+ AS ", ""); // db2 returns
+                                                                                                   // "create view....as
+                                                                                                   // select
     }
-
 
     @Override
     public java.util.Date parseDate(String dateAsString) throws DateParseException {

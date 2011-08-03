@@ -15,7 +15,7 @@ public class DropSequenceStatement extends AbstractSqlStatement {
     @Override
     public boolean skipOnUnsupported() {
         return true;
-    }    
+    }
 
     public String getSchemaName() {
         return schemaName;

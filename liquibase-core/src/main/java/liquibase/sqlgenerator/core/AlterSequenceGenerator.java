@@ -16,13 +16,18 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
         return database.supportsSequences();
     }
 
-    public ValidationErrors validate(AlterSequenceStatement alterSequenceStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(AlterSequenceStatement alterSequenceStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
-        validationErrors.checkDisallowedField("incrementBy", alterSequenceStatement.getIncrementBy(), database, HsqlDatabase.class, H2Database.class);
-        validationErrors.checkDisallowedField("maxValue", alterSequenceStatement.getMaxValue(), database, HsqlDatabase.class, H2Database.class);
-        validationErrors.checkDisallowedField("minValue", alterSequenceStatement.getMinValue(), database, H2Database.class);
-        validationErrors.checkDisallowedField("ordered", alterSequenceStatement.getOrdered(), database, MaxDBDatabase.class, DB2Database.class);
+        validationErrors.checkDisallowedField("incrementBy", alterSequenceStatement.getIncrementBy(), database,
+                HsqlDatabase.class, H2Database.class);
+        validationErrors.checkDisallowedField("maxValue", alterSequenceStatement.getMaxValue(), database,
+                HsqlDatabase.class, H2Database.class);
+        validationErrors.checkDisallowedField("minValue", alterSequenceStatement.getMinValue(), database,
+                H2Database.class);
+        validationErrors.checkDisallowedField("ordered", alterSequenceStatement.getOrdered(), database,
+                MaxDBDatabase.class, DB2Database.class);
 
         validationErrors.checkRequiredField("sequenceName", alterSequenceStatement.getSequenceName());
 
@@ -35,11 +40,12 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
         buffer.append(database.escapeSequenceName(statement.getSchemaName(), statement.getSequenceName()));
 
         if (statement.getIncrementBy() != null) {
-                buffer.append(" INCREMENT BY ").append(statement.getIncrementBy());
+            buffer.append(" INCREMENT BY ").append(statement.getIncrementBy());
         }
 
         if (statement.getMinValue() != null) {
-            if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase || database instanceof H2Database) {
+            if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase
+                    || database instanceof H2Database) {
                 buffer.append(" RESTART WITH ").append(statement.getMinValue());
             } else {
                 buffer.append(" MINVALUE ").append(statement.getMinValue());
@@ -56,8 +62,6 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             }
         }
 
-        return new Sql[]{
-                new UnparsedSql(buffer.toString())
-        };
+        return new Sql[] { new UnparsedSql(buffer.toString()) };
     }
 }

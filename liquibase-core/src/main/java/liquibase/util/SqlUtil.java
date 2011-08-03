@@ -7,18 +7,8 @@ import java.util.List;
 public class SqlUtil {
 
     public static boolean isNumeric(int dataType) {
-        List<Integer> numericTypes = Arrays.asList(
-                Types.BIGINT,
-                Types.BIT,
-                Types.INTEGER,
-                Types.SMALLINT,
-                Types.TINYINT,
-                Types.DECIMAL,
-                Types.DOUBLE,
-                Types.FLOAT,
-                Types.NUMERIC,
-                Types.REAL
-        );
+        List<Integer> numericTypes = Arrays.asList(Types.BIGINT, Types.BIT, Types.INTEGER, Types.SMALLINT,
+                Types.TINYINT, Types.DECIMAL, Types.DOUBLE, Types.FLOAT, Types.NUMERIC, Types.REAL);
 
         return numericTypes.contains(dataType);
     }
@@ -28,11 +18,7 @@ public class SqlUtil {
     }
 
     public static boolean isDate(int dataType) {
-        List<Integer> validTypes = Arrays.asList(
-                Types.DATE,
-                Types.TIME,
-                Types.TIMESTAMP
-        );
+        List<Integer> validTypes = Arrays.asList(Types.DATE, Types.TIME, Types.TIMESTAMP);
 
         return validTypes.contains(dataType);
     }

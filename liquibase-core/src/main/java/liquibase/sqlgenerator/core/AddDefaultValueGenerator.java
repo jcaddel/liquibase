@@ -13,7 +13,8 @@ import liquibase.statement.core.AddDefaultValueStatement;
 
 public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultValueStatement> {
 
-    public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("defaultValue", addDefaultValueStatement.getDefaultValue());
         validationErrors.checkRequiredField("columnName", addDefaultValueStatement.getColumnName());
@@ -23,11 +24,15 @@ public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultVal
 
     public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         Object defaultValue = statement.getDefaultValue();
-        return new Sql[]{
-                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " SET DEFAULT " + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue).convertObjectToString(defaultValue, database),
-                        new Column()
-                                .setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
-                                .setName(statement.getColumnName()))
-        };
+        return new Sql[] { new UnparsedSql("ALTER TABLE "
+                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                + " ALTER COLUMN  "
+                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                        statement.getColumnName())
+                + " SET DEFAULT "
+                + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue)
+                        .convertObjectToString(defaultValue, database), new Column().setTable(
+                new Table(statement.getTableName()).setSchema(statement.getSchemaName())).setName(
+                statement.getColumnName())) };
     }
 }

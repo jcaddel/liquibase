@@ -14,20 +14,18 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
     private boolean deferrable;
     private boolean initiallyDeferred;
 
-	// Some databases supports creation of FK with referention to column marked as unique, not primary
-	// If FK referenced to such unique column this option should be set to false
-	private boolean referencesUniqueColumn = false;
+    // Some databases supports creation of FK with referention to column marked as unique, not primary
+    // If FK referenced to such unique column this option should be set to false
+    private boolean referencesUniqueColumn = false;
 
     private ForeignKeyConstraintType updateRule;
     private ForeignKeyConstraintType deleteRule;
 
     public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[] {
-                new liquibase.database.structure.Column()
-                        .setName(getPrimaryKeyColumns())
+                new liquibase.database.structure.Column().setName(getPrimaryKeyColumns())
                         .setTable(getPrimaryKeyTable()),
-                new liquibase.database.structure.Column()
-                        .setName(getForeignKeyColumns())
+                new liquibase.database.structure.Column().setName(getForeignKeyColumns())
                         .setTable(getForeignKeyTable())
 
         };
@@ -46,12 +44,10 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
     }
 
     public void addPrimaryKeyColumn(String primaryKeyColumn) {
-        if ((this.primaryKeyColumns == null)
-                || (this.primaryKeyColumns.length() == 0)) {
+        if ((this.primaryKeyColumns == null) || (this.primaryKeyColumns.length() == 0)) {
             this.primaryKeyColumns = primaryKeyColumn;
         } else {
-            this.primaryKeyColumns = this.primaryKeyColumns + ", "
-                    + primaryKeyColumn;
+            this.primaryKeyColumns = this.primaryKeyColumns + ", " + primaryKeyColumn;
         }
     }
 
@@ -72,12 +68,10 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
     }
 
     public void addForeignKeyColumn(String foreignKeyColumn) {
-        if ((this.foreignKeyColumns == null)
-                || (this.foreignKeyColumns.length() == 0)) {
+        if ((this.foreignKeyColumns == null) || (this.foreignKeyColumns.length() == 0)) {
             this.foreignKeyColumns = foreignKeyColumn;
         } else {
-            this.foreignKeyColumns = this.foreignKeyColumns + ", "
-                    + foreignKeyColumn;
+            this.foreignKeyColumns = this.foreignKeyColumns + ", " + foreignKeyColumn;
         }
     }
 
@@ -93,12 +87,11 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         this.name = name;
     }
 
-
     @Override
     public String toString() {
-        return getName() + "(" + getForeignKeyTable() + "." + getForeignKeyColumns() + " ->" + getPrimaryKeyTable() + "." + getPrimaryKeyColumns() + ")";
+        return getName() + "(" + getForeignKeyTable() + "." + getForeignKeyColumns() + " ->" + getPrimaryKeyTable()
+                + "." + getPrimaryKeyColumns() + ")";
     }
-
 
     public boolean isDeferrable() {
         return deferrable;
@@ -107,7 +100,6 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
     public void setDeferrable(boolean deferrable) {
         this.deferrable = deferrable;
     }
-
 
     public boolean isInitiallyDeferred() {
         return initiallyDeferred;
@@ -133,18 +125,20 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         return this.deleteRule;
     }
 
-	public boolean getReferencesUniqueColumn() {
-		return referencesUniqueColumn;
-	}
+    public boolean getReferencesUniqueColumn() {
+        return referencesUniqueColumn;
+    }
 
-	public void setReferencesUniqueColumn(boolean referencesUniqueColumn) {
-		this.referencesUniqueColumn = referencesUniqueColumn;
-	}
+    public void setReferencesUniqueColumn(boolean referencesUniqueColumn) {
+        this.referencesUniqueColumn = referencesUniqueColumn;
+    }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         ForeignKey that = (ForeignKey) o;
 
@@ -156,7 +150,7 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
                 && foreignKeyTable.equals(that.foreignKeyTable)
                 && getPrimaryKeyColumns().equalsIgnoreCase(that.getPrimaryKeyColumns())
                 && primaryKeyTable.equals(that.primaryKeyTable)
-		        && referencesUniqueColumn == that.getReferencesUniqueColumn();
+                && referencesUniqueColumn == that.getReferencesUniqueColumn();
     }
 
     @Override
@@ -179,7 +173,6 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
 
         return result;
     }
-
 
     public int compareTo(ForeignKey o) {
         int returnValue = 0;

@@ -4,7 +4,7 @@ import liquibase.database.structure.type.*;
 import liquibase.database.Database;
 import liquibase.database.core.FirebirdDatabase;
 
-public class FirebirdTypeConverter  extends AbstractTypeConverter {
+public class FirebirdTypeConverter extends AbstractTypeConverter {
 
     public int getPriority() {
         return PRIORITY_DATABASE;

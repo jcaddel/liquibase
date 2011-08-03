@@ -32,7 +32,8 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
     public SqlStatement[] generateStatements(Database database) {
 
-        String schemaName = getSchemaName() == null ? (database == null ? null: database.getDefaultSchemaName()) : getSchemaName();
+        String schemaName = getSchemaName() == null ? (database == null ? null : database.getDefaultSchemaName())
+                : getSchemaName();
         CreateTableStatement statement = new CreateTableStatement(schemaName, getTableName());
         for (ColumnConfig column : getColumns()) {
             ConstraintsConfig constraints = column.getConstraints();
@@ -42,14 +43,16 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
             if (constraints != null && constraints.isPrimaryKey() != null && constraints.isPrimaryKey()) {
 
-	            statement.addPrimaryKeyColumn(column.getName(), TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(column.getType(), isAutoIncrement), defaultValue, constraints.getPrimaryKeyName(), constraints.getPrimaryKeyTablespace());
+                statement.addPrimaryKeyColumn(
+                        column.getName(),
+                        TypeConverterFactory.getInstance().findTypeConverter(database)
+                                .getDataType(column.getType(), isAutoIncrement), defaultValue,
+                        constraints.getPrimaryKeyName(), constraints.getPrimaryKeyTablespace());
 
             } else {
-                statement.addColumn(column.getName(),
-                        TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(column.getType(), column.isAutoIncrement()),
-                        defaultValue);
+                statement.addColumn(column.getName(), TypeConverterFactory.getInstance().findTypeConverter(database)
+                        .getDataType(column.getType(), column.isAutoIncrement()), defaultValue);
             }
-
 
             if (constraints != null) {
                 if (constraints.isNullable() != null && !constraints.isNullable()) {
@@ -60,16 +63,20 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
                     if (StringUtils.trimToNull(constraints.getForeignKeyName()) == null) {
                         throw new UnexpectedLiquibaseException("createTable with references requires foreignKeyName");
                     }
-                    ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(constraints.getForeignKeyName(), constraints.getReferences());
+                    ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(constraints.getForeignKeyName(),
+                            constraints.getReferences());
                     fkConstraint.setColumn(column.getName());
-                    fkConstraint.setDeleteCascade(constraints.isDeleteCascade() != null && constraints.isDeleteCascade());
-                    fkConstraint.setInitiallyDeferred(constraints.isInitiallyDeferred() != null && constraints.isInitiallyDeferred());
+                    fkConstraint.setDeleteCascade(constraints.isDeleteCascade() != null
+                            && constraints.isDeleteCascade());
+                    fkConstraint.setInitiallyDeferred(constraints.isInitiallyDeferred() != null
+                            && constraints.isInitiallyDeferred());
                     fkConstraint.setDeferrable(constraints.isDeferrable() != null && constraints.isDeferrable());
                     statement.addColumnConstraint(fkConstraint);
                 }
 
                 if (constraints.isUnique() != null && constraints.isUnique()) {
-                    statement.addColumnConstraint(new UniqueConstraint(constraints.getUniqueConstraintName()).addColumns(column.getName()));
+                    statement.addColumnConstraint(new UniqueConstraint(constraints.getUniqueConstraintName())
+                            .addColumns(column.getName()));
                 }
             }
 
@@ -93,7 +100,8 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         for (ColumnConfig column : getColumns()) {
             String columnRemarks = StringUtils.trimToNull(column.getRemarks());
             if (columnRemarks != null) {
-                SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(schemaName, tableName, column.getName(), columnRemarks);
+                SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(schemaName, tableName,
+                        column.getName(), columnRemarks);
                 if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                     statements.add(remarksStatement);
                 }
@@ -109,9 +117,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         inverse.setSchemaName(getSchemaName());
         inverse.setTableName(getTableName());
 
-        return new Change[]{
-                inverse
-        };
+        return new Change[] { inverse };
     }
 
     public List<ColumnConfig> getColumns() {
@@ -133,7 +139,6 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }
-
 
     public String getTablespace() {
         return tablespace;

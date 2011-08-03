@@ -19,9 +19,10 @@ public class GetViewDefinitionGeneratorSybaseASA extends GetViewDefinitionGenera
     }
 
     @Override
-    public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        return new Sql[]{
-                new UnparsedSql("select viewtext from sysviews where upper(viewname)='" + statement.getViewName().toUpperCase() + "' and upper(vcreator) = '" + statement.getSchemaName().toUpperCase() + '\'')
-        };
+    public Sql[] generateSql(GetViewDefinitionStatement statement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
+        return new Sql[] { new UnparsedSql("select viewtext from sysviews where upper(viewname)='"
+                + statement.getViewName().toUpperCase() + "' and upper(vcreator) = '"
+                + statement.getSchemaName().toUpperCase() + '\'') };
     }
 }

@@ -16,7 +16,8 @@ public class AfterTagChangeSetFilter implements ChangeSetFilter {
         boolean seenTag = false;
         for (RanChangeSet ranChangeSet : ranChangeSets) {
             if (seenTag && !tag.equalsIgnoreCase(ranChangeSet.getTag())) {
-                changeLogsAfterTag.add(changeLogToString(ranChangeSet.getId(), ranChangeSet.getAuthor(), ranChangeSet.getChangeLog()));
+                changeLogsAfterTag.add(changeLogToString(ranChangeSet.getId(), ranChangeSet.getAuthor(),
+                        ranChangeSet.getChangeLog()));
             }
 
             if (!seenTag && tag.equalsIgnoreCase(ranChangeSet.getTag())) {
@@ -25,15 +26,16 @@ public class AfterTagChangeSetFilter implements ChangeSetFilter {
         }
 
         if (!seenTag) {
-            throw new RollbackFailedException("Could not find tag '"+tag+"' in the database");
+            throw new RollbackFailedException("Could not find tag '" + tag + "' in the database");
         }
     }
 
     private String changeLogToString(String id, String author, String changeLog) {
-        return id+":"+author+":"+changeLog;
+        return id + ":" + author + ":" + changeLog;
     }
 
     public boolean accepts(ChangeSet changeSet) {
-        return changeLogsAfterTag.contains(changeLogToString(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath()));
+        return changeLogsAfterTag.contains(changeLogToString(changeSet.getId(), changeSet.getAuthor(),
+                changeSet.getFilePath()));
     }
 }

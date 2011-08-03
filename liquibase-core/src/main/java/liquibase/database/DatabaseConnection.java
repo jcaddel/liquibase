@@ -3,9 +3,8 @@ package liquibase.database;
 import liquibase.exception.DatabaseException;
 
 /**
- * A liquibase abstraction over the normal Connection that is available in
- * java.sql. This interface allows wrappers and aspects over the basic 
- * connection.
+ * A liquibase abstraction over the normal Connection that is available in java.sql. This interface allows wrappers and
+ * aspects over the basic connection.
  * 
  */
 public interface DatabaseConnection {

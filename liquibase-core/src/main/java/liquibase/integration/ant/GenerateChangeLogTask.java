@@ -10,16 +10,16 @@ import java.io.PrintStream;
 
 public class GenerateChangeLogTask extends BaseLiquibaseTask {
 
-	private String diffTypes;
+    private String diffTypes;
     private String dataDir;
 
-	public String getDiffTypes() {
-		return diffTypes;
-	}
+    public String getDiffTypes() {
+        return diffTypes;
+    }
 
-	public void setDiffTypes(String diffTypes) {
-		this.diffTypes = diffTypes;
-	}
+    public void setDiffTypes(String diffTypes) {
+        this.diffTypes = diffTypes;
+    }
 
     public String getDataDir() {
         return dataDir;
@@ -30,39 +30,39 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
     }
 
     @Override
-	public void execute() throws BuildException {
+    public void execute() throws BuildException {
         super.execute();
-        
-		Liquibase liquibase = null;
-		try {
-			PrintStream writer = createPrintStream();
-			if (writer == null) {
-				throw new BuildException("generateChangeLog requires outputFile to be set");
-			}
 
-			liquibase = createLiquibase();
+        Liquibase liquibase = null;
+        try {
+            PrintStream writer = createPrintStream();
+            if (writer == null) {
+                throw new BuildException("generateChangeLog requires outputFile to be set");
+            }
 
-			Database database = liquibase.getDatabase();
-			Diff diff = new Diff(database, getDefaultSchemaName());
-			if (getDiffTypes() != null) {
-				diff.setDiffTypes(getDiffTypes());
-			}
-//			diff.addStatusListener(new OutDiffStatusListener());
-			DiffResult diffResult = diff.compare();
+            liquibase = createLiquibase();
+
+            Database database = liquibase.getDatabase();
+            Diff diff = new Diff(database, getDefaultSchemaName());
+            if (getDiffTypes() != null) {
+                diff.setDiffTypes(getDiffTypes());
+            }
+            // diff.addStatusListener(new OutDiffStatusListener());
+            DiffResult diffResult = diff.compare();
             diffResult.setDataDir(getDataDir());
 
-			if (getChangeLogFile() == null) {
-				diffResult.printChangeLog(writer, database);
-			} else {
-				diffResult.printChangeLog(getChangeLogFile(), database);
-			}
+            if (getChangeLogFile() == null) {
+                diffResult.printChangeLog(writer, database);
+            } else {
+                diffResult.printChangeLog(getChangeLogFile(), database);
+            }
 
-			writer.flush();
-			writer.close();
-		} catch (Exception e) {
-			throw new BuildException(e);
-		} finally {
-			closeDatabase(liquibase);
-		}
-	}
+            writer.flush();
+            writer.close();
+        } catch (Exception e) {
+            throw new BuildException(e);
+        } finally {
+            closeDatabase(liquibase);
+        }
+    }
 }

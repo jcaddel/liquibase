@@ -19,7 +19,7 @@ public interface DatabaseSnapshotGenerator {
     public static final int PRIORITY_DEFAULT = 1;
     /**
      * Generator specific to database, higher priority.
-     *
+     * 
      */
     public static final int PRIORITY_DATABASE = 5;
 
@@ -27,7 +27,8 @@ public interface DatabaseSnapshotGenerator {
 
     int getPriority(Database database);
 
-    DatabaseSnapshot createSnapshot(Database database, String schema, Set<DiffStatusListener> listeners) throws DatabaseException;
+    DatabaseSnapshot createSnapshot(Database database, String schema, Set<DiffStatusListener> listeners)
+            throws DatabaseException;
 
     Table getDatabaseChangeLogTable(Database database) throws DatabaseException;
 
@@ -35,19 +36,22 @@ public interface DatabaseSnapshotGenerator {
 
     Table getTable(String schemaName, String tableName, Database database) throws DatabaseException;
 
-    Column getColumn(String schemaName, String tableName, String columnName, Database database) throws DatabaseException;
+    Column getColumn(String schemaName, String tableName, String columnName, Database database)
+            throws DatabaseException;
 
-    ForeignKey getForeignKeyByForeignKeyTable(String schemaName, String tableName, String fkName, Database database) throws DatabaseException;
+    ForeignKey getForeignKeyByForeignKeyTable(String schemaName, String tableName, String fkName, Database database)
+            throws DatabaseException;
 
     List<ForeignKey> getForeignKeys(String schemaName, String tableName, Database database) throws DatabaseException;
 
-    boolean hasIndex(String schemaName, String tableName, String indexName, Database database, String columnNames) throws DatabaseException;
+    boolean hasIndex(String schemaName, String tableName, String indexName, Database database, String columnNames)
+            throws DatabaseException;
 
     boolean hasDatabaseChangeLogTable(Database database);
 
     boolean hasDatabaseChangeLogLockTable(Database database);
 
     public boolean hasTable(String schemaName, String tableName, Database database);
-    
+
     public boolean hasView(String schemaName, String viewName, Database database);
 }

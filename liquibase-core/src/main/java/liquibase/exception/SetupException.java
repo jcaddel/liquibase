@@ -1,14 +1,12 @@
 package liquibase.exception;
 
 /**
- * If there is an error with setting up a Change this Exception
- * will be thrown.
+ * If there is an error with setting up a Change this Exception will be thrown.
  * 
- * A message must always be provided, if none is then the message
- * from the cause exception will be used.
+ * A message must always be provided, if none is then the message from the cause exception will be used.
  * 
  * @author <a href="mailto:csuml@yahoo.co.uk">Paul Keeble</a>
- *
+ * 
  */
 public class SetupException extends LiquibaseException {
 
@@ -23,7 +21,7 @@ public class SetupException extends LiquibaseException {
     }
 
     public SetupException(Throwable cause) {
-        super(cause.getMessage(),cause);
+        super(cause.getMessage(), cause);
     }
 
 }

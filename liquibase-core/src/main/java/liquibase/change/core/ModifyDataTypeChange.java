@@ -18,11 +18,12 @@ public class ModifyDataTypeChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return tableName+"."+columnName+" datatype was changed to "+newDataType;
+        return tableName + "." + columnName + " datatype was changed to " + newDataType;
     }
 
     public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[] {new ModifyDataTypeStatement(getSchemaName(), getTableName(), getColumnName(), getNewDataType())};
+        return new SqlStatement[] { new ModifyDataTypeStatement(getSchemaName(), getTableName(), getColumnName(),
+                getNewDataType()) };
     }
 
     public String getSchemaName() {

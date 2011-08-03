@@ -7,7 +7,7 @@ public class LoadDataColumnConfig extends ColumnConfig {
     private Integer index;
     private String header;
 
-   public Integer getIndex() {
+    public Integer getIndex() {
         return index;
     }
 

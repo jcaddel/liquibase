@@ -6,11 +6,11 @@ import liquibase.database.Database;
 public class DateType extends DataType {
 
     public DateType() {
-        super("DATE",0,0);
+        super("DATE", 0, 0);
     }
 
     public DateType(String dataTypeName) {
-        super(dataTypeName,0,0);
+        super(dataTypeName, 0, 0);
     }
 
     @Override
@@ -22,7 +22,7 @@ public class DateType extends DataType {
         } else if (value instanceof DatabaseFunction) {
             return ((DatabaseFunction) value).getValue();
         } else if (value.toString().equals("CURRENT_TIMESTAMP()")) {
-              return database.getCurrentDateTimeFunction();
+            return database.getCurrentDateTimeFunction();
         } else if (value instanceof java.sql.Timestamp) {
             return database.getDateLiteral(((java.sql.Timestamp) value));
         } else if (value instanceof java.sql.Date) {
@@ -32,9 +32,8 @@ public class DateType extends DataType {
         } else if (value instanceof java.util.Date) {
             return database.getDateLiteral(((java.util.Date) value));
         } else {
-            return "'"+((String) value).replaceAll("'","''")+"'";
+            return "'" + ((String) value).replaceAll("'", "''") + "'";
         }
     }
-
 
 }

@@ -20,16 +20,22 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
         return (!(database instanceof SybaseDatabase));
     }
 
-    public ValidationErrors validate(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateDatabaseChangeLogTableStatement statement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
 
-    public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         TypeConverter typeConverter = TypeConverterFactory.getInstance().findTypeConverter(database);
-        CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
-                .addPrimaryKeyColumn("ID", typeConverter.getDataType("VARCHAR(63)", false), null, null, null,new NotNullConstraint())
-                .addPrimaryKeyColumn("AUTHOR", typeConverter.getDataType("VARCHAR(63)", false), null, null, null,new NotNullConstraint())
-                .addPrimaryKeyColumn("FILENAME", typeConverter.getDataType("VARCHAR(200)", false), null, null, null,new NotNullConstraint())
+        CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseSchemaName(),
+                database.getDatabaseChangeLogTableName())
+                .addPrimaryKeyColumn("ID", typeConverter.getDataType("VARCHAR(63)", false), null, null, null,
+                        new NotNullConstraint())
+                .addPrimaryKeyColumn("AUTHOR", typeConverter.getDataType("VARCHAR(63)", false), null, null, null,
+                        new NotNullConstraint())
+                .addPrimaryKeyColumn("FILENAME", typeConverter.getDataType("VARCHAR(200)", false), null, null, null,
+                        new NotNullConstraint())
                 .addColumn("DATEEXECUTED", typeConverter.getDateTimeType(), null, new NotNullConstraint())
                 .addColumn("ORDEREXECUTED", typeConverter.getDataType("INT", false), new NotNullConstraint())
                 .addColumn("EXECTYPE", typeConverter.getDataType("VARCHAR(10)", false), new NotNullConstraint())

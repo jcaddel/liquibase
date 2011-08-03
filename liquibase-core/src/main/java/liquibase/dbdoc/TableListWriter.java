@@ -8,5 +8,4 @@ public class TableListWriter extends HTMLListWriter {
         super("Current Tables", "currenttables.html", "tables", outputDir);
     }
 
-
 }

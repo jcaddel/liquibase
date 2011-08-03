@@ -5,8 +5,7 @@ import liquibase.statement.AbstractSqlStatement;
 public class RawSqlStatement extends AbstractSqlStatement {
 
     private String sql;
-    private String endDelimiter  = ";";
-
+    private String endDelimiter = ";";
 
     public RawSqlStatement(String sql) {
         this.sql = sql;
@@ -24,7 +23,7 @@ public class RawSqlStatement extends AbstractSqlStatement {
     }
 
     public String getEndDelimiter() {
-        return endDelimiter.replace("\\r","\r").replace("\\n","\n");
+        return endDelimiter.replace("\\r", "\r").replace("\\n", "\n");
     }
 
     @Override

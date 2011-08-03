@@ -17,7 +17,8 @@ import java.util.List;
 
 public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatement> {
 
-    public ValidationErrors validate(CreateIndexStatement createIndexStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateIndexStatement createIndexStatement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", createIndexStatement.getTableName());
         validationErrors.checkRequiredField("columns", createIndexStatement.getColumns());
@@ -26,58 +27,61 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 
     public Sql[] generateSql(CreateIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
-	    if (database instanceof OracleDatabase) {
-		    // Oracle don't create index when creates foreignKey
-		    // It means that all indexes associated with foreignKey should be created manualy
-		    List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
-		    if (associatedWith != null && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT))) {
-			    return new Sql[0];
-		    }
-	    } else {
-		    // Default filter of index creation:
-		    // creation of all indexes with associations are switched off.
-		    List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
-		    if (associatedWith != null && (associatedWith.contains(Index.MARK_PRIMARY_KEY) ||
-		        associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT) ||
-				associatedWith.contains(Index.MARK_FOREIGN_KEY))) {
-			    return new Sql[0];
-		    }
-	    }
+        if (database instanceof OracleDatabase) {
+            // Oracle don't create index when creates foreignKey
+            // It means that all indexes associated with foreignKey should be created manualy
+            List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
+            if (associatedWith != null
+                    && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith
+                            .contains(Index.MARK_UNIQUE_CONSTRAINT))) {
+                return new Sql[0];
+            }
+        } else {
+            // Default filter of index creation:
+            // creation of all indexes with associations are switched off.
+            List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
+            if (associatedWith != null
+                    && (associatedWith.contains(Index.MARK_PRIMARY_KEY)
+                            || associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT) || associatedWith
+                                .contains(Index.MARK_FOREIGN_KEY))) {
+                return new Sql[0];
+            }
+        }
 
-	    StringBuffer buffer = new StringBuffer();
+        StringBuffer buffer = new StringBuffer();
 
-	    buffer.append("CREATE ");
-	    if (statement.isUnique() != null && statement.isUnique()) {
-		    buffer.append("UNIQUE ");
-	    }
-	    buffer.append("INDEX ");
+        buffer.append("CREATE ");
+        if (statement.isUnique() != null && statement.isUnique()) {
+            buffer.append("UNIQUE ");
+        }
+        buffer.append("INDEX ");
 
-	    if (statement.getIndexName() != null) {
+        if (statement.getIndexName() != null) {
             String indexSchema = statement.getTableSchemaName();
             buffer.append(database.escapeIndexName(indexSchema, statement.getIndexName())).append(" ");
-	    }
-	    buffer.append("ON ");
-	    buffer.append(database.escapeTableName(statement.getTableSchemaName(), statement.getTableName())).append("(");
-	    Iterator<String> iterator = Arrays.asList(statement.getColumns()).iterator();
-	    while (iterator.hasNext()) {
-		    String column = iterator.next();
-		    buffer.append(database.escapeColumnName(statement.getTableSchemaName(), statement.getTableName(), column));
-		    if (iterator.hasNext()) {
-			    buffer.append(", ");
-		    }
-	    }
-	    buffer.append(")");
+        }
+        buffer.append("ON ");
+        buffer.append(database.escapeTableName(statement.getTableSchemaName(), statement.getTableName())).append("(");
+        Iterator<String> iterator = Arrays.asList(statement.getColumns()).iterator();
+        while (iterator.hasNext()) {
+            String column = iterator.next();
+            buffer.append(database.escapeColumnName(statement.getTableSchemaName(), statement.getTableName(), column));
+            if (iterator.hasNext()) {
+                buffer.append(", ");
+            }
+        }
+        buffer.append(")");
 
-	    if (StringUtils.trimToNull(statement.getTablespace()) != null && database.supportsTablespaces()) {
-		    if (database instanceof MSSQLDatabase || database instanceof SybaseASADatabase) {
-			    buffer.append(" ON ").append(statement.getTablespace());
-		    } else if (database instanceof DB2Database || database instanceof InformixDatabase) {
-			    buffer.append(" IN ").append(statement.getTablespace());
-		    } else {
-			    buffer.append(" TABLESPACE ").append(statement.getTablespace());
-		    }
-	    }
+        if (StringUtils.trimToNull(statement.getTablespace()) != null && database.supportsTablespaces()) {
+            if (database instanceof MSSQLDatabase || database instanceof SybaseASADatabase) {
+                buffer.append(" ON ").append(statement.getTablespace());
+            } else if (database instanceof DB2Database || database instanceof InformixDatabase) {
+                buffer.append(" IN ").append(statement.getTablespace());
+            } else {
+                buffer.append(" TABLESPACE ").append(statement.getTablespace());
+            }
+        }
 
-	    return new Sql[]{new UnparsedSql(buffer.toString())};
+        return new Sql[] { new UnparsedSql(buffer.toString()) };
     }
 }

@@ -21,11 +21,12 @@ public class TableWriter extends HTMLWriter {
 
     @Override
     protected String createTitle(Object object) {
-        return "Changes affecting table \""+object.toString() + "\"";
+        return "Changes affecting table \"" + object.toString() + "\"";
     }
 
     @Override
-    protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {
+    protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database)
+            throws IOException {
         writeColumns(fileWriter, ((Table) object), database);
     }
 
@@ -33,11 +34,12 @@ public class TableWriter extends HTMLWriter {
         List<List<String>> cells = new ArrayList<List<String>>();
 
         for (Column column : table.getColumns()) {
-            cells.add(Arrays.asList(TypeConverterFactory.getInstance().findTypeConverter(database).convertToDatabaseTypeString(column, database),
-                    "<A HREF=\"../columns/" + table.getName().toLowerCase() + "." + column.getName().toLowerCase() + ".html" + "\">" + column.getName() + "</A>"));
-            //todo: add foreign key info to columns?
+            cells.add(Arrays.asList(TypeConverterFactory.getInstance().findTypeConverter(database)
+                    .convertToDatabaseTypeString(column, database),
+                    "<A HREF=\"../columns/" + table.getName().toLowerCase() + "." + column.getName().toLowerCase()
+                            + ".html" + "\">" + column.getName() + "</A>"));
+            // todo: add foreign key info to columns?
         }
-
 
         writeTable("Current Columns", cells, fileWriter);
 

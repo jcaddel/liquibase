@@ -26,7 +26,8 @@ public class OrPrecondition extends PreconditionLogic {
         return new ValidationErrors();
     }
 
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
+            throws PreconditionFailedException, PreconditionErrorException {
         boolean onePassed = false;
         List<FailedPrecondition> failures = new ArrayList<FailedPrecondition>();
         for (Precondition precondition : getNestedPreconditions()) {

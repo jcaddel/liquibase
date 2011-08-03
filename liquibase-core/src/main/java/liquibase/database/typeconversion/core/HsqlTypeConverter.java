@@ -19,7 +19,6 @@ public class HsqlTypeConverter extends AbstractTypeConverter {
         return database instanceof HsqlDatabase;
     }
 
-
     @Override
     public ClobType getClobType() {
         return new ClobType("LONGVARCHAR");
@@ -34,10 +33,12 @@ public class HsqlTypeConverter extends AbstractTypeConverter {
     public DateTimeType getDateTimeType() {
         return new DateTimeType("DATETIME");
     }
+
     @Override
     public NVarcharType getNVarcharType() {
         return new NVarcharType("VARCHAR");
     }
+
     @Override
     public NumberType getNumberType() {
         return new NumberType("NUMERIC");

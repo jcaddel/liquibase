@@ -21,11 +21,11 @@ import java.sql.Connection;
 import java.util.Enumeration;
 
 /**
- * Servlet listener than can be added to web.xml to allow Liquibase to run on every application server startup.
- * Using this listener allows users to know that they always have the most up to date database, although it will
- * slow down application server startup slightly.
- * See the <a href="http://www.liquibase.org/manual/latest/servlet_listener_migrator.html">Liquibase documentation</a> for
- * more information.
+ * Servlet listener than can be added to web.xml to allow Liquibase to run on every application server startup. Using
+ * this listener allows users to know that they always have the most up to date database, although it will slow down
+ * application server startup slightly. See the <a
+ * href="http://www.liquibase.org/manual/latest/servlet_listener_migrator.html">Liquibase documentation</a> for more
+ * information.
  */
 public class LiquibaseServletListener implements ServletContextListener {
 
@@ -33,7 +33,6 @@ public class LiquibaseServletListener implements ServletContextListener {
     private String dataSource;
     private String contexts;
     private String defaultSchema;
-
 
     public String getChangeLogFile() {
         return changeLogFile;
@@ -70,7 +69,9 @@ public class LiquibaseServletListener implements ServletContextListener {
 
         String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-            LogFactory.getLogger().info("Liquibase did not run on " + hostName + " because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+            LogFactory.getLogger().info(
+                    "Liquibase did not run on " + hostName + " because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY
+                            + "' system property was set to false");
             return;
         }
 
@@ -99,15 +100,17 @@ public class LiquibaseServletListener implements ServletContextListener {
         }
 
         if (!shouldRun) {
-            servletContextEvent.getServletContext().log("LiquibaseServletListener did not run due to liquibase.host.includes and/or liquibase.host.excludes");
+            servletContextEvent
+                    .getServletContext()
+                    .log("LiquibaseServletListener did not run due to liquibase.host.includes and/or liquibase.host.excludes");
             return;
         }
-
 
         setDataSource(servletContextEvent.getServletContext().getInitParameter("liquibase.datasource"));
         setChangeLogFile(servletContextEvent.getServletContext().getInitParameter("liquibase.changelog"));
         setContexts(servletContextEvent.getServletContext().getInitParameter("liquibase.contexts"));
-        this.defaultSchema = StringUtils.trimToNull(servletContextEvent.getServletContext().getInitParameter("liquibase.schema.default"));
+        this.defaultSchema = StringUtils.trimToNull(servletContextEvent.getServletContext().getInitParameter(
+                "liquibase.schema.default"));
         if (getChangeLogFile() == null) {
             throw new RuntimeException("Cannot run Liquibase, liquibase.changelog is not set");
         }
@@ -131,16 +134,18 @@ public class LiquibaseServletListener implements ServletContextListener {
                 ResourceAccessor clFO = new ClassLoaderResourceAccessor();
                 ResourceAccessor fsFO = new FileSystemResourceAccessor();
 
-
-                Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
+                Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(
+                        new JdbcConnection(connection));
                 database.setDefaultSchemaName(this.defaultSchema);
-                Liquibase liquibase = new Liquibase(getChangeLogFile(), new CompositeResourceAccessor(clFO,fsFO, threadClFO), database);
+                Liquibase liquibase = new Liquibase(getChangeLogFile(), new CompositeResourceAccessor(clFO, fsFO,
+                        threadClFO), database);
 
                 Enumeration<String> initParameters = servletContextEvent.getServletContext().getInitParameterNames();
                 while (initParameters.hasMoreElements()) {
                     String name = initParameters.nextElement().trim();
                     if (name.startsWith("liquibase.parameter.")) {
-                        liquibase.setChangeLogParameter(name.substring("liquibase.parameter".length()), servletContextEvent.getServletContext().getInitParameter(name));
+                        liquibase.setChangeLogParameter(name.substring("liquibase.parameter".length()),
+                                servletContextEvent.getServletContext().getInitParameter(name));
                     }
                 }
 

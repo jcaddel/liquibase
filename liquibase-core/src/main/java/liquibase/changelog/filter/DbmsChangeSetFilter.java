@@ -16,13 +16,13 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
     }
 
     public boolean accepts(ChangeSet changeSet) {
-         List<SqlVisitor> visitorsToRemove = new ArrayList<SqlVisitor>();
+        List<SqlVisitor> visitorsToRemove = new ArrayList<SqlVisitor>();
         for (SqlVisitor visitor : changeSet.getSqlVisitors()) {
             if (databaseString != null && visitor.getApplicableDbms() != null && visitor.getApplicableDbms().size() > 0) {
                 boolean shouldRemove = true;
-                    if (visitor.getApplicableDbms().contains(databaseString)) {
-                        shouldRemove = false;
-                    }
+                if (visitor.getApplicableDbms().contains(databaseString)) {
+                    shouldRemove = false;
+                }
                 if (shouldRemove) {
                     visitorsToRemove.add(visitor);
                 }

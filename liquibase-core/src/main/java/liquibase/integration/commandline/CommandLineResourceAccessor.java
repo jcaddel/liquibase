@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * Implementation of liquibase.FileOpener for the command line app.
- *
+ * 
  * @see liquibase.resource.ResourceAccessor
  */
 public class CommandLineResourceAccessor implements ResourceAccessor {
@@ -51,6 +51,6 @@ public class CommandLineResourceAccessor implements ResourceAccessor {
         } else {
             description = loader.getClass().getName();
         }
-        return getClass().getName()+"("+ description +")";
+        return getClass().getName() + "(" + description + ")";
     }
 }

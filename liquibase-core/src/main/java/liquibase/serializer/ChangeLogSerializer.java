@@ -17,12 +17,12 @@ public interface ChangeLogSerializer {
     String serialize(DatabaseChangeLog databaseChangeLog);
 
     String serialize(ChangeSet changeSet);
-    
+
     String serialize(Change change);
 
     String serialize(SqlVisitor visitor);
 
     String serialize(ColumnConfig columnConfig);
 
-	void write(List<ChangeSet> changeSets, OutputStream out) throws IOException;
+    void write(List<ChangeSet> changeSets, OutputStream out) throws IOException;
 }

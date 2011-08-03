@@ -8,7 +8,7 @@ import liquibase.database.structure.type.DateTimeType;
 import java.text.ParseException;
 import java.sql.Types;
 
-public class DerbyTypeConverter  extends AbstractTypeConverter {
+public class DerbyTypeConverter extends AbstractTypeConverter {
 
     public int getPriority() {
         return PRIORITY_DATABASE;
@@ -19,7 +19,8 @@ public class DerbyTypeConverter  extends AbstractTypeConverter {
     }
 
     @Override
-    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
+    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits,
+            Database database) throws ParseException {
         if (defaultValue != null && defaultValue instanceof String) {
             if (dataType == Types.TIMESTAMP) {
                 defaultValue = ((String) defaultValue).replaceFirst("^TIMESTAMP\\('", "").replaceFirst("'\\)", "");

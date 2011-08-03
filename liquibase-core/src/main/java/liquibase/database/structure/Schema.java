@@ -17,12 +17,15 @@ public class Schema implements DatabaseObject {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         Schema schema = (Schema) o;
 
-        if (name != null ? !name.equals(schema.name) : schema.name != null) return false;
+        if (name != null ? !name.equals(schema.name) : schema.name != null)
+            return false;
 
         return true;
     }

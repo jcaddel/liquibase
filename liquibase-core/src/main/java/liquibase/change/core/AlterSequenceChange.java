@@ -20,6 +20,7 @@ public class AlterSequenceChange extends AbstractChange {
     private BigInteger maxValue;
     private BigInteger minValue;
     private Boolean ordered;
+
     // StartValue is not allowed since we cannot alter the starting sequence number
 
     public AlterSequenceChange() {
@@ -41,7 +42,6 @@ public class AlterSequenceChange extends AbstractChange {
     public void setSequenceName(String sequenceName) {
         this.sequenceName = sequenceName;
     }
-
 
     public BigInteger getIncrementBy() {
         return incrementBy;
@@ -76,13 +76,10 @@ public class AlterSequenceChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[] {
-                new AlterSequenceStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getSequenceName())
-                .setIncrementBy(getIncrementBy())
-                .setMaxValue(getMaxValue())
-                .setMinValue(getMinValue())
-                .setOrdered(isOrdered())
-        };
+        return new SqlStatement[] { new AlterSequenceStatement(
+                getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName(), getSequenceName())
+                .setIncrementBy(getIncrementBy()).setMaxValue(getMaxValue()).setMinValue(getMinValue())
+                .setOrdered(isOrdered()) };
     }
 
     public String getConfirmationMessage() {

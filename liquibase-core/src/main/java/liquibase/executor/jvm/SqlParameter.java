@@ -3,9 +3,10 @@ package liquibase.executor.jvm;
 /**
  * Object to represent a SQL parameter definition.
  * <p/>
- * <p>Parameters may be anonymous, in which case "name" is <code>null</code>.
- * However, all parameters must define a SQL type according to {@link java.sql.Types}.
- *
+ * <p>
+ * Parameters may be anonymous, in which case "name" is <code>null</code>. However, all parameters must define a SQL
+ * type according to {@link java.sql.Types}.
+ * 
  * @author Spring Framework
  * @see java.sql.Types
  */
@@ -26,17 +27,16 @@ class SqlParameter {
      */
     private String typeName;
 
-
     /**
      * The scale to apply in case of a NUMERIC or DECIMAL type, if any
      */
     private Integer scale;
 
-
     /**
      * Create a new anonymous SqlParameter, supplying the SQL type.
-     *
-     * @param sqlType SQL type of the parameter according to <code>java.sql.Types</code>
+     * 
+     * @param sqlType
+     *            SQL type of the parameter according to <code>java.sql.Types</code>
      */
     public SqlParameter(int sqlType) {
         this.sqlType = sqlType;
@@ -44,9 +44,11 @@ class SqlParameter {
 
     /**
      * Create a new anonymous SqlParameter, supplying the SQL type.
-     *
-     * @param sqlType  SQL type of the parameter according to <code>java.sql.Types</code>
-     * @param typeName the type name of the parameter (optional)
+     * 
+     * @param sqlType
+     *            SQL type of the parameter according to <code>java.sql.Types</code>
+     * @param typeName
+     *            the type name of the parameter (optional)
      */
     public SqlParameter(int sqlType, String typeName) {
         this.sqlType = sqlType;
@@ -55,10 +57,11 @@ class SqlParameter {
 
     /**
      * Create a new anonymous SqlParameter, supplying the SQL type.
-     *
-     * @param sqlType SQL type of the parameter according to <code>java.sql.Types</code>
-     * @param scale   the number of digits after the decimal point
-     *                (for DECIMAL and NUMERIC types)
+     * 
+     * @param sqlType
+     *            SQL type of the parameter according to <code>java.sql.Types</code>
+     * @param scale
+     *            the number of digits after the decimal point (for DECIMAL and NUMERIC types)
      */
     public SqlParameter(int sqlType, int scale) {
         this.sqlType = sqlType;
@@ -67,9 +70,11 @@ class SqlParameter {
 
     /**
      * Create a new SqlParameter, supplying name and SQL type.
-     *
-     * @param name    name of the parameter, as used in input and output maps
-     * @param sqlType SQL type of the parameter according to <code>java.sql.Types</code>
+     * 
+     * @param name
+     *            name of the parameter, as used in input and output maps
+     * @param sqlType
+     *            SQL type of the parameter according to <code>java.sql.Types</code>
      */
     public SqlParameter(String name, int sqlType) {
         this.name = name;
@@ -78,10 +83,13 @@ class SqlParameter {
 
     /**
      * Create a new SqlParameter, supplying name and SQL type.
-     *
-     * @param name     name of the parameter, as used in input and output maps
-     * @param sqlType  SQL type of the parameter according to <code>java.sql.Types</code>
-     * @param typeName the type name of the parameter (optional)
+     * 
+     * @param name
+     *            name of the parameter, as used in input and output maps
+     * @param sqlType
+     *            SQL type of the parameter according to <code>java.sql.Types</code>
+     * @param typeName
+     *            the type name of the parameter (optional)
      */
     public SqlParameter(String name, int sqlType, String typeName) {
         this.name = name;
@@ -91,11 +99,13 @@ class SqlParameter {
 
     /**
      * Create a new SqlParameter, supplying name and SQL type.
-     *
-     * @param name    name of the parameter, as used in input and output maps
-     * @param sqlType SQL type of the parameter according to <code>java.sql.Types</code>
-     * @param scale   the number of digits after the decimal point
-     *                (for DECIMAL and NUMERIC types)
+     * 
+     * @param name
+     *            name of the parameter, as used in input and output maps
+     * @param sqlType
+     *            SQL type of the parameter according to <code>java.sql.Types</code>
+     * @param scale
+     *            the number of digits after the decimal point (for DECIMAL and NUMERIC types)
      */
     public SqlParameter(String name, int sqlType, int scale) {
         this.name = name;
@@ -105,8 +115,9 @@ class SqlParameter {
 
     /**
      * Copy constructor.
-     *
-     * @param otherParam the SqlParameter object to copy from
+     * 
+     * @param otherParam
+     *            the SqlParameter object to copy from
      */
     public SqlParameter(SqlParameter otherParam) {
         this.name = otherParam.name;
@@ -114,7 +125,6 @@ class SqlParameter {
         this.typeName = otherParam.typeName;
         this.scale = otherParam.scale;
     }
-
 
     /**
      * Return the name of the parameter.
@@ -144,20 +154,21 @@ class SqlParameter {
         return this.scale;
     }
 
-
     /**
-     * Return whether this parameter holds input values that should be set
-     * before execution even if they are <code>null</code>.
-     * <p>This implementation always returns <code>true</code>.
+     * Return whether this parameter holds input values that should be set before execution even if they are
+     * <code>null</code>.
+     * <p>
+     * This implementation always returns <code>true</code>.
      */
     public boolean isInputValueProvided() {
         return true;
     }
 
     /**
-     * Return whether this parameter is an implicit return parameter used during the
-     * reults preocessing of the CallableStatement.getMoreResults/getUpdateCount.
-     * <p>This implementation always returns <code>false</code>.
+     * Return whether this parameter is an implicit return parameter used during the reults preocessing of the
+     * CallableStatement.getMoreResults/getUpdateCount.
+     * <p>
+     * This implementation always returns <code>false</code>.
      */
     public boolean isResultsParameter() {
         return false;

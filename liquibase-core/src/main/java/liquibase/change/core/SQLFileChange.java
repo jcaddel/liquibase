@@ -18,17 +18,15 @@ import java.io.*;
  * Represents a Change for custom SQL stored in a File.
  * <p/>
  * To create an instance call the constructor as normal and then call
- *
+ * 
  * @author <a href="mailto:csuml@yahoo.co.uk">Paul Keeble</a>
- * @link{#setFileOpener(FileOpener)} before calling setPath otherwise the
- * file will likely not be found.
+ * @link{#setFileOpener(FileOpener) before calling setPath otherwise the file will likely not be found.
  */
 public class SQLFileChange extends AbstractSQLChange {
 
     private String path;
     private String encoding = null;
     private Boolean relativeToChangelogFile;
-
 
     public SQLFileChange() {
         super("sqlFile", "SQL From File", ChangeMetaData.PRIORITY_DEFAULT);
@@ -40,8 +38,9 @@ public class SQLFileChange extends AbstractSQLChange {
 
     /**
      * Sets the file name but setUp must be called for the change to have impact.
-     *
-     * @param fileName The file to use
+     * 
+     * @param fileName
+     *            The file to use
      */
     public void setPath(String fileName) {
         path = fileName;
@@ -49,7 +48,7 @@ public class SQLFileChange extends AbstractSQLChange {
 
     /**
      * The encoding of the file containing SQL statements
-     *
+     * 
      * @return the encoding
      */
     public String getEncoding() {
@@ -57,12 +56,12 @@ public class SQLFileChange extends AbstractSQLChange {
     }
 
     /**
-     * @param encoding the encoding to set
+     * @param encoding
+     *            the encoding to set
      */
     public void setEncoding(String encoding) {
         this.encoding = encoding;
     }
-
 
     public Boolean isRelativeToChangelogFile() {
         return relativeToChangelogFile;
@@ -105,13 +104,14 @@ public class SQLFileChange extends AbstractSQLChange {
 
     /**
      * Tries to load the file from the file system.
-     *
-     * @param file The name of the file to search for
+     * 
+     * @param file
+     *            The name of the file to search for
      * @return True if the file was found, false otherwise.
      */
     private boolean loadFromFileSystem(String file) throws SetupException {
         if (relativeToChangelogFile != null && relativeToChangelogFile) {
-            file = getChangeSet().getFilePath().replaceFirst("/[^/]*$","")+"/"+file;
+            file = getChangeSet().getFilePath().replaceFirst("/[^/]*$", "") + "/" + file;
         }
 
         InputStream fis = null;
@@ -130,7 +130,7 @@ public class SQLFileChange extends AbstractSQLChange {
             if (fis != null) {
                 try {
                     fis.close();
-                } catch (IOException ioe) {//NOPMD
+                } catch (IOException ioe) {// NOPMD
                     // safe to ignore
                 }
             }
@@ -141,15 +141,15 @@ public class SQLFileChange extends AbstractSQLChange {
     /**
      * Tries to load a file using the FileOpener.
      * <p/>
-     * If the fileOpener can not be found then the attempt to load from the
-     * classpath the return is false.
-     *
-     * @param file The file name to try and find.
+     * If the fileOpener can not be found then the attempt to load from the classpath the return is false.
+     * 
+     * @param file
+     *            The file name to try and find.
      * @return True if the file was found and loaded, false otherwise.
      */
     private boolean loadFromClasspath(String file) throws SetupException {
         if (relativeToChangelogFile != null && relativeToChangelogFile) {
-            file = getChangeSet().getFilePath().replaceFirst("/[^/]*$","")+"/"+file;
+            file = getChangeSet().getFilePath().replaceFirst("/[^/]*$", "") + "/" + file;
         }
 
         InputStream in = null;
@@ -171,7 +171,7 @@ public class SQLFileChange extends AbstractSQLChange {
             if (in != null) {
                 try {
                     in.close();
-                } catch (IOException ioe) {//NOPMD
+                } catch (IOException ioe) {// NOPMD
                     // safe to ignore
                 }
             }
@@ -180,7 +180,7 @@ public class SQLFileChange extends AbstractSQLChange {
 
     /**
      * Calculates an MD5 from the contents of the file.
-     *
+     * 
      * @see liquibase.change.AbstractChange#generateCheckSum()
      */
     @Override

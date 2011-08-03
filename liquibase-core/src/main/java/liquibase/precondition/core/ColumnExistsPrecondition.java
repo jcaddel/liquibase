@@ -44,11 +44,15 @@ public class ColumnExistsPrecondition implements Precondition {
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
-    
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
+            throws PreconditionFailedException, PreconditionErrorException {
         try {
-            if (DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).getColumn(getSchemaName(), getTableName(), getColumnName(), database) == null) {
-                throw new PreconditionFailedException("Column '"+database.escapeColumnName(getSchemaName(), getTableName(), getColumnName())+"' does not exist", changeLog, this);
+            if (DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database)
+                    .getColumn(getSchemaName(), getTableName(), getColumnName(), database) == null) {
+                throw new PreconditionFailedException("Column '"
+                        + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName())
+                        + "' does not exist", changeLog, this);
             }
         } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);

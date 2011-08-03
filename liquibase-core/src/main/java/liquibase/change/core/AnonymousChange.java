@@ -25,7 +25,7 @@ public class AnonymousChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return statements.size()+" statements executed";
+        return statements.size() + " statements executed";
     }
 
     public SqlStatement[] generateStatements(Database database) {

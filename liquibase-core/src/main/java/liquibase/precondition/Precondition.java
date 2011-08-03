@@ -9,7 +9,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 
 /**
- * Marker interface for preconditions.  May become an annotation in the future.
+ * Marker interface for preconditions. May become an annotation in the future.
  */
 public interface Precondition {
     public String getName();
@@ -18,6 +18,7 @@ public interface Precondition {
 
     public ValidationErrors validate(Database database);
 
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException;
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
+            throws PreconditionFailedException, PreconditionErrorException;
 
 }

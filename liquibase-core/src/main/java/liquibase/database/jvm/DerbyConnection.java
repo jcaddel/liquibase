@@ -12,7 +12,6 @@ public class DerbyConnection extends JdbcConnection {
         super(connection);
     }
 
-
     @Override
     public void commit() throws DatabaseException {
         super.commit();
@@ -39,7 +38,7 @@ public class DerbyConnection extends JdbcConnection {
                 try {
                     st.close();
                 } catch (SQLException e) {
-                    //ok
+                    // ok
                 }
             }
         }

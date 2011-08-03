@@ -16,9 +16,10 @@ public class SampleChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[]{
-            new CreateTableStatement(null, "samplechange").addColumn("id", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false))
-                    .addColumn("name", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("varchar(5)", false))
-        };
+        return new SqlStatement[] { new CreateTableStatement(null, "samplechange")
+                .addColumn("id",
+                        TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false))
+                .addColumn("name",
+                        TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("varchar(5)", false)) };
     }
 }

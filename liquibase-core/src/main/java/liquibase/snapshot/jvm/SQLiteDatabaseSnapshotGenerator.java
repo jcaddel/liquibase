@@ -37,16 +37,14 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
     }
 
     @Override
-    protected void readTables(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws SQLException, DatabaseException {
+    protected void readTables(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
+            throws SQLException, DatabaseException {
 
         Database database = snapshot.getDatabase();
 
         updateListeners("Reading tables for " + database.toString() + " ...");
-        ResultSet rs = databaseMetaData.getTables(
-                database.convertRequestedSchemaToCatalog(schema),
-                database.convertRequestedSchemaToSchema(schema),
-                null,
-                new String[]{"TABLE", "VIEW"});
+        ResultSet rs = databaseMetaData.getTables(database.convertRequestedSchemaToCatalog(schema),
+                database.convertRequestedSchemaToSchema(schema), null, new String[] { "TABLE", "VIEW" });
 
         try {
             while (rs.next()) {
@@ -56,9 +54,8 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
                 String catalogName = rs.getString("TABLE_CAT");
                 String remarks = rs.getString("REMARKS");
 
-                if (database.isSystemTable(catalogName, schemaName, name) ||
-                        database.isLiquibaseTable(name) ||
-                        database.isSystemView(catalogName, schemaName, name)) {
+                if (database.isSystemTable(catalogName, schemaName, name) || database.isLiquibaseTable(name)
+                        || database.isSystemView(catalogName, schemaName, name)) {
                     continue;
                 }
 
@@ -73,8 +70,7 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
                     view.setName(name);
                     view.setSchema(schemaName);
                     try {
-                        view.setDefinition(database.
-                                getViewDefinition(schema, name));
+                        view.setDefinition(database.getViewDefinition(schema, name));
                     } catch (DatabaseException e) {
                         System.out.println("Error getting view with " + new GetViewDefinitionStatement(schema, name));
                         throw e;
@@ -88,16 +84,14 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
     }
 
     @Override
-    protected void readViews(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws SQLException, DatabaseException {
+    protected void readViews(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
+            throws SQLException, DatabaseException {
 
         Database database = snapshot.getDatabase();
 
         updateListeners("Reading tables for " + database.toString() + " ...");
-        ResultSet rs = databaseMetaData.getTables(
-                database.convertRequestedSchemaToCatalog(schema),
-                database.convertRequestedSchemaToSchema(schema),
-                null,
-                new String[]{"TABLE", "VIEW"});
+        ResultSet rs = databaseMetaData.getTables(database.convertRequestedSchemaToCatalog(schema),
+                database.convertRequestedSchemaToSchema(schema), null, new String[] { "TABLE", "VIEW" });
 
         try {
             while (rs.next()) {
@@ -107,9 +101,8 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
                 String catalogName = rs.getString("TABLE_CAT");
                 String remarks = rs.getString("REMARKS");
 
-                if (database.isSystemTable(catalogName, schemaName, name) ||
-                        database.isLiquibaseTable(name) ||
-                        database.isSystemView(catalogName, schemaName, name)) {
+                if (database.isSystemTable(catalogName, schemaName, name) || database.isLiquibaseTable(name)
+                        || database.isSystemView(catalogName, schemaName, name)) {
                     continue;
                 }
 
@@ -124,8 +117,7 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
                     view.setName(name);
                     view.setSchema(schemaName);
                     try {
-                        view.setDefinition(database.
-                                getViewDefinition(schema, name));
+                        view.setDefinition(database.getViewDefinition(schema, name));
                     } catch (DatabaseException e) {
                         System.out.println("Error getting view with " + new GetViewDefinitionStatement(schema, name));
                         throw e;
@@ -142,9 +134,10 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
      * SQLite specific implementation
      */
     @Override
-    protected void readForeignKeyInformation(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
+    protected void readForeignKeyInformation(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
+            throws DatabaseException, SQLException {
         updateListeners("Reading foreign keys for " + snapshot.getDatabase().toString() + " ...");
-        // Foreign keys are not supported in SQLite until now. 
+        // Foreign keys are not supported in SQLite until now.
         // ...do nothing here
     }
 
@@ -152,15 +145,18 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
      * SQLite specific implementation
      */
     @Override
-    protected void readPrimaryKeys(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
+    protected void readPrimaryKeys(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
+            throws DatabaseException, SQLException {
         Database database = snapshot.getDatabase();
         updateListeners("Reading primary keys for " + database.toString() + " ...");
 
-        //we can't add directly to the this.primaryKeys hashSet because adding columns to an exising PK changes the hashCode and .contains() fails
+        // we can't add directly to the this.primaryKeys hashSet because adding columns to an exising PK changes the
+        // hashCode and .contains() fails
         List<PrimaryKey> foundPKs = new ArrayList<PrimaryKey>();
 
         for (Table table : snapshot.getTables()) {
-            ResultSet rs = databaseMetaData.getPrimaryKeys(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), table.getName());
+            ResultSet rs = databaseMetaData.getPrimaryKeys(database.convertRequestedSchemaToCatalog(schema),
+                    database.convertRequestedSchemaToSchema(schema), table.getName());
 
             try {
                 while (rs.next()) {
@@ -200,7 +196,8 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
     }
 
     @Override
-    protected void readColumns(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws SQLException, DatabaseException {
+    protected void readColumns(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
+            throws SQLException, DatabaseException {
         Database database = snapshot.getDatabase();
         updateListeners("Reading columns for " + database.toString() + " ...");
 
@@ -210,10 +207,13 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
                 Statement selectStatement = null;
                 ResultSet rs = null;
                 try {
-                    selectStatement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-                    rs = databaseMetaData.getColumns(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), cur_table.getName(), null);
+                    selectStatement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection()
+                            .createStatement();
+                    rs = databaseMetaData.getColumns(database.convertRequestedSchemaToCatalog(schema),
+                            database.convertRequestedSchemaToSchema(schema), cur_table.getName(), null);
                     if (rs == null) {
-                        rs = databaseMetaData.getColumns(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), cur_table.getName(), null);
+                        rs = databaseMetaData.getColumns(database.convertRequestedSchemaToCatalog(schema),
+                                database.convertRequestedSchemaToSchema(schema), cur_table.getName(), null);
                     }
                     while ((rs != null) && rs.next()) {
                         readColumnInfo(snapshot, schema, rs);
@@ -235,8 +235,10 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
             Statement selectStatement = null;
             ResultSet rs = null;
             try {
-                selectStatement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-                rs = databaseMetaData.getColumns(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), null, null);
+                selectStatement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection()
+                        .createStatement();
+                rs = databaseMetaData.getColumns(database.convertRequestedSchemaToCatalog(schema),
+                        database.convertRequestedSchemaToSchema(schema), null, null);
                 while (rs.next()) {
                     readColumnInfo(snapshot, schema, rs);
                 }
@@ -254,7 +256,8 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
         }
     }
 
-    private Column readColumnInfo(DatabaseSnapshot snapshot, String schema, ResultSet rs) throws SQLException, DatabaseException {
+    private Column readColumnInfo(DatabaseSnapshot snapshot, String schema, ResultSet rs) throws SQLException,
+            DatabaseException {
         Database database = snapshot.getDatabase();
         Column columnInfo = new Column();
 
@@ -265,8 +268,8 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 
         String upperCaseTableName = tableName.toUpperCase(Locale.ENGLISH);
 
-        if (database.isSystemTable(catalogName, schemaName, upperCaseTableName) ||
-                database.isLiquibaseTable(upperCaseTableName)) {
+        if (database.isSystemTable(catalogName, schemaName, upperCaseTableName)
+                || database.isLiquibaseTable(upperCaseTableName)) {
             return null;
         }
 
@@ -291,7 +294,11 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
         columnInfo.setDecimalDigits(rs.getInt("DECIMAL_POINTS"));
         Object defaultValue = rs.getObject("COLUMN_DEF");
         try {
-            columnInfo.setDefaultValue(TypeConverterFactory.getInstance().findTypeConverter(database).convertDatabaseValueToObject(defaultValue, columnInfo.getDataType(), columnInfo.getColumnSize(), columnInfo.getDecimalDigits(), database));
+            columnInfo.setDefaultValue(TypeConverterFactory
+                    .getInstance()
+                    .findTypeConverter(database)
+                    .convertDatabaseValueToObject(defaultValue, columnInfo.getDataType(), columnInfo.getColumnSize(),
+                            columnInfo.getDecimalDigits(), database));
         } catch (ParseException e) {
             throw new DatabaseException(e);
         }
@@ -305,13 +312,15 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 
         columnInfo.setPrimaryKey(snapshot.isPrimaryKey(columnInfo));
         columnInfo.setAutoIncrement(isColumnAutoIncrement(database, schema, tableName, columnName));
-        columnInfo.setTypeName(TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(rs.getString("TYPE_NAME"), columnInfo.isAutoIncrement()).toString());
+        columnInfo.setTypeName(TypeConverterFactory.getInstance().findTypeConverter(database)
+                .getDataType(rs.getString("TYPE_NAME"), columnInfo.isAutoIncrement()).toString());
 
         return columnInfo;
     }
 
     @Override
-    protected void readIndexes(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
+    protected void readIndexes(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
+            throws DatabaseException, SQLException {
         Database database = snapshot.getDatabase();
         updateListeners("Reading indexes for " + database.toString() + " ...");
 
@@ -331,7 +340,7 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
                 } catch (SQLException e) {
                     if (!e.getMessage().equals("query does not return ResultSet")) {
                         System.err.println(e);
-//            			throw e;
+                        // throw e;
                     }
                 }
                 while ((rs != null) && rs.next()) {
@@ -341,11 +350,12 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
                     Statement statement_2 = null;
                     ResultSet rs_2 = null;
                     try {
-                        statement_2 = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+                        statement_2 = ((JdbcConnection) database.getConnection()).getUnderlyingConnection()
+                                .createStatement();
                         rs_2 = statement_2.executeQuery(sql);
                         while ((rs_2 != null) && rs_2.next()) {
                             int index_column_seqno = rs_2.getInt("seqno");
-//                		int index_column_cid = rs.getInt("cid");
+                            // int index_column_cid = rs.getInt("cid");
                             String index_column_name = rs_2.getString("name");
                             if (index_unique) {
                                 Column column = snapshot.getColumn(table.getName(), index_column_name);
@@ -384,12 +394,14 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
                 if (rs != null) {
                     try {
                         rs.close();
-                    } catch (SQLException ignored) { }
+                    } catch (SQLException ignored) {
+                    }
                 }
                 if (statement != null) {
                     try {
                         statement.close();
-                    } catch (SQLException ignored) { }
+                    } catch (SQLException ignored) {
+                    }
                 }
             }
 
@@ -398,7 +410,7 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
             }
         }
 
-        //remove PK indexes
+        // remove PK indexes
         Set<Index> indexesToRemove = new HashSet<Index>();
         for (Index index : snapshot.getIndexes()) {
             for (PrimaryKey pk : snapshot.getPrimaryKeys()) {
@@ -412,16 +424,17 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
     }
 
     @Override
-    protected void readSequences(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException {
+    protected void readSequences(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
+            throws DatabaseException {
         Database database = snapshot.getDatabase();
         updateListeners("Reading sequences for " + database.toString() + " ...");
 
         String convertedSchemaName = database.convertRequestedSchemaToSchema(schema);
 
         if (database.supportsSequences()) {
-            //noinspection unchecked
-            List<String> sequenceNamess = (List<String>) ExecutorService.getInstance().getExecutor(database).queryForList(new SelectSequencesStatement(schema), String.class);
-
+            // noinspection unchecked
+            List<String> sequenceNamess = (List<String>) ExecutorService.getInstance().getExecutor(database)
+                    .queryForList(new SelectSequencesStatement(schema), String.class);
 
             for (String sequenceName : sequenceNamess) {
                 Sequence seq = new Sequence();

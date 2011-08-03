@@ -10,29 +10,27 @@ import java.net.URLClassLoader;
 import java.util.*;
 
 /**
- * A FileOpener implementation which finds Files in the
- * File System.
+ * A FileOpener implementation which finds Files in the File System.
  * <p/>
- * FileSystemFileOpeners can use a BaseDirectory to determine
- * where relative paths should be resolved from.
- *
+ * FileSystemFileOpeners can use a BaseDirectory to determine where relative paths should be resolved from.
+ * 
  * @author <a href="mailto:csuml@yahoo.co.uk>Paul Keeble</a>
  */
 public class FileSystemResourceAccessor implements ResourceAccessor {
     String baseDirectory;
 
     /**
-     * Creates using a Base directory of null, all files will be
-     * resolved exactly as they are given.
+     * Creates using a Base directory of null, all files will be resolved exactly as they are given.
      */
     public FileSystemResourceAccessor() {
         baseDirectory = null;
     }
 
     /**
-     * Creates using  a supplied base directory.
-     *
-     * @param base The path to use to resolve relative paths
+     * Creates using a supplied base directory.
+     * 
+     * @param base
+     *            The path to use to resolve relative paths
      */
     public FileSystemResourceAccessor(String base) {
         if (new File(base).isFile())
@@ -41,8 +39,7 @@ public class FileSystemResourceAccessor implements ResourceAccessor {
     }
 
     /**
-     * Opens a stream on a file, resolving to the baseDirectory if the
-     * file is relative.
+     * Opens a stream on a file, resolving to the baseDirectory if the file is relative.
      */
     public InputStream getResourceAsStream(String file) throws IOException {
         File absoluteFile = new File(file);
@@ -59,19 +56,20 @@ public class FileSystemResourceAccessor implements ResourceAccessor {
     }
 
     public Enumeration<URL> getResources(String packageName) throws IOException {
-        String directoryPath = (new File(packageName).isAbsolute() || baseDirectory == null) ? packageName : baseDirectory + File.separator + packageName;
+        String directoryPath = (new File(packageName).isAbsolute() || baseDirectory == null) ? packageName
+                : baseDirectory + File.separator + packageName;
 
         File directoryFile = new File(directoryPath);
         if (!directoryFile.exists()) {
             return new Vector<URL>().elements();
         }
         File[] files = directoryFile.listFiles();
-        
+
         List<URL> results = new ArrayList<URL>();
 
         for (File f : files) {
-        	if (!f.isDirectory())
-        		results.add(f.toURI().toURL());
+            if (!f.isDirectory())
+                results.add(f.toURI().toURL());
         }
 
         final Iterator<URL> it = results.iterator();
@@ -89,7 +87,7 @@ public class FileSystemResourceAccessor implements ResourceAccessor {
 
     public ClassLoader toClassLoader() {
         try {
-            return new URLClassLoader(new URL[]{new URL("file://" + baseDirectory)});
+            return new URLClassLoader(new URL[] { new URL("file://" + baseDirectory) });
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -101,7 +99,7 @@ public class FileSystemResourceAccessor implements ResourceAccessor {
         if (dir == null) {
             dir = new File(".").getAbsolutePath();
         }
-        return getClass().getName()+"("+ dir +")";
+        return getClass().getName() + "(" + dir + ")";
     }
 
 }

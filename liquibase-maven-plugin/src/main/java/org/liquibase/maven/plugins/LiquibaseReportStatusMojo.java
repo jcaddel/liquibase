@@ -13,11 +13,9 @@ import liquibase.exception.LiquibaseException;
  */
 public class LiquibaseReportStatusMojo extends AbstractLiquibaseChangeLogMojo {
 
-	@Override
-	protected void performLiquibaseTask(Liquibase liquibase)
-			throws LiquibaseException {
-		liquibase.reportStatus(true, contexts, new OutputStreamWriter(
-				System.out));
-	}
+    @Override
+    protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
+        liquibase.reportStatus(true, contexts, new OutputStreamWriter(System.out));
+    }
 
 }

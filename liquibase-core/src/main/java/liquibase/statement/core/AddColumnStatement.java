@@ -15,7 +15,8 @@ public class AddColumnStatement extends AbstractSqlStatement {
     private Object defaultValue;
     private Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
 
-    public AddColumnStatement(String schemaName, String tableName, String columnName, String columnType, Object defaultValue, ColumnConstraint... constraints) {
+    public AddColumnStatement(String schemaName, String tableName, String columnName, String columnType,
+            Object defaultValue, ColumnConstraint... constraints) {
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.columnName = columnName;

@@ -22,11 +22,13 @@ public class GetViewDefinitionGeneratorInformationSchemaViews extends GetViewDef
     }
 
     @Override
-    public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(GetViewDefinitionStatement statement, Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         try {
-            return new Sql[] {
-                    new UnparsedSql("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = '" + statement.getViewName() + "' AND TABLE_SCHEMA='" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'")
-            };
+            return new Sql[] { new UnparsedSql(
+                    "SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = '"
+                            + statement.getViewName() + "' AND TABLE_SCHEMA='"
+                            + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'") };
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }

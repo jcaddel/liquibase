@@ -1,13 +1,11 @@
 package liquibase.database.core;
 
-
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 
 import java.util.HashSet;
 import java.util.Set;
-
 
 public class MaxDBDatabase extends AbstractDatabase {
 
@@ -118,12 +116,12 @@ public class MaxDBDatabase extends AbstractDatabase {
         if (currentDateTimeFunction != null) {
             return currentDateTimeFunction;
         }
-        
+
         return "TIMESTAMP";
     }
 
     @Override
-    protected String getDefaultDatabaseSchemaName() throws DatabaseException {//NOPMD
+    protected String getDefaultDatabaseSchemaName() throws DatabaseException {// NOPMD
         return super.getDefaultDatabaseSchemaName().toUpperCase();
     }
 

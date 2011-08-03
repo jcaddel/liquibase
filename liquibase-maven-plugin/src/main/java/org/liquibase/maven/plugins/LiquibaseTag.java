@@ -12,29 +12,29 @@ import org.apache.maven.plugin.MojoFailureException;
  */
 public class LiquibaseTag extends AbstractLiquibaseMojo {
 
-  /**
-   * @parameter expression="${liquibase.tag}"
-   * @required
-   */
-  private String tag;
+    /**
+     * @parameter expression="${liquibase.tag}"
+     * @required
+     */
+    private String tag;
 
-  @Override
-  protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
-    super.checkRequiredParametersAreSpecified();
+    @Override
+    protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
+        super.checkRequiredParametersAreSpecified();
 
-    if (tag == null || tag.trim().length() == 0) {
-      throw new MojoFailureException("The tag must be specified.");
+        if (tag == null || tag.trim().length() == 0) {
+            throw new MojoFailureException("The tag must be specified.");
+        }
     }
-  }
 
-  @Override
-  protected void printSettings(String indent) {
-    super.printSettings(indent);
-    getLog().info(indent + "tag: " + tag);
-  }
+    @Override
+    protected void printSettings(String indent) {
+        super.printSettings(indent);
+        getLog().info(indent + "tag: " + tag);
+    }
 
-  @Override
-  protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
-    liquibase.tag(tag);
-  }
+    @Override
+    protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
+        liquibase.tag(tag);
+    }
 }

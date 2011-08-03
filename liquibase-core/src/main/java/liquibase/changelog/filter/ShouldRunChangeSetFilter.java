@@ -21,15 +21,15 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
         this.ranChangeSets = database.getRanChangeSetList();
     }
 
-    @SuppressWarnings({"RedundantIfStatement"})
+    @SuppressWarnings({ "RedundantIfStatement" })
     public boolean accepts(ChangeSet changeSet) {
         for (RanChangeSet ranChangeSet : ranChangeSets) {
             if (ranChangeSet.getId().equals(changeSet.getId())
-                    && ranChangeSet.getAuthor().equals(changeSet.getAuthor())
-                    && isPathEquals(changeSet, ranChangeSet)) {
+                    && ranChangeSet.getAuthor().equals(changeSet.getAuthor()) && isPathEquals(changeSet, ranChangeSet)) {
                 if (changeSet.shouldAlwaysRun() && ranChangeSet.getLastCheckSum() != null) {
                     return true;
-                } else if (changeSet.shouldRunOnChange() && !changeSet.generateCheckSum().equals(ranChangeSet.getLastCheckSum())) {
+                } else if (changeSet.shouldRunOnChange()
+                        && !changeSet.generateCheckSum().equals(ranChangeSet.getLastCheckSum())) {
                     return true;
                 } else {
                     return false;

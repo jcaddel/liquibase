@@ -16,9 +16,9 @@ public class MSSQLTypeConverter extends AbstractTypeConverter {
         return database instanceof MSSQLDatabase;
     }
 
-
     @Override
-    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
+    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits,
+            Database database) throws ParseException {
         if (defaultValue == null) {
             return null;
         }
@@ -36,46 +36,47 @@ public class MSSQLTypeConverter extends AbstractTypeConverter {
         return defaultValue;
     }
 
-
     @Override
     public DataType getDataType(String columnTypeString, Boolean autoIncrement) {
         if (columnTypeString.toLowerCase().endsWith(" identity")) {
             columnTypeString = columnTypeString.replaceFirst(" identity$", "");
             autoIncrement = true;
         }
-        if (columnTypeString.equalsIgnoreCase("varbinary(2147483647)")){
+        if (columnTypeString.equalsIgnoreCase("varbinary(2147483647)")) {
             columnTypeString = "varbinary(max)";
         }
         return super.getDataType(columnTypeString, autoIncrement);
     }
 
     @Override
-    protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName, String precision, String additionalInformation) {
+    protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName,
+            String precision, String additionalInformation) {
         if (columnTypeString.endsWith(" identity")) {
             columnTypeString = columnTypeString.replaceFirst(" identity$", "");
             autoIncrement = true;
         }
-        if (columnTypeString.equalsIgnoreCase("varbinary") && (precision==null || Long.valueOf(precision) > 8000)) {
+        if (columnTypeString.equalsIgnoreCase("varbinary") && (precision == null || Long.valueOf(precision) > 8000)) {
             precision = "max";
         }
 
         // Try to define data type by searching of common standard types
-        DataType returnTypeName = super.getDataType(columnTypeString, autoIncrement, dataTypeName, precision, additionalInformation);
+        DataType returnTypeName = super.getDataType(columnTypeString, autoIncrement, dataTypeName, precision,
+                additionalInformation);
         // If we found CustomType (it means - nothing compatible) then search for oracle types
         if (returnTypeName instanceof CustomType) {
-            boolean returnTypeChanged=false;
+            boolean returnTypeChanged = false;
             if (columnTypeString.toUpperCase().startsWith("NVARCHAR")) {
                 returnTypeName = new NVarcharType();
-                returnTypeChanged=true;
-            } else if(columnTypeString.toUpperCase().startsWith("NCHAR")) {
-                returnTypeName= new CharType("NCHAR");
-                returnTypeChanged=true;
+                returnTypeChanged = true;
+            } else if (columnTypeString.toUpperCase().startsWith("NCHAR")) {
+                returnTypeName = new CharType("NCHAR");
+                returnTypeChanged = true;
             }
 
-            if(returnTypeChanged)
+            if (returnTypeChanged)
                 addPrecisionToType(precision, returnTypeName);
         }
-        
+
         return returnTypeName;
     }
 
@@ -116,7 +117,7 @@ public class MSSQLTypeConverter extends AbstractTypeConverter {
 
     @Override
     public NumberType getNumberType() {
-      return new NumberType("NUMERIC");
+        return new NumberType("NUMERIC");
     }
 
     @Override
