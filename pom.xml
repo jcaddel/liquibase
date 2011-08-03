@@ -13,6 +13,7 @@
   <packaging>pom</packaging>
   <name>Liquibase</name>
   <description>Liquibase is a tool for managing and executing database changes.</description>
+  <url>${kuali.site.hostname}/db/liquibase/${project.version}</url>
   <organization>
     <name>Liquibase.org</name>
     <url>http://www.liquibase.org</url>
