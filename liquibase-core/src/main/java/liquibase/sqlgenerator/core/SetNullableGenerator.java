@@ -76,66 +76,66 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
         if (database instanceof OracleDatabase || database instanceof SybaseDatabase
                 || database instanceof SybaseASADatabase) {
             sql = "ALTER TABLE "
-                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                + " MODIFY "
-                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                        statement.getColumnName()) + nullableString;
+                    + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " MODIFY "
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getColumnName()) + nullableString;
         } else if (database instanceof MSSQLDatabase) {
             sql = "ALTER TABLE "
-                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                + " ALTER COLUMN "
-                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                        statement.getColumnName()) + " "
-                        + typeConverter.getDataType(statement.getColumnDataType(), false) + nullableString;
+                    + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " ALTER COLUMN "
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getColumnName()) + " "
+                    + typeConverter.getDataType(statement.getColumnDataType(), false) + nullableString;
         } else if (database instanceof MySQLDatabase) {
             sql = "ALTER TABLE "
-                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                + " MODIFY "
-                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                        statement.getColumnName()) + " "
-                        + typeConverter.getDataType(statement.getColumnDataType(), false) + nullableString;
+                    + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " MODIFY "
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getColumnName()) + " "
+                    + typeConverter.getDataType(statement.getColumnDataType(), false) + nullableString;
         } else if (database instanceof DerbyDatabase || database instanceof CacheDatabase) {
             sql = "ALTER TABLE "
-                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                + " ALTER COLUMN  "
-                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                        statement.getColumnName()) + nullableString;
+                    + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " ALTER COLUMN  "
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getColumnName()) + nullableString;
         } else if (database instanceof HsqlDatabase) {
             sql = "ALTER TABLE "
-                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                + " ALTER COLUMN "
-                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                        statement.getColumnName()) + " SET" + nullableString;
+                    + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " ALTER COLUMN "
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getColumnName()) + " SET" + nullableString;
         } else if (database instanceof H2Database) {
             sql = "ALTER TABLE "
-                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                + " ALTER COLUMN  "
-                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                        statement.getColumnName()) + " "
-                        + typeConverter.getDataType(statement.getColumnDataType(), false) + nullableString;
+                    + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " ALTER COLUMN  "
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getColumnName()) + " "
+                    + typeConverter.getDataType(statement.getColumnDataType(), false) + nullableString;
         } else if (database instanceof MaxDBDatabase) {
             sql = "ALTER TABLE "
-                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                + " COLUMN  "
-                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                        statement.getColumnName()) + (statement.isNullable() ? " DEFAULT NULL" : " NOT NULL");
+                    + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " COLUMN  "
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getColumnName()) + (statement.isNullable() ? " DEFAULT NULL" : " NOT NULL");
         } else if (database instanceof InformixDatabase) {
             // Informix simply omits the null for nullables
             if (statement.isNullable()) {
                 nullableString = "";
             }
             sql = "ALTER TABLE "
-                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                + " MODIFY ("
-                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                        statement.getColumnName()) + " "
-                        + typeConverter.getDataType(statement.getColumnDataType(), false) + nullableString + ")";
+                    + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " MODIFY ("
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getColumnName()) + " "
+                    + typeConverter.getDataType(statement.getColumnDataType(), false) + nullableString + ")";
         } else {
             sql = "ALTER TABLE "
-                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                + " ALTER COLUMN  "
-                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                        statement.getColumnName()) + (statement.isNullable() ? " DROP NOT NULL" : " SET NOT NULL");
+                    + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " ALTER COLUMN  "
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getColumnName()) + (statement.isNullable() ? " DROP NOT NULL" : " SET NOT NULL");
         }
 
         List<Sql> returnList = new ArrayList<Sql>();

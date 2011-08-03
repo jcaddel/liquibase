@@ -71,7 +71,7 @@ public class DatabaseSnapshotGeneratorFactory {
      * Get generator for database with highest priority.
      */
     public DatabaseSnapshot createSnapshot(Database database, String schema, Set<DiffStatusListener> listeners)
-    throws DatabaseException {
+            throws DatabaseException {
         return getGenerator(database).createSnapshot(database, schema, listeners);
     }
 

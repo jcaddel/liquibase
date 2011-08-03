@@ -35,7 +35,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
     public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE TABLE ")
-        .append(database.escapeTableName(statement.getSchemaName(), statement.getTableName())).append(" ");
+                .append(database.escapeTableName(statement.getSchemaName(), statement.getTableName())).append(" ");
         buffer.append("(");
         Iterator<String> columnIterator = statement.getColumns().iterator();
         while (columnIterator.hasNext()) {
@@ -76,7 +76,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 } else {
                     LogFactory.getLogger().warning(
                             database.getTypeName() + " does not support autoincrement columns as request for "
-                            + (database.escapeTableName(statement.getSchemaName(), statement.getTableName())));
+                                    + (database.escapeTableName(statement.getSchemaName(), statement.getTableName())));
                 }
             }
 
@@ -151,8 +151,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 referencesString = database.getDefaultSchemaName() + "." + referencesString;
             }
             buffer.append(" FOREIGN KEY (")
-            .append(database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                    fkConstraint.getColumn())).append(") REFERENCES ").append(referencesString);
+                    .append(database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            fkConstraint.getColumn())).append(") REFERENCES ").append(referencesString);
 
             if (fkConstraint.isDeleteCascade()) {
                 buffer.append(" ON DELETE CASCADE");

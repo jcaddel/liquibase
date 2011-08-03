@@ -48,66 +48,66 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
             // do no escape the new column name. Otherwise it produce
             // "exec sp_rename '[dbo].[person].[usernae]', '[username]'"
             sql = "exec sp_rename '"
-                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                + "."
-                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                        statement.getOldColumnName()) + "', '" + statement.getNewColumnName() + "'";
+                    + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + "."
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getOldColumnName()) + "', '" + statement.getNewColumnName() + "'";
         } else if (database instanceof MySQLDatabase) {
             sql = "ALTER TABLE "
-                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                + " CHANGE "
-                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                        statement.getOldColumnName())
-                        + " "
-                        + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                                statement.getNewColumnName()) + " " + statement.getColumnDataType();
+                    + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " CHANGE "
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getOldColumnName())
+                    + " "
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getNewColumnName()) + " " + statement.getColumnDataType();
         } else if (database instanceof HsqlDatabase || database instanceof H2Database) {
             sql = "ALTER TABLE "
-                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                + " ALTER COLUMN "
-                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                        statement.getOldColumnName())
-                        + " RENAME TO "
-                        + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                                statement.getNewColumnName());
+                    + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " ALTER COLUMN "
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getOldColumnName())
+                    + " RENAME TO "
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getNewColumnName());
         } else if (database instanceof FirebirdDatabase) {
             sql = "ALTER TABLE "
-                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                + " ALTER COLUMN "
-                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                        statement.getOldColumnName())
-                        + " TO "
-                        + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                                statement.getNewColumnName());
+                    + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " ALTER COLUMN "
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getOldColumnName())
+                    + " TO "
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getNewColumnName());
         } else if ((database instanceof MaxDBDatabase)
-                // supported in Derby from version 10.3.1.4 (see "http://issues.apache.org/jira/browse/DERBY-1490")
+        // supported in Derby from version 10.3.1.4 (see "http://issues.apache.org/jira/browse/DERBY-1490")
                 || (database instanceof DerbyDatabase) || (database instanceof InformixDatabase)) {
             sql = "RENAME COLUMN "
-                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                + "."
-                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                        statement.getOldColumnName())
-                        + " TO "
-                        + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                                statement.getNewColumnName());
+                    + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + "."
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getOldColumnName())
+                    + " TO "
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getNewColumnName());
         } else if (database instanceof SybaseASADatabase) {
             sql = "ALTER TABLE "
-                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                + " RENAME "
-                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                        statement.getOldColumnName())
-                        + " TO "
-                        + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                                statement.getNewColumnName());
+                    + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " RENAME "
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getOldColumnName())
+                    + " TO "
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getNewColumnName());
         } else {
             sql = "ALTER TABLE "
-                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                + " RENAME COLUMN "
-                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                        statement.getOldColumnName())
-                        + " TO "
-                        + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                                statement.getNewColumnName());
+                    + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                    + " RENAME COLUMN "
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getOldColumnName())
+                    + " TO "
+                    + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                            statement.getNewColumnName());
         }
 
         return new Sql[] { new UnparsedSql(sql) };

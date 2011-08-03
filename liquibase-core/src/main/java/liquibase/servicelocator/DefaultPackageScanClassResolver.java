@@ -418,7 +418,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
         } catch (Exception e) {
             log.warning(
                     "Cannot examine class '" + fqn + "' due to a " + e.getClass().getName() + " with message: "
-                    + e.getMessage(), e);
+                            + e.getMessage(), e);
         }
     }
 

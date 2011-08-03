@@ -87,7 +87,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                     if (changeSet.getOnValidationFail().equals(ChangeSet.ValidationFailOption.MARK_RAN)) {
                         LogFactory.getLogger().info(
                                 "Skipping changeSet " + changeSet + " due to validation error(s): "
-                                + StringUtils.join(foundErrors.getErrorMessages(), ", "));
+                                        + StringUtils.join(foundErrors.getErrorMessages(), ", "));
                         changeSet.setValidationFailed(true);
                     } else {
                         validationErrors.addAll(foundErrors, changeSet);
@@ -152,8 +152,8 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
     public boolean validationPassed() {
         return invalidMD5Sums.size() == 0 && failedPreconditions.size() == 0 && errorPreconditions.size() == 0
-        && duplicateChangeSets.size() == 0 && changeValidationExceptions.size() == 0
-        && setupExceptions.size() == 0 && !validationErrors.hasErrors();
+                && duplicateChangeSets.size() == 0 && changeValidationExceptions.size() == 0
+                && setupExceptions.size() == 0 && !validationErrors.hasErrors();
     }
 
     public Database getDatabase() {

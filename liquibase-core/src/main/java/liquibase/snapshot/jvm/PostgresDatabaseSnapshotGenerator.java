@@ -59,7 +59,7 @@ public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
      */
     @Override
     protected void readUniqueConstraints(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
-    throws DatabaseException, SQLException {
+            throws DatabaseException, SQLException {
         Database database = snapshot.getDatabase();
         updateListeners("Reading unique constraints for " + database.toString() + " ...");
         List<UniqueConstraint> foundUC = new ArrayList<UniqueConstraint>();
@@ -67,9 +67,9 @@ public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
         ResultSet rs = null;
         try {
             statement = ((JdbcConnection) database.getConnection())
-            .getUnderlyingConnection()
-            .prepareStatement(
-                    "select pgc.conname, pgc.conrelid, pgc.conkey, pgcl.relname from pg_constraint pgc inner join pg_class pgcl on pgcl.oid = pgc.conrelid and pgcl.relkind ='r' where contype = 'u'");
+                    .getUnderlyingConnection()
+                    .prepareStatement(
+                            "select pgc.conname, pgc.conrelid, pgc.conkey, pgcl.relname from pg_constraint pgc inner join pg_class pgcl on pgcl.oid = pgc.conrelid and pgcl.relkind ='r' where contype = 'u'");
             rs = statement.executeQuery();
             while (rs.next()) {
                 String constraintName = rs.getString("conname");

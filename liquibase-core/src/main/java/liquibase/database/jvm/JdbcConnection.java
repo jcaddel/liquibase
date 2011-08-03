@@ -127,7 +127,7 @@ public class JdbcConnection implements DatabaseConnection {
     }
 
     public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
-    throws DatabaseException {
+            throws DatabaseException {
         try {
             return con.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability);
         } catch (SQLException e) {
@@ -237,7 +237,7 @@ public class JdbcConnection implements DatabaseConnection {
     }
 
     public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency)
-    throws DatabaseException {
+            throws DatabaseException {
         try {
             return con.prepareCall(sql, resultSetType, resultSetConcurrency);
         } catch (SQLException e) {
@@ -263,7 +263,7 @@ public class JdbcConnection implements DatabaseConnection {
     }
 
     public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
-    throws DatabaseException {
+            throws DatabaseException {
         try {
             return con.prepareStatement(sql, resultSetType, resultSetConcurrency);
         } catch (SQLException e) {
@@ -409,7 +409,7 @@ public class JdbcConnection implements DatabaseConnection {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof JdbcConnection
-        && this.getUnderlyingConnection().equals(((JdbcConnection) obj).getUnderlyingConnection());
+                && this.getUnderlyingConnection().equals(((JdbcConnection) obj).getUnderlyingConnection());
 
     }
 

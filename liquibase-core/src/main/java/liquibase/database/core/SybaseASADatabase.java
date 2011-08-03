@@ -172,7 +172,7 @@ public class SybaseASADatabase extends AbstractDatabase {
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return "Adaptive Server Anywhere".equalsIgnoreCase(conn.getDatabaseProductName())
-        || "SQL Anywhere".equalsIgnoreCase(conn.getDatabaseProductName());
+                || "SQL Anywhere".equalsIgnoreCase(conn.getDatabaseProductName());
     }
 
     @Override

@@ -111,8 +111,8 @@ public abstract class JdbcUtils {
      */
     public static boolean isNumeric(int sqlType) {
         return Types.BIT == sqlType || Types.BIGINT == sqlType || Types.DECIMAL == sqlType || Types.DOUBLE == sqlType
-        || Types.FLOAT == sqlType || Types.INTEGER == sqlType || Types.NUMERIC == sqlType
-        || Types.REAL == sqlType || Types.SMALLINT == sqlType || Types.TINYINT == sqlType;
+                || Types.FLOAT == sqlType || Types.INTEGER == sqlType || Types.NUMERIC == sqlType
+                || Types.REAL == sqlType || Types.SMALLINT == sqlType || Types.TINYINT == sqlType;
     }
 
     /**

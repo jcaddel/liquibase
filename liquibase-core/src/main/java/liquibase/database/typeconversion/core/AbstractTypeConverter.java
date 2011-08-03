@@ -472,7 +472,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
                 return translatedTypeName;
             } else if (database instanceof OracleDatabase && (translatedTypeName.equals("VARCHAR2"))) {
                 return translatedTypeName + "(" + referenceColumn.getColumnSize() + " "
-                + referenceColumn.getLengthSemantics() + ")";
+                        + referenceColumn.getLengthSemantics() + ")";
             } else if (database instanceof MySQLDatabase && translatedTypeName.equalsIgnoreCase("DOUBLE")) {
                 return translatedTypeName;
             }
@@ -491,7 +491,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         } else {
             LogFactory.getLogger().warning(
                     "Unknown Data Type: " + referenceColumn.getDataType() + " (" + referenceColumn.getTypeName()
-                    + ").  Assuming it does not take parameters");
+                            + ").  Assuming it does not take parameters");
             dataType = referenceColumn.getTypeName();
         }
         return dataType;

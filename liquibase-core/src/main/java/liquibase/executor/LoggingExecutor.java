@@ -66,7 +66,7 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
 
     @Override
     public Map call(CallableSqlStatement csc, List declaredParameters, List<SqlVisitor> sqlVisitors)
-    throws DatabaseException {
+            throws DatabaseException {
         throw new DatabaseException("Do not know how to output callable statement");
     }
 
@@ -132,7 +132,7 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
 
     @Override
     public Object queryForObject(SqlStatement sql, Class requiredType, List<SqlVisitor> sqlVisitors)
-    throws DatabaseException {
+            throws DatabaseException {
         return delegatedReadExecutor.queryForObject(sql, requiredType, sqlVisitors);
     }
 
@@ -170,7 +170,7 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
 
     @Override
     public List queryForList(SqlStatement sql, Class elementType, List<SqlVisitor> sqlVisitors)
-    throws DatabaseException {
+            throws DatabaseException {
         return delegatedReadExecutor.queryForList(sql, elementType, sqlVisitors);
     }
 

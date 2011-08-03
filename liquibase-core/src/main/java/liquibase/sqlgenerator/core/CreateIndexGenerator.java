@@ -48,7 +48,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
             if (associatedWith != null
                     && (associatedWith.contains(Index.MARK_PRIMARY_KEY)
                             || associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT) || associatedWith
-                            .contains(Index.MARK_FOREIGN_KEY))) {
+                                .contains(Index.MARK_FOREIGN_KEY))) {
                 return new Sql[0];
             }
         }

@@ -49,19 +49,19 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
 
         if (database instanceof MSSQLDatabase) {
             sql = "exec sp_rename '" + database.escapeViewName(statement.getSchemaName(), statement.getOldViewName())
-            + "', '" + statement.getNewViewName() + '\'';
+                    + "', '" + statement.getNewViewName() + '\'';
         } else if (database instanceof MySQLDatabase) {
             sql = "RENAME TABLE " + database.escapeViewName(statement.getSchemaName(), statement.getOldViewName())
-            + " TO " + database.escapeViewName(statement.getSchemaName(), statement.getNewViewName());
+                    + " TO " + database.escapeViewName(statement.getSchemaName(), statement.getNewViewName());
         } else if (database instanceof PostgresDatabase) {
             sql = "ALTER TABLE " + database.escapeViewName(statement.getSchemaName(), statement.getOldViewName())
-            + " RENAME TO " + database.escapeViewName(null, statement.getNewViewName());
+                    + " RENAME TO " + database.escapeViewName(null, statement.getNewViewName());
         } else if (database instanceof MaxDBDatabase) {
             sql = "RENAME VIEW " + database.escapeViewName(statement.getSchemaName(), statement.getOldViewName())
-            + " TO " + database.escapeViewName(null, statement.getNewViewName());
+                    + " TO " + database.escapeViewName(null, statement.getNewViewName());
         } else {
             sql = "RENAME " + database.escapeViewName(statement.getSchemaName(), statement.getOldViewName()) + " TO "
-            + database.escapeViewName(null, statement.getNewViewName());
+                    + database.escapeViewName(null, statement.getNewViewName());
         }
 
         return new Sql[] { new UnparsedSql(sql) };

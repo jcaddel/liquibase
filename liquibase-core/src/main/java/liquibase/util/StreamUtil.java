@@ -48,7 +48,7 @@ public class StreamUtil {
     public static String getStreamContents(InputStream ins, String charsetName) throws IOException {
 
         InputStreamReader reader = (charsetName != null) ? new InputStreamReader(ins, charsetName)
-        : new InputStreamReader(ins);
+                : new InputStreamReader(ins);
         return getReaderContents(reader);
     }
 

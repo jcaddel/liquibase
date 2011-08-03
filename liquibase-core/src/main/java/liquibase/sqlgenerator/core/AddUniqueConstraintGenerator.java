@@ -20,8 +20,8 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
     @Override
     public boolean supports(AddUniqueConstraintStatement statement, Database database) {
         return !(database instanceof SQLiteDatabase) && !(database instanceof MSSQLDatabase)
-        && !(database instanceof SybaseDatabase) && !(database instanceof SybaseASADatabase)
-        && !(database instanceof InformixDatabase);
+                && !(database instanceof SybaseDatabase) && !(database instanceof SybaseASADatabase)
+                && !(database instanceof InformixDatabase);
     }
 
     @Override

@@ -35,11 +35,11 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
         if (statement.getConstraintName() == null || database instanceof MySQLDatabase
                 || database instanceof SybaseASADatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-            + " ADD PRIMARY KEY (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";
+                    + " ADD PRIMARY KEY (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";
         } else {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-            + " ADD CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName())
-            + " PRIMARY KEY (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";
+                    + " ADD CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName())
+                    + " PRIMARY KEY (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";
         }
 
         if (StringUtils.trimToNull(statement.getTablespace()) != null && database.supportsTablespaces()) {

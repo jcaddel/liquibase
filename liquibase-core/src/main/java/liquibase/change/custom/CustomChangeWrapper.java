@@ -64,7 +64,7 @@ public class CustomChangeWrapper extends AbstractChange {
             } catch (ClassCastException e) { // fails in Ant in particular
                 try {
                     customChange = (CustomChange) Thread.currentThread().getContextClassLoader().loadClass(className)
-                    .newInstance();
+                            .newInstance();
                 } catch (ClassNotFoundException e1) {
                     customChange = (CustomChange) Class.forName(className).newInstance();
                 }
@@ -131,7 +131,7 @@ public class CustomChangeWrapper extends AbstractChange {
 
     @Override
     public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException,
-    RollbackImpossibleException {
+            RollbackImpossibleException {
         SqlStatement[] statements = null;
         try {
             configureCustomChange();

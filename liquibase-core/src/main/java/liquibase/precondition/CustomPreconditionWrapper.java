@@ -59,7 +59,7 @@ public class CustomPreconditionWrapper implements Precondition {
 
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
-    throws PreconditionFailedException, PreconditionErrorException {
+            throws PreconditionFailedException, PreconditionErrorException {
         CustomPrecondition customPrecondition;
         try {
             // System.out.println(classLoader.toString());
