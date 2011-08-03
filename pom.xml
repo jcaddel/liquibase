@@ -11,7 +11,7 @@
   <version>2.0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Liquibase</name>
-  <description>Liquibase is a tool for managing and executing database changes.</description>
+  <description>Liquibase is a tool for managing and executing database changes. </description>
   <url>http://www.liquibase.org</url>
   <organization>
     <name>Liquibase.org</name>
