@@ -1,31 +1,38 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
-import liquibase.database.typeconversion.TypeConverterFactory;
-import liquibase.database.core.*;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.Table;
-import liquibase.exception.ValidationErrors;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.core.AddColumnStatement;
-import liquibase.statement.core.AddForeignKeyConstraintStatement;
-import liquibase.statement.ColumnConstraint;
-import liquibase.statement.ForeignKeyConstraint;
-
-import javax.swing.*;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import liquibase.database.Database;
+import liquibase.database.core.CacheDatabase;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.H2Database;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.SybaseDatabase;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.Table;
+import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
+import liquibase.sql.Sql;
+import liquibase.sql.UnparsedSql;
+import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.statement.ColumnConstraint;
+import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.core.AddColumnStatement;
+import liquibase.statement.core.AddForeignKeyConstraintStatement;
+
 public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement> {
 
+    @Override
     public ValidationErrors validate(AddColumnStatement statement, Database database,
             SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
@@ -46,16 +53,17 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
         String alterTable = "ALTER TABLE "
-                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                + " ADD "
-                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                        statement.getColumnName())
-                + " "
-                + TypeConverterFactory.getInstance().findTypeConverter(database)
-                        .getDataType(statement.getColumnType(), statement.isAutoIncrement());
+            + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+            + " ADD "
+            + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                    statement.getColumnName())
+                    + " "
+                    + TypeConverterFactory.getInstance().findTypeConverter(database)
+                    .getDataType(statement.getColumnType(), statement.isAutoIncrement());
 
         if (statement.isAutoIncrement() && database.supportsAutoIncrement()) {
             alterTable += " " + database.getAutoIncrementClause();
@@ -82,7 +90,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         List<Sql> returnSql = new ArrayList<Sql>();
         returnSql.add(new UnparsedSql(alterTable, new Column().setTable(
                 new Table(statement.getTableName()).setSchema(statement.getSchemaName())).setName(
-                statement.getColumnName())));
+                        statement.getColumnName())));
 
         addForeignKeyStatements(statement, database, returnSql);
 
@@ -122,12 +130,12 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         if (defaultValue != null) {
             if (database instanceof MSSQLDatabase) {
                 clause += " CONSTRAINT "
-                        + ((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(),
-                                statement.getColumnName());
+                    + ((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(),
+                            statement.getColumnName());
             }
             clause += " DEFAULT "
-                    + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue)
-                            .convertObjectToString(defaultValue, database);
+                + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue)
+                .convertObjectToString(defaultValue, database);
         }
         return clause;
     }

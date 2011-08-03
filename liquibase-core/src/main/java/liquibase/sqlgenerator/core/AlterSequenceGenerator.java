@@ -1,11 +1,14 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.FirebirdDatabase;
+import liquibase.database.core.H2Database;
+import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.MaxDBDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AlterSequenceStatement;
 
@@ -16,6 +19,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
         return database.supportsSequences();
     }
 
+    @Override
     public ValidationErrors validate(AlterSequenceStatement alterSequenceStatement, Database database,
             SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
@@ -34,6 +38,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(AlterSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("ALTER SEQUENCE ");

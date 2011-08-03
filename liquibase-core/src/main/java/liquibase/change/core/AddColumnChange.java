@@ -1,19 +1,29 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
-import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.exception.ValidationErrors;
-import liquibase.statement.*;
-import liquibase.statement.core.AddColumnStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
-import liquibase.statement.core.UpdateStatement;
-import liquibase.util.StringUtils;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeWithColumns;
+import liquibase.change.ColumnConfig;
+import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
+import liquibase.exception.ValidationErrors;
+import liquibase.statement.AutoIncrementConstraint;
+import liquibase.statement.ColumnConstraint;
+import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.NotNullConstraint;
+import liquibase.statement.PrimaryKeyConstraint;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.UniqueConstraint;
+import liquibase.statement.core.AddColumnStatement;
+import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.statement.core.UpdateStatement;
+import liquibase.util.StringUtils;
 
 /**
  * Adds a column to an existing table.
@@ -45,10 +55,12 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         this.tableName = tableName;
     }
 
+    @Override
     public List<ColumnConfig> getColumns() {
         return columns;
     }
 
+    @Override
     public void addColumn(ColumnConfig column) {
         columns.add(column);
     }
@@ -66,6 +78,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         return validationErrors;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
 
         List<SqlStatement> sql = new ArrayList<SqlStatement>();
@@ -150,6 +163,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         return inverses.toArray(new Change[inverses.size()]);
     }
 
+    @Override
     public String getConfirmationMessage() {
         List<String> names = new ArrayList<String>(columns.size());
         for (ColumnConfig col : columns) {

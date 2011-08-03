@@ -1,14 +1,14 @@
 package liquibase.changelog;
 
-import liquibase.changelog.filter.*;
-import liquibase.changelog.visitor.ChangeSetVisitor;
-import liquibase.database.Database;
-import liquibase.exception.LiquibaseException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import liquibase.changelog.filter.ChangeSetFilter;
+import liquibase.changelog.visitor.ChangeSetVisitor;
+import liquibase.database.Database;
+import liquibase.exception.LiquibaseException;
 
 public class ChangeLogIterator {
     private DatabaseChangeLog databaseChangeLog;

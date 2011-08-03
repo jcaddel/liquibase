@@ -1,5 +1,9 @@
 package liquibase.sqlgenerator.core;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
@@ -12,10 +16,6 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddAutoIncrementStatement;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * SQLite does not support this ALTER TABLE operation until now. For more information see:
@@ -40,14 +40,17 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
 
         // define alter table logic
         SQLiteDatabase.AlterTableVisitor rename_alter_visitor = new SQLiteDatabase.AlterTableVisitor() {
+            @Override
             public ColumnConfig[] getColumnsToAdd() {
                 return new ColumnConfig[0];
             }
 
+            @Override
             public boolean copyThisColumn(ColumnConfig column) {
                 return true;
             }
 
+            @Override
             public boolean createThisColumn(ColumnConfig column) {
                 if (column.getName().equals(statement.getColumnName())) {
                     column.setAutoIncrement(true);
@@ -56,6 +59,7 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
                 return true;
             }
 
+            @Override
             public boolean createThisIndex(Index index) {
                 return true;
             }

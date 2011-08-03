@@ -1,5 +1,8 @@
 package liquibase.change.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import liquibase.change.AbstractChange;
 import liquibase.change.Change;
 import liquibase.change.ChangeMetaData;
@@ -14,9 +17,6 @@ import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetNullableStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Adds a not-null constraint to an existing column.
@@ -72,6 +72,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
 
         // // if (database instanceof SQLiteDatabase) {
@@ -88,7 +89,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         }
 
         statements
-                .add(new SetNullableStatement(schemaName, getTableName(), getColumnName(), getColumnDataType(), false));
+        .add(new SetNullableStatement(schemaName, getTableName(), getColumnName(), getColumnDataType(), false));
         if (database instanceof DB2Database) {
             statements.add(new ReorganizeTableStatement(schemaName, getTableName()));
         }
@@ -133,14 +134,17 @@ public class AddNotNullConstraintChange extends AbstractChange {
 
         // define alter table logic
         AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
+            @Override
             public ColumnConfig[] getColumnsToAdd() {
                 return new ColumnConfig[0];
             }
 
+            @Override
             public boolean copyThisColumn(ColumnConfig column) {
                 return true;
             }
 
+            @Override
             public boolean createThisColumn(ColumnConfig column) {
                 if (column.getName().equals(getColumnName())) {
                     column.getConstraints().setNullable(false);
@@ -148,6 +152,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
                 return true;
             }
 
+            @Override
             public boolean createThisIndex(Index index) {
                 return true;
             }
@@ -175,6 +180,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         return new Change[] { inverse };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Null constraint has been added to " + getTableName() + "." + getColumnName();
     }

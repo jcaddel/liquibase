@@ -1,7 +1,11 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.SybaseASADatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -16,6 +20,7 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
         return (!(database instanceof SQLiteDatabase));
     }
 
+    @Override
     public ValidationErrors validate(AddPrimaryKeyStatement addPrimaryKeyStatement, Database database,
             SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
@@ -24,16 +29,17 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(AddPrimaryKeyStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
         if (statement.getConstraintName() == null || database instanceof MySQLDatabase
                 || database instanceof SybaseASADatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                    + " ADD PRIMARY KEY (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";
+            + " ADD PRIMARY KEY (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";
         } else {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                    + " ADD CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName())
-                    + " PRIMARY KEY (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";
+            + " ADD CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName())
+            + " PRIMARY KEY (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";
         }
 
         if (StringUtils.trimToNull(statement.getTablespace()) != null && database.supportsTablespaces()) {

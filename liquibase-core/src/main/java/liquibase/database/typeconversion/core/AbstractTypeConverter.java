@@ -1,17 +1,5 @@
 package liquibase.database.typeconversion.core;
 
-import liquibase.change.ColumnConfig;
-import liquibase.database.Database;
-import liquibase.database.core.*;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.type.*;
-import liquibase.database.typeconversion.TypeConverter;
-import liquibase.exception.DateParseException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
-import liquibase.statement.DatabaseFunction;
-import liquibase.util.StringUtils;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Types;
@@ -19,8 +7,50 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 
+import liquibase.change.ColumnConfig;
+import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.H2Database;
+import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.type.BigIntType;
+import liquibase.database.structure.type.BlobType;
+import liquibase.database.structure.type.BooleanType;
+import liquibase.database.structure.type.CharType;
+import liquibase.database.structure.type.ClobType;
+import liquibase.database.structure.type.CurrencyType;
+import liquibase.database.structure.type.CustomType;
+import liquibase.database.structure.type.DataType;
+import liquibase.database.structure.type.DatabaseFunctionType;
+import liquibase.database.structure.type.DateTimeType;
+import liquibase.database.structure.type.DateType;
+import liquibase.database.structure.type.DoubleType;
+import liquibase.database.structure.type.FloatType;
+import liquibase.database.structure.type.IntType;
+import liquibase.database.structure.type.NVarcharType;
+import liquibase.database.structure.type.NumberType;
+import liquibase.database.structure.type.SmallIntType;
+import liquibase.database.structure.type.TextType;
+import liquibase.database.structure.type.TimeType;
+import liquibase.database.structure.type.TinyIntType;
+import liquibase.database.structure.type.UUIDType;
+import liquibase.database.structure.type.VarcharType;
+import liquibase.database.typeconversion.TypeConverter;
+import liquibase.exception.DateParseException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
+import liquibase.statement.DatabaseFunction;
+import liquibase.util.StringUtils;
+
 public abstract class AbstractTypeConverter implements TypeConverter {
 
+    @Override
     public Object convertDatabaseValueToObject(Object value, int databaseDataType, int firstParameter,
             int secondParameter, Database database) throws ParseException {
         if (value == null) {
@@ -33,6 +63,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         }
     }
 
+    @Override
     public DataType getDataType(Object object) {
         if (object instanceof BigInteger) {
             return getBigIntType();
@@ -145,6 +176,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
      * Returns the database-specific datatype for the given column configuration. This method will convert some generic
      * column types (e.g. boolean, currency) to the correct type for the current database.
      */
+    @Override
     public DataType getDataType(String columnTypeString, Boolean autoIncrement) {
         // Parse out data type and precision
         // Example cases: "CLOB", "java.sql.Types.CLOB", "CLOB(10000)", "java.sql.Types.CLOB(10000)
@@ -249,6 +281,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         }
     }
 
+    @Override
     public DataType getDataType(ColumnConfig columnConfig) {
         return getDataType(columnConfig.getType(), columnConfig.isAutoIncrement());
     }
@@ -256,6 +289,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
     /**
      * Returns the actual database-specific data type to use a "date" (no time information) column.
      */
+    @Override
     public DateType getDateType() {
         return new DateType();
     }
@@ -263,14 +297,17 @@ public abstract class AbstractTypeConverter implements TypeConverter {
     /**
      * Returns the actual database-specific data type to use a "time" column.
      */
+    @Override
     public TimeType getTimeType() {
         return new TimeType();
     }
 
+    @Override
     public DateTimeType getDateTimeType() {
         return new DateTimeType();
     }
 
+    @Override
     public BigIntType getBigIntType() {
         return new BigIntType();
     }
@@ -278,6 +315,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
     /**
      * Returns the actual database-specific data type to use for a "char" column.
      */
+    @Override
     public CharType getCharType() {
         return new CharType();
     }
@@ -285,6 +323,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
     /**
      * Returns the actual database-specific data type to use for a "varchar" column.
      */
+    @Override
     public VarcharType getVarcharType() {
         return new VarcharType();
     }
@@ -301,6 +340,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
      * 
      * @return database-specific type for float
      */
+    @Override
     public FloatType getFloatType() {
         return new FloatType();
     }
@@ -310,6 +350,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
      * 
      * @return database-specific type for double
      */
+    @Override
     public DoubleType getDoubleType() {
         return new DoubleType();
     }
@@ -319,6 +360,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
      * 
      * @return database-specific type for int
      */
+    @Override
     public IntType getIntType() {
         return new IntType();
     }
@@ -328,6 +370,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
      * 
      * @return database-specific type for tinyint
      */
+    @Override
     public TinyIntType getTinyIntType() {
         return new TinyIntType();
     }
@@ -336,6 +379,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         return new SmallIntType();
     }
 
+    @Override
     public BooleanType getBooleanType() {
         return new BooleanType();
     }
@@ -344,30 +388,37 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         return new NumberType();
     }
 
+    @Override
     public CurrencyType getCurrencyType() {
         return new CurrencyType();
     }
 
+    @Override
     public UUIDType getUUIDType() {
         return new UUIDType();
     }
 
+    @Override
     public TextType getTextType() {
         return getClobType();
     }
 
+    @Override
     public ClobType getClobType() {
         return new ClobType();
     }
 
+    @Override
     public BlobType getBlobType() {
         return new BlobType();
     }
 
+    @Override
     public BlobType getLongBlobType() {
         return getBlobType();
     }
 
+    @Override
     public String convertToDatabaseTypeString(Column referenceColumn, Database database) {
 
         List<Integer> noParens = Arrays.asList(Types.ARRAY, Types.BIGINT, Types.BINARY, Types.BIT, Types.BLOB,
@@ -421,7 +472,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
                 return translatedTypeName;
             } else if (database instanceof OracleDatabase && (translatedTypeName.equals("VARCHAR2"))) {
                 return translatedTypeName + "(" + referenceColumn.getColumnSize() + " "
-                        + referenceColumn.getLengthSemantics() + ")";
+                + referenceColumn.getLengthSemantics() + ")";
             } else if (database instanceof MySQLDatabase && translatedTypeName.equalsIgnoreCase("DOUBLE")) {
                 return translatedTypeName;
             }
@@ -440,7 +491,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         } else {
             LogFactory.getLogger().warning(
                     "Unknown Data Type: " + referenceColumn.getDataType() + " (" + referenceColumn.getTypeName()
-                            + ").  Assuming it does not take parameters");
+                    + ").  Assuming it does not take parameters");
             dataType = referenceColumn.getTypeName();
         }
         return dataType;

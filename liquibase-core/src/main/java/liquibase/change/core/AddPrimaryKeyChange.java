@@ -1,5 +1,8 @@
 package liquibase.change.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import liquibase.change.AbstractChange;
 import liquibase.change.Change;
 import liquibase.change.ChangeMetaData;
@@ -13,9 +16,6 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddPrimaryKeyStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Creates a primary key out of an existing column or set of columns.
@@ -72,6 +72,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.tablespace = tablespace;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
 
         String schemaName = getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName();
@@ -99,14 +100,17 @@ public class AddPrimaryKeyChange extends AbstractChange {
 
         // define alter table logic
         AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
+            @Override
             public ColumnConfig[] getColumnsToAdd() {
                 return new ColumnConfig[0];
             }
 
+            @Override
             public boolean copyThisColumn(ColumnConfig column) {
                 return true;
             }
 
+            @Override
             public boolean createThisColumn(ColumnConfig column) {
                 String[] split_columns = getColumnNames().split("[ ]*,[ ]*");
                 for (String split_column : split_columns) {
@@ -117,6 +121,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
                 return true;
             }
 
+            @Override
             public boolean createThisIndex(Index index) {
                 return true;
             }
@@ -143,6 +148,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         return new Change[] { inverse, };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Primary key added to " + getTableName() + " (" + getColumnNames() + ")";
     }
