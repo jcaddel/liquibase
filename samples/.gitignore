@@ -1,2 +1,3 @@
-/liquibase-ext-changewithnestedtags
 /target
+/.settings
+/.project
