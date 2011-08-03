@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.kuali</groupId>
@@ -137,6 +138,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
+          <version>1.0.1</version>
           <executions>
             <execution>
               <id>enforce-java</id>
@@ -154,18 +156,26 @@
             </execution>
           </executions>
         </plugin>
+        <plugin>
+          <groupId>com.google.code.maven-svn-revision-number-plugin</groupId>
+          <artifactId>maven-svn-revision-number-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>generate-svn-info</id>
+              <phase>none</phase>
+            </execution>
+          </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+      </plugin>
+      <plugin>
         <groupId>com.google.code.maven-svn-revision-number-plugin</groupId>
         <artifactId>maven-svn-revision-number-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>generate-svn-info</id>
-            <phase>none</phase>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
