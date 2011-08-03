@@ -55,8 +55,7 @@ public class ChangeLogParameters {
      * @param key
      *            Name of the parameter
      * @return The parameter value or null if not found. (Note that null can also be return if it is the parameter
-     *         value. For strict parameter existence use {@link #hasValue(String)))
-     * 
+     *         value. For strict parameter existence use {@link #hasValue(String))) *
      */
     public Object getValue(String key) {
         ChangeLogParameter parameter = findParameter(key);

@@ -28,203 +28,203 @@ import liquibase.statement.SqlStatement;
  */
 public abstract class AbstractChange implements Change {
 
-	@ChangeProperty(includeInSerialization = false)
-	private ChangeMetaData changeMetaData;
+    @ChangeProperty(includeInSerialization = false)
+    private ChangeMetaData changeMetaData;
 
-	@ChangeProperty(includeInSerialization = false)
-	private ResourceAccessor resourceAccessor;
+    @ChangeProperty(includeInSerialization = false)
+    private ResourceAccessor resourceAccessor;
 
-	@ChangeProperty(includeInSerialization = false)
-	private ChangeSet changeSet;
+    @ChangeProperty(includeInSerialization = false)
+    private ChangeSet changeSet;
 
-	/**
-	 * Constructor with tag name and name
-	 * 
-	 * @param changeName
-	 *            the tag name for this change
-	 * @param changeDescription
-	 *            the name for this change
-	 */
-	protected AbstractChange(String changeName, String changeDescription, int priority) {
-		this.changeMetaData = new ChangeMetaData(changeName, changeDescription, priority);
-	}
+    /**
+     * Constructor with tag name and name
+     * 
+     * @param changeName
+     *            the tag name for this change
+     * @param changeDescription
+     *            the name for this change
+     */
+    protected AbstractChange(String changeName, String changeDescription, int priority) {
+        this.changeMetaData = new ChangeMetaData(changeName, changeDescription, priority);
+    }
 
-	@Override
-	public ChangeMetaData getChangeMetaData() {
-		return changeMetaData;
-	}
+    @Override
+    public ChangeMetaData getChangeMetaData() {
+        return changeMetaData;
+    }
 
-	protected void setPriority(int newPriority) {
-		this.changeMetaData.setPriority(newPriority);
-	}
+    protected void setPriority(int newPriority) {
+        this.changeMetaData.setPriority(newPriority);
+    }
 
-	@Override
-	public ChangeSet getChangeSet() {
-		return changeSet;
-	}
+    @Override
+    public ChangeSet getChangeSet() {
+        return changeSet;
+    }
 
-	@Override
-	public void setChangeSet(ChangeSet changeSet) {
-		this.changeSet = changeSet;
-	}
+    @Override
+    public void setChangeSet(ChangeSet changeSet) {
+        this.changeSet = changeSet;
+    }
 
-	@Override
-	public boolean requiresUpdatedDatabaseMetadata(Database database) {
-		for (SqlStatement statement : generateStatements(database)) {
-			if (SqlGeneratorFactory.getInstance().requiresCurrentDatabaseMetadata(statement, database)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    @Override
+    public boolean requiresUpdatedDatabaseMetadata(Database database) {
+        for (SqlStatement statement : generateStatements(database)) {
+            if (SqlGeneratorFactory.getInstance().requiresCurrentDatabaseMetadata(statement, database)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	@Override
-	public boolean supports(Database database) {
-		for (SqlStatement statement : generateStatements(database)) {
-			if (!SqlGeneratorFactory.getInstance().supports(statement, database)) {
-				return false;
-			}
-		}
-		return true;
-	}
+    @Override
+    public boolean supports(Database database) {
+        for (SqlStatement statement : generateStatements(database)) {
+            if (!SqlGeneratorFactory.getInstance().supports(statement, database)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-	@Override
-	public Warnings warn(Database database) {
-		Warnings warnings = new Warnings();
-		for (SqlStatement statement : generateStatements(database)) {
-			if (SqlGeneratorFactory.getInstance().supports(statement, database)) {
-				warnings.addAll(SqlGeneratorFactory.getInstance().warn(statement, database));
-			}
-		}
+    @Override
+    public Warnings warn(Database database) {
+        Warnings warnings = new Warnings();
+        for (SqlStatement statement : generateStatements(database)) {
+            if (SqlGeneratorFactory.getInstance().supports(statement, database)) {
+                warnings.addAll(SqlGeneratorFactory.getInstance().warn(statement, database));
+            }
+        }
 
-		return warnings;
-	}
+        return warnings;
+    }
 
-	@Override
-	public ValidationErrors validate(Database database) {
-		ValidationErrors changeValidationErrors = new ValidationErrors();
-		for (SqlStatement statement : generateStatements(database)) {
-			boolean supported = SqlGeneratorFactory.getInstance().supports(statement, database);
-			if (!supported) {
-				if (statement.skipOnUnsupported()) {
-					LogFactory.getLogger().info(
-							getChangeMetaData().getName() + " is not supported on " + database.getTypeName()
-							+ " but will continue");
-				} else {
-					changeValidationErrors.addError(getChangeMetaData().getName() + " is not supported on "
-							+ database.getTypeName());
-				}
-			} else {
-				changeValidationErrors.addAll(SqlGeneratorFactory.getInstance().validate(statement, database));
-			}
-		}
+    @Override
+    public ValidationErrors validate(Database database) {
+        ValidationErrors changeValidationErrors = new ValidationErrors();
+        for (SqlStatement statement : generateStatements(database)) {
+            boolean supported = SqlGeneratorFactory.getInstance().supports(statement, database);
+            if (!supported) {
+                if (statement.skipOnUnsupported()) {
+                    LogFactory.getLogger().info(
+                            getChangeMetaData().getName() + " is not supported on " + database.getTypeName()
+                                    + " but will continue");
+                } else {
+                    changeValidationErrors.addError(getChangeMetaData().getName() + " is not supported on "
+                            + database.getTypeName());
+                }
+            } else {
+                changeValidationErrors.addAll(SqlGeneratorFactory.getInstance().validate(statement, database));
+            }
+        }
 
-		return changeValidationErrors;
-	}
+        return changeValidationErrors;
+    }
 
-	/*
-	 * Skipped by this skeletal implementation
-	 * 
-	 * @see liquibase.change.Change#generateStatements(liquibase.database.Database)
-	 */
+    /*
+     * Skipped by this skeletal implementation
+     * 
+     * @see liquibase.change.Change#generateStatements(liquibase.database.Database)
+     */
 
-	/**
-	 * @see liquibase.change.Change#generateRollbackStatements(liquibase.database.Database)
-	 */
-	@Override
-	public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException,
-	RollbackImpossibleException {
-		return generateRollbackStatementsFromInverse(database);
-	}
+    /**
+     * @see liquibase.change.Change#generateRollbackStatements(liquibase.database.Database)
+     */
+    @Override
+    public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException,
+            RollbackImpossibleException {
+        return generateRollbackStatementsFromInverse(database);
+    }
 
-	/**
-	 * @see Change#supportsRollback(liquibase.database.Database)
-	 * @param database
-	 */
-	@Override
-	public boolean supportsRollback(Database database) {
-		return createInverses() != null;
-	}
+    /**
+     * @see Change#supportsRollback(liquibase.database.Database)
+     * @param database
+     */
+    @Override
+    public boolean supportsRollback(Database database) {
+        return createInverses() != null;
+    }
 
-	/**
-	 * @see liquibase.change.Change#generateCheckSum()
-	 */
-	@Override
-	public CheckSum generateCheckSum() {
-		return CheckSum.compute(new StringChangeLogSerializer().serialize(this));
-	}
+    /**
+     * @see liquibase.change.Change#generateCheckSum()
+     */
+    @Override
+    public CheckSum generateCheckSum() {
+        return CheckSum.compute(new StringChangeLogSerializer().serialize(this));
+    }
 
-	// ~ ------------------------------------------------------------------------------- private methods
-	/*
-	 * Generates rollback statements from the inverse changes returned by createInverses()
-	 * 
-	 * @param database the target {@link Database} associated to this change's rollback statements
-	 * 
-	 * @return an array of {@link String}s containing the rollback statements from the inverse changes
-	 * 
-	 * @throws UnsupportedChangeException if this change is not supported by the {@link Database} passed as argument
-	 * 
-	 * @throws RollbackImpossibleException if rollback is not supported for this change
-	 */
-	private SqlStatement[] generateRollbackStatementsFromInverse(Database database) throws UnsupportedChangeException,
-	RollbackImpossibleException {
-		Change[] inverses = createInverses();
-		if (inverses == null) {
-			throw new RollbackImpossibleException("No inverse to " + getClass().getName() + " created");
-		}
+    // ~ ------------------------------------------------------------------------------- private methods
+    /*
+     * Generates rollback statements from the inverse changes returned by createInverses()
+     * 
+     * @param database the target {@link Database} associated to this change's rollback statements
+     * 
+     * @return an array of {@link String}s containing the rollback statements from the inverse changes
+     * 
+     * @throws UnsupportedChangeException if this change is not supported by the {@link Database} passed as argument
+     * 
+     * @throws RollbackImpossibleException if rollback is not supported for this change
+     */
+    private SqlStatement[] generateRollbackStatementsFromInverse(Database database) throws UnsupportedChangeException,
+            RollbackImpossibleException {
+        Change[] inverses = createInverses();
+        if (inverses == null) {
+            throw new RollbackImpossibleException("No inverse to " + getClass().getName() + " created");
+        }
 
-		List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
-		for (Change inverse : inverses) {
-			statements.addAll(Arrays.asList(inverse.generateStatements(database)));
-		}
+        for (Change inverse : inverses) {
+            statements.addAll(Arrays.asList(inverse.generateStatements(database)));
+        }
 
-		return statements.toArray(new SqlStatement[statements.size()]);
-	}
+        return statements.toArray(new SqlStatement[statements.size()]);
+    }
 
-	/*
-	 * Create inverse changes that can roll back this change. This method is intended to be overriden by the subclasses
-	 * that can create inverses.
-	 * 
-	 * @return an array of {@link Change}s containing the inverse changes that can roll back this change
-	 */
-	protected Change[] createInverses() {
-		return null;
-	}
+    /*
+     * Create inverse changes that can roll back this change. This method is intended to be overriden by the subclasses
+     * that can create inverses.
+     * 
+     * @return an array of {@link Change}s containing the inverse changes that can roll back this change
+     */
+    protected Change[] createInverses() {
+        return null;
+    }
 
-	/**
-	 * Default implementation that stores the file opener provided when the Change was created.
-	 */
-	@Override
-	public void setResourceAccessor(ResourceAccessor resourceAccessor) {
-		this.resourceAccessor = resourceAccessor;
-	}
+    /**
+     * Default implementation that stores the file opener provided when the Change was created.
+     */
+    @Override
+    public void setResourceAccessor(ResourceAccessor resourceAccessor) {
+        this.resourceAccessor = resourceAccessor;
+    }
 
-	/**
-	 * Returns the FileOpen as provided by the creating ChangeLog.
-	 * 
-	 * @return The file opener
-	 */
-	public ResourceAccessor getResourceAccessor() {
-		return resourceAccessor;
-	}
+    /**
+     * Returns the FileOpen as provided by the creating ChangeLog.
+     * 
+     * @return The file opener
+     */
+    public ResourceAccessor getResourceAccessor() {
+        return resourceAccessor;
+    }
 
-	/**
-	 * Most Changes don't need to do any setup. This implements a no-op
-	 */
-	@Override
-	public void init() throws SetupException {
+    /**
+     * Most Changes don't need to do any setup. This implements a no-op
+     */
+    @Override
+    public void init() throws SetupException {
 
-	}
+    }
 
-	@Override
-	public Set<DatabaseObject> getAffectedDatabaseObjects(Database database) {
-		Set<DatabaseObject> affectedObjects = new HashSet<DatabaseObject>();
-		for (SqlStatement statement : generateStatements(database)) {
-			affectedObjects.addAll(SqlGeneratorFactory.getInstance().getAffectedDatabaseObjects(statement, database));
-		}
+    @Override
+    public Set<DatabaseObject> getAffectedDatabaseObjects(Database database) {
+        Set<DatabaseObject> affectedObjects = new HashSet<DatabaseObject>();
+        for (SqlStatement statement : generateStatements(database)) {
+            affectedObjects.addAll(SqlGeneratorFactory.getInstance().getAffectedDatabaseObjects(statement, database));
+        }
 
-		return affectedObjects;
-	}
+        return affectedObjects;
+    }
 
 }
