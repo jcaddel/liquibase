@@ -1,13 +1,17 @@
 package liquibase.change;
 
+import java.util.Set;
+
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.*;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.SetupException;
+import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
-
-import java.util.Set;
 
 /**
  * Interface all changes (refactorings) implement.
@@ -50,77 +54,77 @@ import java.util.Set;
  */
 public interface Change {
 
-    public ChangeMetaData getChangeMetaData();
+	public ChangeMetaData getChangeMetaData();
 
-    public ChangeSet getChangeSet();
+	public ChangeSet getChangeSet();
 
-    public void setChangeSet(ChangeSet changeSet);
+	public void setChangeSet(ChangeSet changeSet);
 
-    /**
-     * Sets the fileOpener that should be used for any file loading and resource finding for files that are provided by
-     * the user.
-     */
-    public void setResourceAccessor(ResourceAccessor resourceAccessor);
+	/**
+	 * Sets the fileOpener that should be used for any file loading and resource finding for files that are provided by
+	 * the user.
+	 */
+	public void setResourceAccessor(ResourceAccessor resourceAccessor);
 
-    /**
-     * This method will be called after the no arg constructor and all of the properties have been set to allow the task
-     * to do any heavy tasks or more importantly generate any exceptions to report to the user about the settings
-     * provided.
-     */
-    public void init() throws SetupException;
+	/**
+	 * This method will be called after the no arg constructor and all of the properties have been set to allow the task
+	 * to do any heavy tasks or more importantly generate any exceptions to report to the user about the settings
+	 * provided.
+	 */
+	public void init() throws SetupException;
 
-    boolean supports(Database database);
+	boolean supports(Database database);
 
-    public Warnings warn(Database database);
+	public Warnings warn(Database database);
 
-    public ValidationErrors validate(Database database);
+	public ValidationErrors validate(Database database);
 
-    public Set<DatabaseObject> getAffectedDatabaseObjects(Database database);
+	public Set<DatabaseObject> getAffectedDatabaseObjects(Database database);
 
-    /**
-     * Calculates the checksum (currently MD5 hash) for the current configuration of this change.
-     */
-    public CheckSum generateCheckSum();
+	/**
+	 * Calculates the checksum (currently MD5 hash) for the current configuration of this change.
+	 */
+	public CheckSum generateCheckSum();
 
-    /**
-     * @return Confirmation message to be displayed after the change is executed
-     */
-    public String getConfirmationMessage();
+	/**
+	 * @return Confirmation message to be displayed after the change is executed
+	 */
+	public String getConfirmationMessage();
 
-    /**
-     * Generates the SQL statements required to run the change
-     * 
-     * @param database
-     *            databasethe target {@link liquibase.database.Database} associated to this change's statements
-     * @return an array of {@link String}s with the statements
-     */
-    public SqlStatement[] generateStatements(Database database);
+	/**
+	 * Generates the SQL statements required to run the change
+	 * 
+	 * @param database
+	 *            databasethe target {@link liquibase.database.Database} associated to this change's statements
+	 * @return an array of {@link String}s with the statements
+	 */
+	public SqlStatement[] generateStatements(Database database);
 
-    /**
-     * Can this change be rolled back
-     * 
-     * @return <i>true</i> if rollback is supported, <i>false</i> otherwise
-     * @param database
-     */
-    public boolean supportsRollback(Database database);
+	/**
+	 * Can this change be rolled back
+	 * 
+	 * @return <i>true</i> if rollback is supported, <i>false</i> otherwise
+	 * @param database
+	 */
+	public boolean supportsRollback(Database database);
 
-    /**
-     * Generates the SQL statements required to roll back the change
-     * 
-     * @param database
-     *            database databasethe target {@link Database} associated to this change's rollback statements
-     * @return an array of {@link String}s with the rollback statements
-     * @throws UnsupportedChangeException
-     *             if this change is not supported by the {@link Database} passed as argument
-     * @throws RollbackImpossibleException
-     *             if rollback is not supported for this change
-     */
-    public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException,
-            RollbackImpossibleException;
+	/**
+	 * Generates the SQL statements required to roll back the change
+	 * 
+	 * @param database
+	 *            database databasethe target {@link Database} associated to this change's rollback statements
+	 * @return an array of {@link String}s with the rollback statements
+	 * @throws UnsupportedChangeException
+	 *             if this change is not supported by the {@link Database} passed as argument
+	 * @throws RollbackImpossibleException
+	 *             if rollback is not supported for this change
+	 */
+	public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException,
+	RollbackImpossibleException;
 
-    /**
-     * Does this change require access to the database metadata? If true, the change cannot be used in an
-     * updateSql-style command.
-     */
-    public boolean requiresUpdatedDatabaseMetadata(Database database);
+	/**
+	 * Does this change require access to the database metadata? If true, the change cannot be used in an
+	 * updateSql-style command.
+	 */
+	public boolean requiresUpdatedDatabaseMetadata(Database database);
 }
