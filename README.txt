@@ -7,11 +7,12 @@ The pom's have been significantly altered:
 - Changed the <scm> section to reflect the location of the source on GitHub
 - All of the java based artifacts get deployed, including the example code
 
-The functionality of the source code is unchanged, but the source has been modified as follows:
+The full source tree has been modified as follows:
 
 - code formatting applied (a slightly modified version of the default Sun formatting conventions)
-- Import statements organized with .* imports replaced by explicit imports
-- A few other whitespace/formatting touch ups pointed out by checkstyle
+- Import statements organized
+- .* imports replaced by explicit imports
+- A few other whitespace/formatting touch ups as pointed out by checkstyle
 
 
 All three of the built in Maven lifecyles (clean, site, and default) work correctly.
