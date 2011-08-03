@@ -439,7 +439,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     }
 
     protected boolean handleIncludedChangeLog(String fileName, boolean isRelativePath, String relativeBaseFileName)
-    throws LiquibaseException {
+            throws LiquibaseException {
         if (!(fileName.endsWith(".xml") || fileName.endsWith(".sql"))) {
             log.debug(relativeBaseFileName + "/" + fileName + " is not a recognized file type");
             return false;
@@ -459,7 +459,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
             }
         }
         DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor)
-        .parse(fileName, changeLogParameters, resourceAccessor);
+                .parse(fileName, changeLogParameters, resourceAccessor);
         PreconditionContainer preconditions = changeLog.getPreconditions();
         if (preconditions != null) {
             if (null == databaseChangeLog.getPreconditions()) {
@@ -475,7 +475,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     }
 
     private void setProperty(Object object, String attributeName, String attributeValue) throws IllegalAccessException,
-    InvocationTargetException, CustomChangeException {
+            InvocationTargetException, CustomChangeException {
         if (object instanceof CustomChangeWrapper) {
             if (attributeName.equals("class")) {
                 ((CustomChangeWrapper) object).setClass(changeLogParameters.expandExpressions(attributeValue));

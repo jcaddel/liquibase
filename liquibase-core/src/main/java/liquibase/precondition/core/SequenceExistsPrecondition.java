@@ -45,7 +45,7 @@ public class SequenceExistsPrecondition implements Precondition {
 
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
-    throws PreconditionFailedException, PreconditionErrorException {
+            throws PreconditionFailedException, PreconditionErrorException {
         DatabaseSnapshot snapshot;
         try {
             snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, getSchemaName(), null);

@@ -46,11 +46,11 @@ public class SqlPrecondition implements Precondition {
 
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
-    throws PreconditionFailedException, PreconditionErrorException {
+            throws PreconditionFailedException, PreconditionErrorException {
         DatabaseConnection connection = database.getConnection();
         try {
             String result = (String) ExecutorService.getInstance().getExecutor(database)
-            .queryForObject(new RawSqlStatement(getSql().replaceFirst(";$", "")), String.class);
+                    .queryForObject(new RawSqlStatement(getSql().replaceFirst(";$", "")), String.class);
             if (result == null) {
                 throw new PreconditionFailedException("No rows returned from SQL Precondition", changeLog, this);
             }

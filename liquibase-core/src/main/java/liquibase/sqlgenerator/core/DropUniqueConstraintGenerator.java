@@ -33,20 +33,20 @@ public class DropUniqueConstraintGenerator extends AbstractSqlGenerator<DropUniq
         String sql;
         if (database instanceof MySQLDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-            + " DROP KEY " + database.escapeConstraintName(statement.getConstraintName());
+                    + " DROP KEY " + database.escapeConstraintName(statement.getConstraintName());
         } else if (database instanceof MaxDBDatabase) {
             sql = "DROP INDEX " + database.escapeConstraintName(statement.getConstraintName()) + " ON "
-            + database.escapeTableName(statement.getSchemaName(), statement.getTableName());
+                    + database.escapeTableName(statement.getSchemaName(), statement.getTableName());
         } else if (database instanceof OracleDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-            + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName())
-            + " DROP INDEX";
+                    + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName())
+                    + " DROP INDEX";
         } else if (database instanceof SybaseASADatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-            + " DROP UNIQUE (" + statement.getUniqueColumns() + ")";
+                    + " DROP UNIQUE (" + statement.getUniqueColumns() + ")";
         } else {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-            + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
+                    + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
         }
 
         return new Sql[] { new UnparsedSql(sql) };

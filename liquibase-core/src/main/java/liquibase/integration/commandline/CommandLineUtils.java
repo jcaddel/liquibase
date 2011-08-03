@@ -30,7 +30,7 @@ public class CommandLineUtils {
 
     public static Database createDatabaseObject(ClassLoader classLoader, String url, String username, String password,
             String driver, String defaultSchemaName, String databaseClass, String driverPropertiesFile)
-    throws DatabaseException {
+            throws DatabaseException {
         if (driver == null) {
             driver = DatabaseFactory.getInstance().findDefaultDriver(url);
         }
@@ -109,7 +109,7 @@ public class CommandLineUtils {
     }
 
     public static void doDiffToChangeLog(String changeLogFile, Database referenceDatabase, Database targetDatabase)
-    throws DatabaseException, IOException, ParserConfigurationException {
+            throws DatabaseException, IOException, ParserConfigurationException {
         Diff diff = new Diff(referenceDatabase, targetDatabase);
         diff.addStatusListener(new OutDiffStatusListener());
         DiffResult diffResult = diff.compare();

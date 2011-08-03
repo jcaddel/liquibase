@@ -27,7 +27,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         validationErrors.checkRequiredField("sequenceName", statement.getSequenceName());
 
         validationErrors
-        .checkDisallowedField("startValue", statement.getStartValue(), database, FirebirdDatabase.class);
+                .checkDisallowedField("startValue", statement.getStartValue(), database, FirebirdDatabase.class);
         validationErrors.checkDisallowedField("incrementBy", statement.getIncrementBy(), database,
                 FirebirdDatabase.class);
 

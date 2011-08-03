@@ -66,7 +66,7 @@ public class IndexExistsPrecondition implements Precondition {
 
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
-    throws PreconditionFailedException, PreconditionErrorException {
+            throws PreconditionFailedException, PreconditionErrorException {
         try {
             if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database)
                     .hasIndex(getSchemaName(), getTableName(), getIndexName(), database, getColumnNames())) {

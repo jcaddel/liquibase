@@ -56,7 +56,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
                 statement.addPrimaryKeyColumn(
                         column.getName(),
                         TypeConverterFactory.getInstance().findTypeConverter(database)
-                        .getDataType(column.getType(), isAutoIncrement), defaultValue,
+                                .getDataType(column.getType(), isAutoIncrement), defaultValue,
                         constraints.getPrimaryKeyName(), constraints.getPrimaryKeyTablespace());
 
             } else {
@@ -86,7 +86,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
                 if (constraints.isUnique() != null && constraints.isUnique()) {
                     statement.addColumnConstraint(new UniqueConstraint(constraints.getUniqueConstraintName())
-                    .addColumns(column.getName()));
+                            .addColumns(column.getName()));
                 }
             }
 

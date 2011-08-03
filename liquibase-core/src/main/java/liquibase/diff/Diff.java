@@ -268,8 +268,8 @@ public class Diff {
             if (!referenceSnapshot.getColumns().contains(targetColumn)
                     && (targetColumn.getTable() == null || !diffResult.getUnexpectedTables().contains(
                             targetColumn.getTable()))
-                            && (targetColumn.getView() == null || !diffResult.getUnexpectedViews().contains(
-                                    targetColumn.getView()))) {
+                    && (targetColumn.getView() == null || !diffResult.getUnexpectedViews().contains(
+                            targetColumn.getView()))) {
                 diffResult.addUnexpectedColumn(targetColumn);
             } else if (targetColumn.getTable() != null
                     && !diffResult.getUnexpectedTables().contains(targetColumn.getTable())) {

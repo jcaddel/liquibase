@@ -201,7 +201,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
     }
 
     private boolean parseBoolean(Matcher matcher, ChangeSet changeSet, boolean defaultValue)
-    throws ChangeLogParseException {
+            throws ChangeLogParseException {
         boolean stripComments = defaultValue;
         if (matcher.matches()) {
             try {
@@ -215,7 +215,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
     }
 
     protected InputStream openChangeLogFile(String physicalChangeLogLocation, ResourceAccessor resourceAccessor)
-    throws IOException {
+            throws IOException {
         return resourceAccessor.getResourceAsStream(physicalChangeLogLocation);
     }
 }

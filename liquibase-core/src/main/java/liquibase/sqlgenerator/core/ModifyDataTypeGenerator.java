@@ -50,7 +50,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
     @Override
     public Sql[] generateSql(ModifyDataTypeStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String alterTable = "ALTER TABLE "
-            + database.escapeTableName(statement.getSchemaName(), statement.getTableName());
+                + database.escapeTableName(statement.getSchemaName(), statement.getTableName());
 
         // add "MODIFY"
         alterTable += " " + getModifyString(database) + " ";
@@ -63,7 +63,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
 
         // add column type
         alterTable += TypeConverterFactory.getInstance().findTypeConverter(database)
-        .getDataType(statement.getNewDataType(), false);
+                .getDataType(statement.getNewDataType(), false);
 
         return new Sql[] { new UnparsedSql(alterTable) };
     }

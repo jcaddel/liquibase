@@ -76,7 +76,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
 
     @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database)
-    throws LiquibaseException {
+            throws LiquibaseException {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
         if (rootChangeLogName == null) {
             rootChangeLogName = changeSet.getFilePath();
@@ -94,7 +94,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
 
         boolean toRun = runStatus.equals(ChangeSet.RunStatus.NOT_RAN)
-        || runStatus.equals(ChangeSet.RunStatus.RUN_AGAIN);
+                || runStatus.equals(ChangeSet.RunStatus.RUN_AGAIN);
         for (Change change : changeSet.getChanges()) {
             if (toRun) {
                 changesToRunByAuthor.get(changeSet.getAuthor()).add(change);
@@ -132,7 +132,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
     }
 
     public void writeHTML(File rootOutputDir, ResourceAccessor resourceAccessor) throws IOException, DatabaseException,
-    DatabaseHistoryException {
+            DatabaseHistoryException {
         ChangeLogWriter changeLogWriter = new ChangeLogWriter(resourceAccessor, rootOutputDir);
         HTMLWriter authorWriter = new AuthorWriter(rootOutputDir, database);
         HTMLWriter tableWriter = new TableWriter(rootOutputDir, database);
@@ -159,7 +159,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
 
         for (Table table : snapshot.getTables()) {
             tableWriter
-            .writeHTML(table, changesByObject.get(table), changesToRunByObject.get(table), rootChangeLogName);
+                    .writeHTML(table, changesByObject.get(table), changesToRunByObject.get(table), rootChangeLogName);
         }
 
         for (Column column : snapshot.getColumns()) {

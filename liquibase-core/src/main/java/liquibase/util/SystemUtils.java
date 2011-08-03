@@ -1218,7 +1218,7 @@ public class SystemUtils {
      * @since 2.1
      */
     public static final boolean IS_OS_UNIX = IS_OS_AIX || IS_OS_HP_UX || IS_OS_IRIX || IS_OS_LINUX || IS_OS_MAC_OSX
-    || IS_OS_SOLARIS || IS_OS_SUN_OS;
+            || IS_OS_SOLARIS || IS_OS_SUN_OS;
 
     /**
      * <p>

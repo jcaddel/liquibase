@@ -177,8 +177,8 @@ public class Column implements DatabaseObject, Comparable<Column> {
             Column column = (Column) o;
 
             return name.equalsIgnoreCase(column.name)
-            && !(table != null ? !table.equals(column.table) : column.table != null)
-            && !(view != null ? !view.equals(column.view) : column.view != null);
+                    && !(table != null ? !table.equals(column.table) : column.table != null)
+                    && !(view != null ? !view.equals(column.view) : column.view != null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -227,9 +227,9 @@ public class Column implements DatabaseObject, Comparable<Column> {
             return false;
         } else {
             return this.getDataType() != otherColumn.getDataType()
-            || this.getColumnSize() != otherColumn.getColumnSize()
-            || this.getDecimalDigits() != otherColumn.getDecimalDigits()
-            || this.getLengthSemantics() != otherColumn.getLengthSemantics();
+                    || this.getColumnSize() != otherColumn.getColumnSize()
+                    || this.getDecimalDigits() != otherColumn.getDecimalDigits()
+                    || this.getLengthSemantics() != otherColumn.getLengthSemantics();
         }
     }
 

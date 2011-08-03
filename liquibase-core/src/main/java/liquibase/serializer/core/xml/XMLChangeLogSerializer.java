@@ -107,13 +107,13 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         Document doc = documentBuilder.newDocument();
         Element changeLogElement = doc.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(),
-        "databaseChangeLog");
+                "databaseChangeLog");
 
         changeLogElement.setAttribute("xmlns", XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace());
         changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
         changeLogElement.setAttribute("xsi:schemaLocation",
                 "http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-"
-                + XMLChangeLogSAXParser.getSchemaVersion() + ".xsd");
+                        + XMLChangeLogSAXParser.getSchemaVersion() + ".xsd");
 
         doc.appendChild(changeLogElement);
         setCurrentChangeLogFileDOM(doc);
@@ -330,7 +330,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     public Element createNode(ChangeSet changeSet) {
         Element node = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(),
-        "changeSet");
+                "changeSet");
         node.setAttribute("id", changeSet.getId());
         node.setAttribute("author", changeSet.getAuthor());
 

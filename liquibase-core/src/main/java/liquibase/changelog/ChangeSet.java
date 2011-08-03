@@ -277,7 +277,7 @@ public class ChangeSet implements Conditional {
 
                     LogFactory.getLogger().info(
                             "Continuing past: " + toString()
-                            + " despite precondition failure due to onFail='CONTINUE': " + message);
+                                    + " despite precondition failure due to onFail='CONTINUE': " + message);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.MARK_RAN)) {
                     execType = ExecType.MARK_RAN;
                     skipChange = true;
@@ -453,7 +453,7 @@ public class ChangeSet implements Conditional {
 
     public String toString(boolean includeMD5Sum) {
         return filePath + "::" + getId() + "::" + getAuthor()
-        + (includeMD5Sum ? ("::(Checksum: " + generateCheckSum() + ")") : "");
+                + (includeMD5Sum ? ("::(Checksum: " + generateCheckSum() + ")") : "");
     }
 
     @Override

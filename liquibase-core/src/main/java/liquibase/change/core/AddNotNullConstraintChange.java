@@ -89,7 +89,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         }
 
         statements
-        .add(new SetNullableStatement(schemaName, getTableName(), getColumnName(), getColumnDataType(), false));
+                .add(new SetNullableStatement(schemaName, getTableName(), getColumnName(), getColumnDataType(), false));
         if (database instanceof DB2Database) {
             statements.add(new ReorganizeTableStatement(schemaName, getTableName()));
         }

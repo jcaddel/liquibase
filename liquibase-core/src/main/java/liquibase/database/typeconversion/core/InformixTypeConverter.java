@@ -52,13 +52,13 @@ public class InformixTypeConverter extends AbstractTypeConverter {
 
     private boolean isSerial(DataType type) {
         return INTEGER_PATTERN.matcher(type.getDataTypeName()).matches()
-        || SERIAL_PATTERN.matcher(type.getDataTypeName()).matches();
+                || SERIAL_PATTERN.matcher(type.getDataTypeName()).matches();
     }
 
     private boolean isSerial8(DataType type) {
         return INTEGER8_PATTERN.matcher(type.getDataTypeName()).matches()
-        || SERIAL8_PATTERN.matcher(type.getDataTypeName()).matches()
-        || "BIGINT".equalsIgnoreCase(type.getDataTypeName());
+                || SERIAL8_PATTERN.matcher(type.getDataTypeName()).matches()
+                || "BIGINT".equalsIgnoreCase(type.getDataTypeName());
     }
 
     @Override

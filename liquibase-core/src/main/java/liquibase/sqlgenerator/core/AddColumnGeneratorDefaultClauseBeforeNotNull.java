@@ -31,9 +31,9 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
     @Override
     public boolean supports(AddColumnStatement statement, Database database) {
         return database instanceof OracleDatabase || database instanceof HsqlDatabase || database instanceof H2Database
-        || database instanceof DerbyDatabase || database instanceof DB2Database
-        || database instanceof FirebirdDatabase || database instanceof SybaseDatabase
-        || database instanceof SybaseASADatabase || database instanceof InformixDatabase;
+                || database instanceof DerbyDatabase || database instanceof DB2Database
+                || database instanceof FirebirdDatabase || database instanceof SybaseDatabase
+                || database instanceof SybaseASADatabase || database instanceof InformixDatabase;
     }
 
     @Override
@@ -49,13 +49,13 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
     @Override
     public Sql[] generateSql(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String alterTable = "ALTER TABLE "
-            + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-            + " ADD "
-            + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                    statement.getColumnName())
-                    + " "
-                    + TypeConverterFactory.getInstance().findTypeConverter(database)
-                    .getDataType(statement.getColumnType(), statement.isAutoIncrement());
+                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                + " ADD "
+                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                        statement.getColumnName())
+                + " "
+                + TypeConverterFactory.getInstance().findTypeConverter(database)
+                        .getDataType(statement.getColumnType(), statement.isAutoIncrement());
 
         alterTable += getDefaultClause(statement, database);
 
@@ -87,7 +87,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
         List<Sql> returnSql = new ArrayList<Sql>();
         returnSql.add(new UnparsedSql(alterTable, new Column().setTable(
                 new Table(statement.getTableName()).setSchema(statement.getSchemaName())).setName(
-                        statement.getColumnName())));
+                statement.getColumnName())));
 
         addForeignKeyStatements(statement, database, returnSql);
 
@@ -99,8 +99,8 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
         Object defaultValue = statement.getDefaultValue();
         if (defaultValue != null) {
             clause += " DEFAULT "
-                + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue)
-                .convertObjectToString(defaultValue, database);
+                    + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue)
+                            .convertObjectToString(defaultValue, database);
         }
         return clause;
     }

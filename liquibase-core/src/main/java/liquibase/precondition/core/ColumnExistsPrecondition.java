@@ -53,7 +53,7 @@ public class ColumnExistsPrecondition implements Precondition {
 
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
-    throws PreconditionFailedException, PreconditionErrorException {
+            throws PreconditionFailedException, PreconditionErrorException {
         try {
             if (DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database)
                     .getColumn(getSchemaName(), getTableName(), getColumnName(), database) == null) {

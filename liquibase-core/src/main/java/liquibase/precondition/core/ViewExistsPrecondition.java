@@ -43,7 +43,7 @@ public class ViewExistsPrecondition implements Precondition {
 
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
-    throws PreconditionFailedException, PreconditionErrorException {
+            throws PreconditionFailedException, PreconditionErrorException {
         try {
             if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database)
                     .hasView(getSchemaName(), getViewName(), database)) {

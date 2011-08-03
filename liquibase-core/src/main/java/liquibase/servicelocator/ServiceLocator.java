@@ -83,7 +83,7 @@ public class ServiceLocator {
                     InputStream is = url.openStream();
                     Manifest manifest = new Manifest(is);
                     String attributes = StringUtils.trimToNull(manifest.getMainAttributes().getValue(
-                    "Liquibase-Package"));
+                            "Liquibase-Package"));
                     if (attributes != null) {
                         for (Object value : attributes.split(",")) {
                             addPackageToScan(value.toString());

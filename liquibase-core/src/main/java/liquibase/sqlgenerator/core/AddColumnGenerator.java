@@ -57,13 +57,13 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
     public Sql[] generateSql(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
         String alterTable = "ALTER TABLE "
-            + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-            + " ADD "
-            + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
-                    statement.getColumnName())
-                    + " "
-                    + TypeConverterFactory.getInstance().findTypeConverter(database)
-                    .getDataType(statement.getColumnType(), statement.isAutoIncrement());
+                + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+                + " ADD "
+                + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                        statement.getColumnName())
+                + " "
+                + TypeConverterFactory.getInstance().findTypeConverter(database)
+                        .getDataType(statement.getColumnType(), statement.isAutoIncrement());
 
         if (statement.isAutoIncrement() && database.supportsAutoIncrement()) {
             alterTable += " " + database.getAutoIncrementClause();
@@ -90,7 +90,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         List<Sql> returnSql = new ArrayList<Sql>();
         returnSql.add(new UnparsedSql(alterTable, new Column().setTable(
                 new Table(statement.getTableName()).setSchema(statement.getSchemaName())).setName(
-                        statement.getColumnName())));
+                statement.getColumnName())));
 
         addForeignKeyStatements(statement, database, returnSql);
 
@@ -130,12 +130,12 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         if (defaultValue != null) {
             if (database instanceof MSSQLDatabase) {
                 clause += " CONSTRAINT "
-                    + ((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(),
-                            statement.getColumnName());
+                        + ((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(),
+                                statement.getColumnName());
             }
             clause += " DEFAULT "
-                + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue)
-                .convertObjectToString(defaultValue, database);
+                    + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue)
+                            .convertObjectToString(defaultValue, database);
         }
         return clause;
     }
