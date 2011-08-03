@@ -7,7 +7,11 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * A FileOpener implementation which finds Files in the File System.
@@ -41,6 +45,7 @@ public class FileSystemResourceAccessor implements ResourceAccessor {
     /**
      * Opens a stream on a file, resolving to the baseDirectory if the file is relative.
      */
+    @Override
     public InputStream getResourceAsStream(String file) throws IOException {
         File absoluteFile = new File(file);
         File relativeFile = (baseDirectory == null) ? new File(file) : new File(baseDirectory, file);
@@ -55,6 +60,7 @@ public class FileSystemResourceAccessor implements ResourceAccessor {
         }
     }
 
+    @Override
     public Enumeration<URL> getResources(String packageName) throws IOException {
         String directoryPath = (new File(packageName).isAbsolute() || baseDirectory == null) ? packageName
                 : baseDirectory + File.separator + packageName;
@@ -75,16 +81,19 @@ public class FileSystemResourceAccessor implements ResourceAccessor {
         final Iterator<URL> it = results.iterator();
         return new Enumeration<URL>() {
 
+            @Override
             public boolean hasMoreElements() {
                 return it.hasNext();
             }
 
+            @Override
             public URL nextElement() {
                 return it.next();
             }
         };
     }
 
+    @Override
     public ClassLoader toClassLoader() {
         try {
             return new URLClassLoader(new URL[] { new URL("file://" + baseDirectory) });

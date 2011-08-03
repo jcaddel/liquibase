@@ -1,5 +1,17 @@
 package liquibase.changelog.visitor;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -7,7 +19,17 @@ import liquibase.database.Database;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
-import liquibase.dbdoc.*;
+import liquibase.dbdoc.AuthorListWriter;
+import liquibase.dbdoc.AuthorWriter;
+import liquibase.dbdoc.ChangeLogListWriter;
+import liquibase.dbdoc.ChangeLogWriter;
+import liquibase.dbdoc.ColumnWriter;
+import liquibase.dbdoc.HTMLWriter;
+import liquibase.dbdoc.PendingChangesWriter;
+import liquibase.dbdoc.PendingSQLWriter;
+import liquibase.dbdoc.RecentChangesWriter;
+import liquibase.dbdoc.TableListWriter;
+import liquibase.dbdoc.TableWriter;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
@@ -15,12 +37,6 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.util.StreamUtil;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
 
 public class DBDocVisitor implements ChangeSetVisitor {
 
@@ -53,12 +69,14 @@ public class DBDocVisitor implements ChangeSetVisitor {
         recentChanges = new ArrayList<Change>();
     }
 
+    @Override
     public ChangeSetVisitor.Direction getDirection() {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
+    @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database)
-            throws LiquibaseException {
+    throws LiquibaseException {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
         if (rootChangeLogName == null) {
             rootChangeLogName = changeSet.getFilePath();
@@ -76,7 +94,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
 
         boolean toRun = runStatus.equals(ChangeSet.RunStatus.NOT_RAN)
-                || runStatus.equals(ChangeSet.RunStatus.RUN_AGAIN);
+        || runStatus.equals(ChangeSet.RunStatus.RUN_AGAIN);
         for (Change change : changeSet.getChanges()) {
             if (toRun) {
                 changesToRunByAuthor.get(changeSet.getAuthor()).add(change);
@@ -114,7 +132,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
     }
 
     public void writeHTML(File rootOutputDir, ResourceAccessor resourceAccessor) throws IOException, DatabaseException,
-            DatabaseHistoryException {
+    DatabaseHistoryException {
         ChangeLogWriter changeLogWriter = new ChangeLogWriter(resourceAccessor, rootOutputDir);
         HTMLWriter authorWriter = new AuthorWriter(rootOutputDir, database);
         HTMLWriter tableWriter = new TableWriter(rootOutputDir, database);
@@ -141,7 +159,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
 
         for (Table table : snapshot.getTables()) {
             tableWriter
-                    .writeHTML(table, changesByObject.get(table), changesToRunByObject.get(table), rootChangeLogName);
+            .writeHTML(table, changesByObject.get(table), changesToRunByObject.get(table), rootChangeLogName);
         }
 
         for (Column column : snapshot.getColumns()) {
@@ -206,6 +224,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
             return logicalPath.hashCode();
         }
 
+        @Override
         public int compareTo(ChangeLogInfo o) {
             return this.logicalPath.compareTo(o.logicalPath);
         }

@@ -1,26 +1,32 @@
 package liquibase.snapshot.jvm;
 
+import java.sql.Array;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.StringTokenizer;
+
 import liquibase.database.Database;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.database.structure.Table;
 import liquibase.database.structure.UniqueConstraint;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.util.StringUtils;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.StringTokenizer;
-
 public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
 
+    @Override
     public boolean supports(Database database) {
         return database instanceof PostgresDatabase;
     }
 
+    @Override
     public int getPriority(Database database) {
         return PRIORITY_DATABASE;
     }
@@ -53,7 +59,7 @@ public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
      */
     @Override
     protected void readUniqueConstraints(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
-            throws DatabaseException, SQLException {
+    throws DatabaseException, SQLException {
         Database database = snapshot.getDatabase();
         updateListeners("Reading unique constraints for " + database.toString() + " ...");
         List<UniqueConstraint> foundUC = new ArrayList<UniqueConstraint>();
@@ -61,9 +67,9 @@ public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
         ResultSet rs = null;
         try {
             statement = ((JdbcConnection) database.getConnection())
-                    .getUnderlyingConnection()
-                    .prepareStatement(
-                            "select pgc.conname, pgc.conrelid, pgc.conkey, pgcl.relname from pg_constraint pgc inner join pg_class pgcl on pgcl.oid = pgc.conrelid and pgcl.relkind ='r' where contype = 'u'");
+            .getUnderlyingConnection()
+            .prepareStatement(
+                    "select pgc.conname, pgc.conrelid, pgc.conkey, pgcl.relname from pg_constraint pgc inner join pg_class pgcl on pgcl.oid = pgc.conrelid and pgcl.relkind ='r' where contype = 'u'");
             rs = statement.executeQuery();
             while (rs.next()) {
                 String constraintName = rs.getString("conname");

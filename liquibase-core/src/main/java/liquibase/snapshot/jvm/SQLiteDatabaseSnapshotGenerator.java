@@ -1,10 +1,28 @@
 package liquibase.snapshot.jvm;
 
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
 import liquibase.database.Database;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.structure.*;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.Index;
+import liquibase.database.structure.PrimaryKey;
+import liquibase.database.structure.Sequence;
+import liquibase.database.structure.Table;
+import liquibase.database.structure.View;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
@@ -12,13 +30,6 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.SelectSequencesStatement;
 import liquibase.util.StringUtils;
-
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.ParseException;
-import java.util.*;
 
 public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
 
@@ -28,17 +39,19 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
     public SQLiteDatabaseSnapshotGenerator() {
     }
 
+    @Override
     public boolean supports(Database database) {
         return database instanceof SQLiteDatabase;
     }
 
+    @Override
     public int getPriority(Database database) {
         return PRIORITY_DATABASE;
     }
 
     @Override
     protected void readTables(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
-            throws SQLException, DatabaseException {
+    throws SQLException, DatabaseException {
 
         Database database = snapshot.getDatabase();
 
@@ -85,7 +98,7 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 
     @Override
     protected void readViews(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
-            throws SQLException, DatabaseException {
+    throws SQLException, DatabaseException {
 
         Database database = snapshot.getDatabase();
 
@@ -135,7 +148,7 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
      */
     @Override
     protected void readForeignKeyInformation(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
-            throws DatabaseException, SQLException {
+    throws DatabaseException, SQLException {
         updateListeners("Reading foreign keys for " + snapshot.getDatabase().toString() + " ...");
         // Foreign keys are not supported in SQLite until now.
         // ...do nothing here
@@ -146,7 +159,7 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
      */
     @Override
     protected void readPrimaryKeys(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
-            throws DatabaseException, SQLException {
+    throws DatabaseException, SQLException {
         Database database = snapshot.getDatabase();
         updateListeners("Reading primary keys for " + database.toString() + " ...");
 
@@ -197,7 +210,7 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 
     @Override
     protected void readColumns(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
-            throws SQLException, DatabaseException {
+    throws SQLException, DatabaseException {
         Database database = snapshot.getDatabase();
         updateListeners("Reading columns for " + database.toString() + " ...");
 
@@ -208,7 +221,7 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
                 ResultSet rs = null;
                 try {
                     selectStatement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection()
-                            .createStatement();
+                    .createStatement();
                     rs = databaseMetaData.getColumns(database.convertRequestedSchemaToCatalog(schema),
                             database.convertRequestedSchemaToSchema(schema), cur_table.getName(), null);
                     if (rs == null) {
@@ -236,7 +249,7 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
             ResultSet rs = null;
             try {
                 selectStatement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection()
-                        .createStatement();
+                .createStatement();
                 rs = databaseMetaData.getColumns(database.convertRequestedSchemaToCatalog(schema),
                         database.convertRequestedSchemaToSchema(schema), null, null);
                 while (rs.next()) {
@@ -257,7 +270,7 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
     }
 
     private Column readColumnInfo(DatabaseSnapshot snapshot, String schema, ResultSet rs) throws SQLException,
-            DatabaseException {
+    DatabaseException {
         Database database = snapshot.getDatabase();
         Column columnInfo = new Column();
 
@@ -320,7 +333,7 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 
     @Override
     protected void readIndexes(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
-            throws DatabaseException, SQLException {
+    throws DatabaseException, SQLException {
         Database database = snapshot.getDatabase();
         updateListeners("Reading indexes for " + database.toString() + " ...");
 
@@ -351,7 +364,7 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
                     ResultSet rs_2 = null;
                     try {
                         statement_2 = ((JdbcConnection) database.getConnection()).getUnderlyingConnection()
-                                .createStatement();
+                        .createStatement();
                         rs_2 = statement_2.executeQuery(sql);
                         while ((rs_2 != null) && rs_2.next()) {
                             int index_column_seqno = rs_2.getInt("seqno");
@@ -425,7 +438,7 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 
     @Override
     protected void readSequences(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
-            throws DatabaseException {
+    throws DatabaseException {
         Database database = snapshot.getDatabase();
         updateListeners("Reading sequences for " + database.toString() + " ...");
 
@@ -434,7 +447,7 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
         if (database.supportsSequences()) {
             // noinspection unchecked
             List<String> sequenceNamess = (List<String>) ExecutorService.getInstance().getExecutor(database)
-                    .queryForList(new SelectSequencesStatement(schema), String.class);
+            .queryForList(new SelectSequencesStatement(schema), String.class);
 
             for (String sequenceName : sequenceNamess) {
                 Sequence seq = new Sequence();

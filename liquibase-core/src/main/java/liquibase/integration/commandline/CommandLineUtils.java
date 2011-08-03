@@ -1,32 +1,24 @@
 package liquibase.integration.commandline;
 
-import liquibase.change.Change;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.RanChangeSet;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.util.Properties;
+
+import javax.xml.parsers.ParserConfigurationException;
+
 import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.database.structure.DatabaseObject;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
 import liquibase.diff.DiffStatusListener;
-import liquibase.exception.*;
+import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
-
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.Writer;
-import java.sql.*;
-import java.sql.Date;
-import java.util.*;
 
 /**
  * Common Utilitiy methods used in the CommandLine application and the Maven plugin. These methods were orignally moved
@@ -38,7 +30,7 @@ public class CommandLineUtils {
 
     public static Database createDatabaseObject(ClassLoader classLoader, String url, String username, String password,
             String driver, String defaultSchemaName, String databaseClass, String driverPropertiesFile)
-            throws DatabaseException {
+    throws DatabaseException {
         if (driver == null) {
             driver = DatabaseFactory.getInstance().findDefaultDriver(url);
         }
@@ -117,7 +109,7 @@ public class CommandLineUtils {
     }
 
     public static void doDiffToChangeLog(String changeLogFile, Database referenceDatabase, Database targetDatabase)
-            throws DatabaseException, IOException, ParserConfigurationException {
+    throws DatabaseException, IOException, ParserConfigurationException {
         Diff diff = new Diff(referenceDatabase, targetDatabase);
         diff.addStatusListener(new OutDiffStatusListener());
         DiffResult diffResult = diff.compare();
@@ -151,6 +143,7 @@ public class CommandLineUtils {
 
     private static class OutDiffStatusListener implements DiffStatusListener {
 
+        @Override
         public void statusUpdate(String message) {
             LogFactory.getLogger().info(message);
 

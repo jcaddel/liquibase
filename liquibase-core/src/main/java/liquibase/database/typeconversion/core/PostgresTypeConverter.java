@@ -1,18 +1,24 @@
 package liquibase.database.typeconversion.core;
 
+import java.sql.Types;
+import java.text.ParseException;
+
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
-import liquibase.database.structure.type.*;
-
-import java.text.ParseException;
-import java.sql.Types;
+import liquibase.database.structure.type.BlobType;
+import liquibase.database.structure.type.ClobType;
+import liquibase.database.structure.type.DataType;
+import liquibase.database.structure.type.DateTimeType;
+import liquibase.database.structure.type.NumberType;
 
 public class PostgresTypeConverter extends AbstractTypeConverter {
 
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean supports(Database database) {
         return database instanceof PostgresDatabase;
     }

@@ -1,11 +1,14 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.FirebirdDatabase;
+import liquibase.database.core.H2Database;
+import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.MaxDBDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateSequenceStatement;
 
@@ -16,6 +19,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         return database.supportsSequences();
     }
 
+    @Override
     public ValidationErrors validate(CreateSequenceStatement statement, Database database,
             SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
@@ -23,7 +27,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         validationErrors.checkRequiredField("sequenceName", statement.getSequenceName());
 
         validationErrors
-                .checkDisallowedField("startValue", statement.getStartValue(), database, FirebirdDatabase.class);
+        .checkDisallowedField("startValue", statement.getStartValue(), database, FirebirdDatabase.class);
         validationErrors.checkDisallowedField("incrementBy", statement.getIncrementBy(), database,
                 FirebirdDatabase.class);
 
@@ -38,6 +42,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(CreateSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE SEQUENCE ");

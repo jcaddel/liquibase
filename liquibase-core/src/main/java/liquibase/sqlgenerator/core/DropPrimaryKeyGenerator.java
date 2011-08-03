@@ -1,11 +1,15 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.FirebirdDatabase;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropPrimaryKeyStatement;
 
@@ -16,6 +20,7 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
         return (!(database instanceof SQLiteDatabase));
     }
 
+    @Override
     public ValidationErrors validate(DropPrimaryKeyStatement dropPrimaryKeyStatement, Database database,
             SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
@@ -28,6 +33,7 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(DropPrimaryKeyStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
 
@@ -46,15 +52,15 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
                 query.append(" where o.name = '").append(statement.getTableName()).append("'");
                 query.append("\n");
                 query.append("set @sql='alter table ")
-                        .append(database.escapeTableName(statement.getSchemaName(), statement.getTableName()))
-                        .append(" drop constraint ' + @pkname");
+                .append(database.escapeTableName(statement.getSchemaName(), statement.getTableName()))
+                .append(" drop constraint ' + @pkname");
                 query.append("\n");
                 query.append("exec(@sql)");
                 query.append("\n");
                 sql = query.toString();
             } else {
                 sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                        + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
+                + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
             }
         } else if (database instanceof PostgresDatabase) {
             if (statement.getConstraintName() == null) {
@@ -78,20 +84,20 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
                 sql = query.toString();
             } else {
                 sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                        + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
+                + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
             }
         } else if (database instanceof FirebirdDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                    + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
+            + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
         } else if (database instanceof OracleDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                    + " DROP PRIMARY KEY DROP INDEX";
+            + " DROP PRIMARY KEY DROP INDEX";
         } else if (database instanceof InformixDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                    + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
+            + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
         } else {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
-                    + " DROP PRIMARY KEY";
+            + " DROP PRIMARY KEY";
         }
 
         return new Sql[] { new UnparsedSql(sql) };

@@ -1,12 +1,19 @@
 package liquibase.snapshot;
 
-import liquibase.database.Database;
-import liquibase.database.structure.*;
-import liquibase.util.StringUtils;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import liquibase.database.Database;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.ForeignKey;
+import liquibase.database.structure.Index;
+import liquibase.database.structure.PrimaryKey;
+import liquibase.database.structure.Sequence;
+import liquibase.database.structure.Table;
+import liquibase.database.structure.UniqueConstraint;
+import liquibase.database.structure.View;
+import liquibase.util.StringUtils;
 
 public class DatabaseSnapshot {
 

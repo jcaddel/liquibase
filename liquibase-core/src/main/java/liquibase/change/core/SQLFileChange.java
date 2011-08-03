@@ -1,5 +1,9 @@
 package liquibase.change.core;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+
 import liquibase.change.AbstractSQLChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.CheckSum;
@@ -11,8 +15,6 @@ import liquibase.logging.LogFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-
-import java.io.*;
 
 /**
  * Represents a Change for custom SQL stored in a File.
@@ -130,7 +132,7 @@ public class SQLFileChange extends AbstractSQLChange {
             if (fis != null) {
                 try {
                     fis.close();
-                } catch (IOException ioe) {// NOPMD
+                } catch (IOException ioe) { // NOPMD
                     // safe to ignore
                 }
             }
@@ -171,7 +173,7 @@ public class SQLFileChange extends AbstractSQLChange {
             if (in != null) {
                 try {
                     in.close();
-                } catch (IOException ioe) {// NOPMD
+                } catch (IOException ioe) { // NOPMD
                     // safe to ignore
                 }
             }
@@ -192,6 +194,7 @@ public class SQLFileChange extends AbstractSQLChange {
         return CheckSum.compute(sql);
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "SQL in file " + path + " executed";
     }

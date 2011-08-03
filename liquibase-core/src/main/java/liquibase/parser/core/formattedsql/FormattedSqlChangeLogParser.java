@@ -1,5 +1,12 @@
 package liquibase.parser.core.formattedsql;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeLogParameters;
@@ -12,12 +19,9 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
 
-import java.io.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
+    @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
         BufferedReader reader = null;
         try {
@@ -42,10 +46,12 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         }
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT + 5;
     }
 
+    @Override
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters,
             ResourceAccessor resourceAccessor) throws ChangeLogParseException {
 
@@ -195,7 +201,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
     }
 
     private boolean parseBoolean(Matcher matcher, ChangeSet changeSet, boolean defaultValue)
-            throws ChangeLogParseException {
+    throws ChangeLogParseException {
         boolean stripComments = defaultValue;
         if (matcher.matches()) {
             try {
@@ -209,7 +215,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
     }
 
     protected InputStream openChangeLogFile(String physicalChangeLogLocation, ResourceAccessor resourceAccessor)
-            throws IOException {
+    throws IOException {
         return resourceAccessor.getResourceAsStream(physicalChangeLogLocation);
     }
 }

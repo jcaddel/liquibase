@@ -1,16 +1,20 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.FirebirdDatabase;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.SybaseDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropColumnStatement;
 
 public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatement> {
 
+    @Override
     public ValidationErrors validate(DropColumnStatement dropColumnStatement, Database database,
             SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
@@ -19,6 +23,7 @@ public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatemen
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(DropColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         if (database instanceof DB2Database) {
             return new Sql[] { new UnparsedSql("ALTER TABLE "

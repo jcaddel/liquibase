@@ -1,8 +1,13 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
-import java.util.*;
+import liquibase.statement.AbstractSqlStatement;
 
 public class UpdateStatement extends AbstractSqlStatement {
     private String schemaName;

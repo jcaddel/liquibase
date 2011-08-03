@@ -1,11 +1,18 @@
 package liquibase.database.jvm;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Savepoint;
+import java.sql.Statement;
+import java.util.Map;
+
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-
-import java.sql.*;
-import java.util.Map;
 
 /**
  * A ConnectionWrapper implementation which delegates completely to an underlying java.sql.connection.
@@ -19,6 +26,7 @@ public class JdbcConnection implements DatabaseConnection {
         this.con = connection;
     }
 
+    @Override
     public String getDatabaseProductName() throws DatabaseException {
         try {
             return con.getMetaData().getDatabaseProductName();
@@ -27,6 +35,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public String getDatabaseProductVersion() throws DatabaseException {
         try {
             return con.getMetaData().getDatabaseProductVersion();
@@ -35,6 +44,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public int getDatabaseMajorVersion() throws DatabaseException {
         try {
             return con.getMetaData().getDatabaseMajorVersion();
@@ -43,6 +53,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public int getDatabaseMinorVersion() throws DatabaseException {
         try {
             return con.getMetaData().getDatabaseMinorVersion();
@@ -51,6 +62,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public String getURL() {
         try {
             return con.getMetaData().getURL();
@@ -59,6 +71,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public String getConnectionUserName() {
         try {
             return con.getMetaData().getUserName();
@@ -84,6 +97,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public void close() throws DatabaseException {
         rollback();
         try {
@@ -93,6 +107,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public void commit() throws DatabaseException {
         try {
             if (!con.getAutoCommit()) {
@@ -112,7 +127,7 @@ public class JdbcConnection implements DatabaseConnection {
     }
 
     public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
-            throws DatabaseException {
+    throws DatabaseException {
         try {
             return con.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability);
         } catch (SQLException e) {
@@ -128,6 +143,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public boolean getAutoCommit() throws DatabaseException {
         try {
             return con.getAutoCommit();
@@ -136,6 +152,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public String getCatalog() throws DatabaseException {
         try {
             return con.getCatalog();
@@ -184,6 +201,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public boolean isClosed() throws DatabaseException {
         try {
             return con.isClosed();
@@ -200,6 +218,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public String nativeSQL(String sql) throws DatabaseException {
         try {
             return con.nativeSQL(sql);
@@ -218,7 +237,7 @@ public class JdbcConnection implements DatabaseConnection {
     }
 
     public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency)
-            throws DatabaseException {
+    throws DatabaseException {
         try {
             return con.prepareCall(sql, resultSetType, resultSetConcurrency);
         } catch (SQLException e) {
@@ -244,7 +263,7 @@ public class JdbcConnection implements DatabaseConnection {
     }
 
     public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
-            throws DatabaseException {
+    throws DatabaseException {
         try {
             return con.prepareStatement(sql, resultSetType, resultSetConcurrency);
         } catch (SQLException e) {
@@ -292,6 +311,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public void rollback() throws DatabaseException {
         try {
             if (!con.getAutoCommit() && !con.isClosed()) {
@@ -312,6 +332,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public void setAutoCommit(boolean autoCommit) throws DatabaseException {
         // Fix for Sybase jConnect JDBC driver bug.
         // Which throws DatabaseException(JZ016: The AutoCommit option is already set to false)
@@ -388,7 +409,7 @@ public class JdbcConnection implements DatabaseConnection {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof JdbcConnection
-                && this.getUnderlyingConnection().equals(((JdbcConnection) obj).getUnderlyingConnection());
+        && this.getUnderlyingConnection().equals(((JdbcConnection) obj).getUnderlyingConnection());
 
     }
 

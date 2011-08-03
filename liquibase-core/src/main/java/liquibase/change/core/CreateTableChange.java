@@ -1,18 +1,27 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeWithColumns;
+import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
 import liquibase.database.Database;
 import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.*;
+import liquibase.statement.AutoIncrementConstraint;
+import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.NotNullConstraint;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.statement.core.SetTableRemarksStatement;
 import liquibase.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Creates a new table.
@@ -30,6 +39,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         columns = new ArrayList<ColumnConfig>();
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
 
         String schemaName = getSchemaName() == null ? (database == null ? null : database.getDefaultSchemaName())
@@ -46,7 +56,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
                 statement.addPrimaryKeyColumn(
                         column.getName(),
                         TypeConverterFactory.getInstance().findTypeConverter(database)
-                                .getDataType(column.getType(), isAutoIncrement), defaultValue,
+                        .getDataType(column.getType(), isAutoIncrement), defaultValue,
                         constraints.getPrimaryKeyName(), constraints.getPrimaryKeyTablespace());
 
             } else {
@@ -76,7 +86,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
                 if (constraints.isUnique() != null && constraints.isUnique()) {
                     statement.addColumnConstraint(new UniqueConstraint(constraints.getUniqueConstraintName())
-                            .addColumns(column.getName()));
+                    .addColumns(column.getName()));
                 }
             }
 
@@ -120,6 +130,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         return new Change[] { inverse };
     }
 
+    @Override
     public List<ColumnConfig> getColumns() {
         return columns;
     }
@@ -148,6 +159,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         this.tablespace = tablespace;
     }
 
+    @Override
     public void addColumn(ColumnConfig column) {
         columns.add(column);
     }
@@ -160,6 +172,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         this.remarks = remarks;
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Table " + tableName + " created";
     }

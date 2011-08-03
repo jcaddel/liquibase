@@ -1,5 +1,12 @@
 package liquibase.database.core;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.Vector;
+
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
 import liquibase.database.AbstractDatabase;
@@ -13,10 +20,12 @@ import liquibase.exception.UnsupportedChangeException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.*;
+import liquibase.statement.core.CopyRowsStatement;
+import liquibase.statement.core.CreateIndexStatement;
+import liquibase.statement.core.DropTableStatement;
+import liquibase.statement.core.ReindexStatement;
+import liquibase.statement.core.RenameTableStatement;
 import liquibase.util.ISODateFormat;
-
-import java.util.*;
 
 public class SQLiteDatabase extends AbstractDatabase {
 
@@ -28,6 +37,7 @@ public class SQLiteDatabase extends AbstractDatabase {
 
     public static final String PRODUCT_NAME = "SQLite";
 
+    @Override
     public String getCurrentDateTimeFunction() {
         if (currentDateTimeFunction != null) {
             return currentDateTimeFunction;
@@ -36,6 +46,7 @@ public class SQLiteDatabase extends AbstractDatabase {
         return "CURRENT_TIMESTAMP";
     }
 
+    @Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:sqlite:")) {
             return "SQLite.JDBCDriver";
@@ -43,22 +54,27 @@ public class SQLiteDatabase extends AbstractDatabase {
         return null;
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
 
+    @Override
     public String getTypeName() {
         return "sqlite";
     }
 
+    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return "SQLite".equalsIgnoreCase(conn.getDatabaseProductName());
     }
 
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }
 
+    @Override
     public boolean supportsTablespaces() {
         return false;
     }
@@ -80,7 +96,7 @@ public class SQLiteDatabase extends AbstractDatabase {
 
     public String getTrigger(String table, String column) {
         return "CREATE TRIGGER insert_" + table + "_timeEnter AFTER  INSERT ON " + table + " BEGIN" + " UPDATE "
-                + table + " SET " + column + " = DATETIME('NOW')" + " WHERE rowid = new.rowid END ";
+        + table + " SET " + column + " = DATETIME('NOW')" + " WHERE rowid = new.rowid END ";
     }
 
     @Override
@@ -151,7 +167,7 @@ public class SQLiteDatabase extends AbstractDatabase {
         for (Index index_config : newIndices) {
             statements.add(new CreateIndexStatement(index_config.getName(), schemaName, tableName, index_config
                     .isUnique(), index_config.getAssociatedWithAsString(), index_config.getColumns().toArray(
-                    new String[index_config.getColumns().size()])));
+                            new String[index_config.getColumns().size()])));
         }
 
         return statements;

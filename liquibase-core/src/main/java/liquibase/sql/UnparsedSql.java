@@ -1,8 +1,12 @@
 package liquibase.sql;
 
-import liquibase.database.structure.DatabaseObject;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import java.util.*;
+import liquibase.database.structure.DatabaseObject;
 
 public class UnparsedSql implements Sql {
 
@@ -42,14 +46,17 @@ public class UnparsedSql implements Sql {
         this.affectedDatabaseObjects.addAll(moreAffectedDatabaseObjects);
     }
 
+    @Override
     public String toSql() {
         return sql;
     }
 
+    @Override
     public String getEndDelimiter() {
         return endDelimiter;
     }
 
+    @Override
     public Set<? extends DatabaseObject> getAffectedDatabaseObjects() {
         return affectedDatabaseObjects;
     }

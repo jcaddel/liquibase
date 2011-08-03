@@ -1,19 +1,33 @@
 package liquibase.database.typeconversion.core;
 
-import liquibase.database.Database;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.type.*;
-
 import java.sql.Types;
 import java.text.ParseException;
 
+import liquibase.database.Database;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.type.BigIntType;
+import liquibase.database.structure.type.BooleanType;
+import liquibase.database.structure.type.CurrencyType;
+import liquibase.database.structure.type.CustomType;
+import liquibase.database.structure.type.DataType;
+import liquibase.database.structure.type.DateTimeType;
+import liquibase.database.structure.type.DoubleType;
+import liquibase.database.structure.type.IntType;
+import liquibase.database.structure.type.NVarcharType;
+import liquibase.database.structure.type.TimeType;
+import liquibase.database.structure.type.TinyIntType;
+import liquibase.database.structure.type.UUIDType;
+import liquibase.database.structure.type.VarcharType;
+
 public class OracleTypeConverter extends AbstractTypeConverter {
 
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean supports(Database database) {
         return database instanceof OracleDatabase;
     }
@@ -95,8 +109,8 @@ public class OracleTypeConverter extends AbstractTypeConverter {
                     defaultValue = ((String) defaultValue).replaceFirst("\\(", "").replaceFirst("\\)", "");
                 }
                 defaultValue = ((String) defaultValue).replaceFirst("'\\s*$", "'"); // sometimes oracle adds an extra
-                                                                                    // space after the trailing ' (see
-                                                                                    // http://sourceforge.net/tracker/index.php?func=detail&aid=1824663&group_id=187970&atid=923443).
+                // space after the trailing ' (see
+                // http://sourceforge.net/tracker/index.php?func=detail&aid=1824663&group_id=187970&atid=923443).
             }
         }
         return super.convertDatabaseValueToObject(defaultValue, dataType, columnSize, decimalDigits, database);

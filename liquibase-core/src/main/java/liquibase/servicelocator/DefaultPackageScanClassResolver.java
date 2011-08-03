@@ -1,23 +1,27 @@
 package liquibase.servicelocator;
 
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogLevel;
-import liquibase.logging.Logger;
-import liquibase.logging.core.DefaultLogger;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
+
+import liquibase.logging.Logger;
+import liquibase.logging.core.DefaultLogger;
 
 /**
  * Default implement of {@link PackageScanClassResolver}
@@ -30,6 +34,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
     private Set<ClassLoader> classLoaders;
     private Set<PackageScanFilter> scanFilters;
 
+    @Override
     public void addClassLoader(ClassLoader classLoader) {
         try {
             getClassLoaders().add(classLoader);
@@ -39,6 +44,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
         }
     }
 
+    @Override
     public void addFilter(PackageScanFilter filter) {
         if (scanFilters == null) {
             scanFilters = new LinkedHashSet<PackageScanFilter>();
@@ -46,12 +52,14 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
         scanFilters.add(filter);
     }
 
+    @Override
     public void removeFilter(PackageScanFilter filter) {
         if (scanFilters != null) {
             scanFilters.remove(filter);
         }
     }
 
+    @Override
     public Set<ClassLoader> getClassLoaders() {
         if (classLoaders == null) {
             classLoaders = new HashSet<ClassLoader>();
@@ -65,10 +73,12 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
         return classLoaders;
     }
 
+    @Override
     public void setClassLoaders(Set<ClassLoader> classLoaders) {
         this.classLoaders = classLoaders;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public Set<Class<?>> findImplementations(Class parent, String... packageNames) {
         if (packageNames == null) {
@@ -89,6 +99,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
         return classes;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public Set<Class<?>> findByFilter(PackageScanFilter filter, String... packageNames) {
         if (packageNames == null) {
@@ -407,7 +418,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
         } catch (Exception e) {
             log.warning(
                     "Cannot examine class '" + fqn + "' due to a " + e.getClass().getName() + " with message: "
-                            + e.getMessage(), e);
+                    + e.getMessage(), e);
         }
     }
 

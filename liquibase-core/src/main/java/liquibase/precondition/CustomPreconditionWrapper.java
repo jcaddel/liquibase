@@ -1,17 +1,22 @@
 package liquibase.precondition;
 
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.ChangeSet;
-import liquibase.database.Database;
-import liquibase.exception.*;
-import liquibase.precondition.core.ErrorPrecondition;
-import liquibase.precondition.core.FailedPrecondition;
-import liquibase.util.ObjectUtil;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.database.Database;
+import liquibase.exception.CustomPreconditionErrorException;
+import liquibase.exception.CustomPreconditionFailedException;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
+import liquibase.precondition.core.ErrorPrecondition;
+import liquibase.precondition.core.FailedPrecondition;
+import liquibase.util.ObjectUtil;
 
 public class CustomPreconditionWrapper implements Precondition {
 
@@ -42,16 +47,19 @@ public class CustomPreconditionWrapper implements Precondition {
         this.paramValues.put(name, value);
     }
 
+    @Override
     public Warnings warn(Database database) {
         return new Warnings();
     }
 
+    @Override
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
 
+    @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
-            throws PreconditionFailedException, PreconditionErrorException {
+    throws PreconditionFailedException, PreconditionErrorException {
         CustomPrecondition customPrecondition;
         try {
             // System.out.println(classLoader.toString());
@@ -84,6 +92,7 @@ public class CustomPreconditionWrapper implements Precondition {
         }
     }
 
+    @Override
     public String getName() {
         return "customPrecondition";
     }

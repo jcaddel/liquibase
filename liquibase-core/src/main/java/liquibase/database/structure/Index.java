@@ -1,8 +1,11 @@
 package liquibase.database.structure;
 
-import liquibase.util.StringUtils;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import java.util.*;
+import liquibase.util.StringUtils;
 
 public class Index implements DatabaseObject, Comparable<Index> {
 
@@ -23,6 +26,7 @@ public class Index implements DatabaseObject, Comparable<Index> {
     // for example: foreignKey, primaryKey or uniqueConstraint
     private Set<String> associatedWith = new HashSet<String>();
 
+    @Override
     public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[] { table };
     }
@@ -129,6 +133,7 @@ public class Index implements DatabaseObject, Comparable<Index> {
         return result;
     }
 
+    @Override
     public int compareTo(Index o) {
         int returnValue = this.table.getName().compareTo(o.table.getName());
 

@@ -1,5 +1,18 @@
 package liquibase.servicelocator;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Modifier;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.jar.Manifest;
+
 import liquibase.exception.ServiceNotFoundException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.Logger;
@@ -7,13 +20,6 @@ import liquibase.logging.core.DefaultLogger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Modifier;
-import java.net.URL;
-import java.util.*;
-import java.util.jar.Manifest;
 
 public class ServiceLocator {
 
@@ -33,7 +39,7 @@ public class ServiceLocator {
     private Map<Class, List<Class>> classesBySuperclass;
     private List<String> packagesToScan;
     private Logger logger = new DefaultLogger(); // cannot look up regular logger because you get a stackoverflow since
-                                                 // we are in the servicelocator
+    // we are in the servicelocator
     private PackageScanClassResolver classResolver;
 
     private ServiceLocator() {
@@ -77,7 +83,7 @@ public class ServiceLocator {
                     InputStream is = url.openStream();
                     Manifest manifest = new Manifest(is);
                     String attributes = StringUtils.trimToNull(manifest.getMainAttributes().getValue(
-                            "Liquibase-Package"));
+                    "Liquibase-Package"));
                     if (attributes != null) {
                         for (Object value : attributes.split(",")) {
                             addPackageToScan(value.toString());

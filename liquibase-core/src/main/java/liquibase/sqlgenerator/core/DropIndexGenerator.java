@@ -1,20 +1,22 @@
 package liquibase.sqlgenerator.core;
 
+import java.util.List;
+
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.database.structure.Index;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropIndexStatement;
 import liquibase.util.StringUtils;
 
-import java.util.List;
-
 public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement> {
 
+    @Override
     public ValidationErrors validate(DropIndexStatement statement, Database database,
             SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
@@ -27,6 +29,7 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(DropIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
         if (associatedWith != null) {

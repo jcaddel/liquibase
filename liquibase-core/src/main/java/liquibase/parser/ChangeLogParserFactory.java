@@ -1,11 +1,14 @@
 package liquibase.parser;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
-
-import java.util.*;
 
 public class ChangeLogParserFactory {
 
@@ -28,6 +31,7 @@ public class ChangeLogParserFactory {
     private ChangeLogParserFactory() {
         Class<? extends ChangeLogParser>[] classes;
         changelogParserComparator = new Comparator<ChangeLogParser>() {
+            @Override
             public int compare(ChangeLogParser o1, ChangeLogParser o2) {
                 return Integer.valueOf(o2.getPriority()).compareTo(o1.getPriority());
             }
@@ -51,7 +55,7 @@ public class ChangeLogParserFactory {
     }
 
     public ChangeLogParser getParser(String fileNameOrExtension, ResourceAccessor resourceAccessor)
-            throws LiquibaseException {
+    throws LiquibaseException {
         for (ChangeLogParser parser : parsers) {
             if (parser.supports(fileNameOrExtension, resourceAccessor)) {
                 return parser;

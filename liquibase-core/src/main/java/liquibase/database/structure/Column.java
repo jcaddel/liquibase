@@ -1,13 +1,6 @@
 package liquibase.database.structure;
 
-import liquibase.database.Database;
-import liquibase.database.core.*;
-import liquibase.logging.LogFactory;
 import liquibase.util.SqlUtil;
-
-import java.sql.Types;
-import java.util.Arrays;
-import java.util.List;
 
 public class Column implements DatabaseObject, Comparable<Column> {
     private Table table;
@@ -37,6 +30,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
         return table;
     }
 
+    @Override
     public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[] { getTable() };
     }
@@ -147,6 +141,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
         return tableOrViewName + "." + getName();
     }
 
+    @Override
     public int compareTo(Column o) {
         try {
             // noinspection UnusedAssignment
@@ -182,8 +177,8 @@ public class Column implements DatabaseObject, Comparable<Column> {
             Column column = (Column) o;
 
             return name.equalsIgnoreCase(column.name)
-                    && !(table != null ? !table.equals(column.table) : column.table != null)
-                    && !(view != null ? !view.equals(column.view) : column.view != null);
+            && !(table != null ? !table.equals(column.table) : column.table != null)
+            && !(view != null ? !view.equals(column.view) : column.view != null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -232,9 +227,9 @@ public class Column implements DatabaseObject, Comparable<Column> {
             return false;
         } else {
             return this.getDataType() != otherColumn.getDataType()
-                    || this.getColumnSize() != otherColumn.getColumnSize()
-                    || this.getDecimalDigits() != otherColumn.getDecimalDigits()
-                    || this.getLengthSemantics() != otherColumn.getLengthSemantics();
+            || this.getColumnSize() != otherColumn.getColumnSize()
+            || this.getDecimalDigits() != otherColumn.getDecimalDigits()
+            || this.getLengthSemantics() != otherColumn.getLengthSemantics();
         }
     }
 

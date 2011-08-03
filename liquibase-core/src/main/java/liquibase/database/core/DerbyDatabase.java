@@ -1,13 +1,13 @@
 package liquibase.database.core;
 
+import java.lang.reflect.Method;
+import java.sql.Driver;
+
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
-
-import java.lang.reflect.Method;
-import java.sql.Driver;
 
 public class DerbyDatabase extends AbstractDatabase {
 
@@ -20,10 +20,12 @@ public class DerbyDatabase extends AbstractDatabase {
         determineDriverVersion();
     }
 
+    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return "Apache Derby".equalsIgnoreCase(conn.getDatabaseProductName());
     }
 
+    @Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:derby")) {
             return "org.apache.derby.jdbc.EmbeddedDriver";
@@ -31,16 +33,18 @@ public class DerbyDatabase extends AbstractDatabase {
         return null;
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
 
+    @Override
     public String getTypeName() {
         return "derby";
     }
 
     @Override
-    protected String getDefaultDatabaseSchemaName() throws DatabaseException {// NOPMD
+    protected String getDefaultDatabaseSchemaName() throws DatabaseException { // NOPMD
         return super.getDefaultDatabaseSchemaName().toUpperCase();
     }
 
@@ -53,10 +57,12 @@ public class DerbyDatabase extends AbstractDatabase {
         }
     }
 
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }
 
+    @Override
     public String getCurrentDateTimeFunction() {
         if (currentDateTimeFunction != null) {
             return currentDateTimeFunction;
@@ -87,6 +93,7 @@ public class DerbyDatabase extends AbstractDatabase {
         }
     }
 
+    @Override
     public boolean supportsTablespaces() {
         return false;
     }

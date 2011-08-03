@@ -1,12 +1,16 @@
 package liquibase.database;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.servicelocator.ServiceLocator;
-
-import java.util.*;
 
 public class DatabaseFactory {
     private static DatabaseFactory instance;
@@ -52,6 +56,7 @@ public class DatabaseFactory {
     public Database findCorrectDatabaseImplementation(DatabaseConnection connection) throws DatabaseException {
 
         SortedSet<Database> foundDatabases = new TreeSet<Database>(new Comparator<Database>() {
+            @Override
             public int compare(Database o1, Database o2) {
                 return -1 * new Integer(o1.getPriority()).compareTo(o2.getPriority());
             }

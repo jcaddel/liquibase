@@ -1,5 +1,35 @@
 package liquibase.integration.commandline;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.Writer;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.CommandLineParsingException;
@@ -16,19 +46,6 @@ import liquibase.servicelocator.ServiceLocator;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-
-import java.io.*;
-import java.lang.reflect.Field;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 /**
  * Class for executing Liquibase via the command line.
@@ -208,28 +225,28 @@ public class Main {
 
     private boolean isChangeLogRequired(String command) {
         return command.toLowerCase().startsWith("update") || command.toLowerCase().startsWith("rollback")
-                || "validate".equals(command);
+        || "validate".equals(command);
     }
 
     private boolean isCommand(String arg) {
         return "migrate".equals(arg) || "migrateSQL".equalsIgnoreCase(arg) || "update".equalsIgnoreCase(arg)
-                || "updateSQL".equalsIgnoreCase(arg) || "updateCount".equalsIgnoreCase(arg)
-                || "updateCountSQL".equalsIgnoreCase(arg) || "rollback".equalsIgnoreCase(arg)
-                || "rollbackToDate".equalsIgnoreCase(arg) || "rollbackCount".equalsIgnoreCase(arg)
-                || "rollbackSQL".equalsIgnoreCase(arg) || "rollbackToDateSQL".equalsIgnoreCase(arg)
-                || "rollbackCountSQL".equalsIgnoreCase(arg) || "futureRollbackSQL".equalsIgnoreCase(arg)
-                || "updateTestingRollback".equalsIgnoreCase(arg) || "tag".equalsIgnoreCase(arg)
-                || "listLocks".equalsIgnoreCase(arg) || "dropAll".equalsIgnoreCase(arg)
-                || "releaseLocks".equalsIgnoreCase(arg) || "status".equalsIgnoreCase(arg)
-                || "validate".equalsIgnoreCase(arg) || "help".equalsIgnoreCase(arg) || "diff".equalsIgnoreCase(arg)
-                || "diffChangeLog".equalsIgnoreCase(arg) || "generateChangeLog".equalsIgnoreCase(arg)
-                || "clearCheckSums".equalsIgnoreCase(arg) || "dbDoc".equalsIgnoreCase(arg)
-                || "changelogSync".equalsIgnoreCase(arg) || "changelogSyncSQL".equalsIgnoreCase(arg)
-                || "markNextChangeSetRan".equalsIgnoreCase(arg) || "markNextChangeSetRanSQL".equalsIgnoreCase(arg);
+        || "updateSQL".equalsIgnoreCase(arg) || "updateCount".equalsIgnoreCase(arg)
+        || "updateCountSQL".equalsIgnoreCase(arg) || "rollback".equalsIgnoreCase(arg)
+        || "rollbackToDate".equalsIgnoreCase(arg) || "rollbackCount".equalsIgnoreCase(arg)
+        || "rollbackSQL".equalsIgnoreCase(arg) || "rollbackToDateSQL".equalsIgnoreCase(arg)
+        || "rollbackCountSQL".equalsIgnoreCase(arg) || "futureRollbackSQL".equalsIgnoreCase(arg)
+        || "updateTestingRollback".equalsIgnoreCase(arg) || "tag".equalsIgnoreCase(arg)
+        || "listLocks".equalsIgnoreCase(arg) || "dropAll".equalsIgnoreCase(arg)
+        || "releaseLocks".equalsIgnoreCase(arg) || "status".equalsIgnoreCase(arg)
+        || "validate".equalsIgnoreCase(arg) || "help".equalsIgnoreCase(arg) || "diff".equalsIgnoreCase(arg)
+        || "diffChangeLog".equalsIgnoreCase(arg) || "generateChangeLog".equalsIgnoreCase(arg)
+        || "clearCheckSums".equalsIgnoreCase(arg) || "dbDoc".equalsIgnoreCase(arg)
+        || "changelogSync".equalsIgnoreCase(arg) || "changelogSyncSQL".equalsIgnoreCase(arg)
+        || "markNextChangeSetRan".equalsIgnoreCase(arg) || "markNextChangeSetRanSQL".equalsIgnoreCase(arg);
     }
 
     protected void parsePropertiesFile(InputStream propertiesInputStream) throws IOException,
-            CommandLineParsingException {
+    CommandLineParsingException {
         Properties props = new Properties();
         props.load(propertiesInputStream);
 
@@ -240,7 +257,7 @@ public class Main {
                 }
                 if (((String) entry.getKey()).startsWith("parameter.")) {
                     changeLogParameters
-                            .put(((String) entry.getKey()).replaceFirst("^parameter.", ""), entry.getValue());
+                    .put(((String) entry.getKey()).replaceFirst("^parameter.", ""), entry.getValue());
                 } else {
                     Field field = getClass().getDeclaredField((String) entry.getKey());
                     Object currentValue = field.get(this);
@@ -506,6 +523,7 @@ public class Main {
         }
         if (includeSystemClasspath) {
             classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
+                @Override
                 public URLClassLoader run() {
                     return new URLClassLoader(urls.toArray(new URL[urls.size()]), Thread.currentThread()
                             .getContextClassLoader());
@@ -514,6 +532,7 @@ public class Main {
 
         } else {
             classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
+                @Override
                 public URLClassLoader run() {
                     return new URLClassLoader(urls.toArray(new URL[urls.size()]));
                 }
@@ -751,7 +770,7 @@ public class Main {
     }
 
     private Database createReferenceDatabaseFromCommandParams(Set<String> commandParams)
-            throws CommandLineParsingException, DatabaseException {
+    throws CommandLineParsingException, DatabaseException {
         String driver = referenceDriver;
         String url = referenceUrl;
         String username = referenceUsername;

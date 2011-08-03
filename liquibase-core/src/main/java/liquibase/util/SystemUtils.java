@@ -1218,7 +1218,7 @@ public class SystemUtils {
      * @since 2.1
      */
     public static final boolean IS_OS_UNIX = IS_OS_AIX || IS_OS_HP_UX || IS_OS_IRIX || IS_OS_LINUX || IS_OS_MAC_OSX
-            || IS_OS_SOLARIS || IS_OS_SUN_OS;
+    || IS_OS_SOLARIS || IS_OS_SUN_OS;
 
     /**
      * <p>
@@ -1374,6 +1374,7 @@ public class SystemUtils {
      * @return the version, for example 1.31f for JDK 1.3.1
      * @deprecated Use {@link #JAVA_VERSION_FLOAT} instead. Method will be removed in Commons Lang 3.0.
      */
+    @Deprecated
     public static float getJavaVersion() {
         return JAVA_VERSION_FLOAT;
     }

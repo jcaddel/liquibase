@@ -1,12 +1,15 @@
 package liquibase.resource;
 
-import liquibase.util.StringUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Vector;
+
+import liquibase.util.StringUtils;
 
 /**
  * A FileOpener that will search in a List of other FileOpeners until it finds one that has a resource of the
@@ -42,6 +45,7 @@ public class CompositeResourceAccessor implements ResourceAccessor {
      * <p/>
      * If none of the FileOpeners was able to produce a stream to the file then null is returned.
      */
+    @Override
     public InputStream getResourceAsStream(String file) throws IOException {
         for (ResourceAccessor o : openers) {
             InputStream is = o.getResourceAsStream(file);
@@ -55,6 +59,7 @@ public class CompositeResourceAccessor implements ResourceAccessor {
      * Searches all of the FileOpeners for a directory named packageName. If no results are found within any of the
      * directories then an empty Enumeration is returned.
      */
+    @Override
     public Enumeration<URL> getResources(String packageName) throws IOException {
         Vector<URL> urls = new Vector<URL>();
         for (ResourceAccessor o : openers) {
@@ -68,6 +73,7 @@ public class CompositeResourceAccessor implements ResourceAccessor {
         return urls.elements();
     }
 
+    @Override
     public ClassLoader toClassLoader() {
         ClassLoader[] loaders = new ClassLoader[openers.size()];
         int i = 0;

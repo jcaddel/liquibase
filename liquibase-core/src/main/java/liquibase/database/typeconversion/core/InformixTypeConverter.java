@@ -1,17 +1,26 @@
 package liquibase.database.typeconversion.core;
 
+import java.util.regex.Pattern;
+
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
-import liquibase.database.structure.type.*;
-
-import java.util.regex.Pattern;
+import liquibase.database.structure.type.BigIntType;
+import liquibase.database.structure.type.BooleanType;
+import liquibase.database.structure.type.CurrencyType;
+import liquibase.database.structure.type.CustomType;
+import liquibase.database.structure.type.DataType;
+import liquibase.database.structure.type.DateTimeType;
+import liquibase.database.structure.type.TextType;
+import liquibase.database.structure.type.TimeType;
 
 public class InformixTypeConverter extends AbstractTypeConverter {
 
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean supports(Database database) {
         return database instanceof InformixDatabase;
     }
@@ -43,13 +52,13 @@ public class InformixTypeConverter extends AbstractTypeConverter {
 
     private boolean isSerial(DataType type) {
         return INTEGER_PATTERN.matcher(type.getDataTypeName()).matches()
-                || SERIAL_PATTERN.matcher(type.getDataTypeName()).matches();
+        || SERIAL_PATTERN.matcher(type.getDataTypeName()).matches();
     }
 
     private boolean isSerial8(DataType type) {
         return INTEGER8_PATTERN.matcher(type.getDataTypeName()).matches()
-                || SERIAL8_PATTERN.matcher(type.getDataTypeName()).matches()
-                || "BIGINT".equalsIgnoreCase(type.getDataTypeName());
+        || SERIAL8_PATTERN.matcher(type.getDataTypeName()).matches()
+        || "BIGINT".equalsIgnoreCase(type.getDataTypeName());
     }
 
     @Override

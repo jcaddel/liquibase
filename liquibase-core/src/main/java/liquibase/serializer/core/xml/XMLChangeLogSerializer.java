@@ -1,5 +1,20 @@
 package liquibase.serializer.core.xml;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import liquibase.change.Change;
 import liquibase.change.ChangeProperty;
 import liquibase.change.ColumnConfig;
@@ -17,15 +32,13 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 import liquibase.util.XMLUtil;
 import liquibase.util.xml.DefaultXmlWriter;
-import org.w3c.dom.*;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.util.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
 public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
@@ -42,32 +55,38 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         this.currentChangeLogFileDOM = currentChangeLogFileDOM;
     }
 
+    @Override
     public String[] getValidFileExtensions() {
         return new String[] { "xml" };
     }
 
+    @Override
     public String serialize(DatabaseChangeLog databaseChangeLog) {
         return null; // todo
     }
 
+    @Override
     public String serialize(Change change) {
         StringBuffer buffer = new StringBuffer();
         nodeToStringBuffer(createNode(change), buffer);
         return buffer.toString();
     }
 
+    @Override
     public String serialize(SqlVisitor visitor) {
         StringBuffer buffer = new StringBuffer();
         nodeToStringBuffer(createNode(visitor), buffer);
         return buffer.toString();
     }
 
+    @Override
     public String serialize(ColumnConfig columnConfig) {
         StringBuffer buffer = new StringBuffer();
         nodeToStringBuffer(createNode(columnConfig), buffer);
         return buffer.toString();
     }
 
+    @Override
     public String serialize(ChangeSet changeSet) {
         StringBuffer buffer = new StringBuffer();
         nodeToStringBuffer(createNode(changeSet), buffer);
@@ -75,6 +94,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     }
 
+    @Override
     public void write(List<ChangeSet> changeSets, OutputStream out) throws IOException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder;
@@ -87,13 +107,13 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         Document doc = documentBuilder.newDocument();
         Element changeLogElement = doc.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(),
-                "databaseChangeLog");
+        "databaseChangeLog");
 
         changeLogElement.setAttribute("xmlns", XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace());
         changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
         changeLogElement.setAttribute("xsi:schemaLocation",
                 "http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-"
-                        + XMLChangeLogSAXParser.getSchemaVersion() + ".xsd");
+                + XMLChangeLogSAXParser.getSchemaVersion() + ".xsd");
 
         doc.appendChild(changeLogElement);
         setCurrentChangeLogFileDOM(doc);
@@ -310,7 +330,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     public Element createNode(ChangeSet changeSet) {
         Element node = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(),
-                "changeSet");
+        "changeSet");
         node.setAttribute("id", changeSet.getId());
         node.setAttribute("author", changeSet.getAuthor());
 

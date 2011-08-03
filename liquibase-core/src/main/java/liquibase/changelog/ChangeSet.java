@@ -1,11 +1,26 @@
 package liquibase.changelog;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import liquibase.change.Change;
 import liquibase.change.CheckSum;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.database.Database;
-import liquibase.exception.*;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.MigrationFailedException;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.RollbackFailedException;
+import liquibase.exception.SetupException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
@@ -18,8 +33,6 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-
-import java.util.*;
 
 /**
  * Encapsulates a changeSet and all its associated changes.
@@ -264,7 +277,7 @@ public class ChangeSet implements Conditional {
 
                     LogFactory.getLogger().info(
                             "Continuing past: " + toString()
-                                    + " despite precondition failure due to onFail='CONTINUE': " + message);
+                            + " despite precondition failure due to onFail='CONTINUE': " + message);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.MARK_RAN)) {
                     execType = ExecType.MARK_RAN;
                     skipChange = true;
@@ -440,7 +453,7 @@ public class ChangeSet implements Conditional {
 
     public String toString(boolean includeMD5Sum) {
         return filePath + "::" + getId() + "::" + getAuthor()
-                + (includeMD5Sum ? ("::(Checksum: " + generateCheckSum() + ")") : "");
+        + (includeMD5Sum ? ("::(Checksum: " + generateCheckSum() + ")") : "");
     }
 
     @Override
@@ -578,10 +591,12 @@ public class ChangeSet implements Conditional {
         return false;
     }
 
+    @Override
     public PreconditionContainer getPreconditions() {
         return preconditions;
     }
 
+    @Override
     public void setPreconditions(PreconditionContainer preconditionContainer) {
         this.preconditions = preconditionContainer;
     }

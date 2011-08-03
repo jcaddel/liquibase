@@ -1,22 +1,26 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
-import liquibase.database.core.*;
-import liquibase.database.structure.Index;
-import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.core.CreateIndexStatement;
-import liquibase.util.StringUtils;
-
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.structure.Index;
+import liquibase.exception.ValidationErrors;
+import liquibase.sql.Sql;
+import liquibase.sql.UnparsedSql;
+import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.CreateIndexStatement;
+import liquibase.util.StringUtils;
+
 public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatement> {
 
+    @Override
     public ValidationErrors validate(CreateIndexStatement createIndexStatement, Database database,
             SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
@@ -25,6 +29,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(CreateIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
         if (database instanceof OracleDatabase) {
@@ -43,7 +48,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
             if (associatedWith != null
                     && (associatedWith.contains(Index.MARK_PRIMARY_KEY)
                             || associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT) || associatedWith
-                                .contains(Index.MARK_FOREIGN_KEY))) {
+                            .contains(Index.MARK_FOREIGN_KEY))) {
                 return new Sql[0];
             }
         }

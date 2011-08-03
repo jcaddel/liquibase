@@ -1,20 +1,26 @@
 package liquibase.database;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Date;
+import java.util.List;
+
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.*;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.DatabaseHistoryException;
+import liquibase.exception.DateParseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.StatementNotSupportedOnDatabaseException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.DatabaseFunction;
-
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Date;
-import java.util.List;
+import liquibase.statement.SqlStatement;
 
 public interface Database extends DatabaseObject, PrioritizedService {
 
@@ -236,30 +242,29 @@ public interface Database extends DatabaseObject, PrioritizedService {
     boolean isLocalDatabase() throws DatabaseException;
 
     void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors)
-            throws LiquibaseException, UnsupportedChangeException;/*
-                                                                   * Executes the statements passed as argument to a
-                                                                   * target {@link Database}
-                                                                   * 
-                                                                   * @param statements an array containing the SQL
-                                                                   * statements to be issued
-                                                                   * 
-                                                                   * @param database the target {@link Database}
-                                                                   * 
-                                                                   * @throws DatabaseException if there were problems
-                                                                   * issuing the statements
-                                                                   */
+    throws LiquibaseException, UnsupportedChangeException;
+
+    /*
+     * Executes the statements passed as argument to a target {@link Database}
+     * 
+     * @param statements an array containing the SQL statements to be issued
+     * 
+     * @param database the target {@link Database}
+     * 
+     * @throws DatabaseException if there were problems issuing the statements
+     */
 
     void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException;
 
     void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException,
-            UnsupportedChangeException, StatementNotSupportedOnDatabaseException, LiquibaseException;
+    UnsupportedChangeException, StatementNotSupportedOnDatabaseException, LiquibaseException;
 
     void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException,
-            UnsupportedChangeException, RollbackImpossibleException;
+    UnsupportedChangeException, RollbackImpossibleException;
 
     void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException,
-            UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException,
-            LiquibaseException;
+    UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException,
+    LiquibaseException;
 
     int getNextChangeSetSequenceValue() throws LiquibaseException;
 

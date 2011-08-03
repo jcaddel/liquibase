@@ -1,9 +1,13 @@
 package liquibase.precondition.core;
 
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
-import liquibase.exception.*;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.precondition.Precondition;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
@@ -38,16 +42,19 @@ public class PrimaryKeyExistsPrecondition implements Precondition {
         this.tableName = tableName;
     }
 
+    @Override
     public Warnings warn(Database database) {
         return new Warnings();
     }
 
+    @Override
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
 
+    @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
-            throws PreconditionFailedException, PreconditionErrorException {
+    throws PreconditionFailedException, PreconditionErrorException {
         DatabaseSnapshot snapshot;
         try {
             snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, getSchemaName(), null);
@@ -69,6 +76,7 @@ public class PrimaryKeyExistsPrecondition implements Precondition {
         }
     }
 
+    @Override
     public String getName() {
         return "primaryKeyExists";
     }

@@ -1,19 +1,63 @@
 package liquibase.diff;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import javax.xml.parsers.ParserConfigurationException;
+
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
-import liquibase.change.core.*;
+import liquibase.change.core.AddColumnChange;
+import liquibase.change.core.AddForeignKeyConstraintChange;
+import liquibase.change.core.AddNotNullConstraintChange;
+import liquibase.change.core.AddPrimaryKeyChange;
+import liquibase.change.core.AddUniqueConstraintChange;
+import liquibase.change.core.CreateIndexChange;
+import liquibase.change.core.CreateSequenceChange;
+import liquibase.change.core.CreateTableChange;
+import liquibase.change.core.CreateViewChange;
+import liquibase.change.core.DropColumnChange;
+import liquibase.change.core.DropForeignKeyConstraintChange;
+import liquibase.change.core.DropIndexChange;
+import liquibase.change.core.DropNotNullConstraintChange;
+import liquibase.change.core.DropPrimaryKeyChange;
+import liquibase.change.core.DropSequenceChange;
+import liquibase.change.core.DropTableChange;
+import liquibase.change.core.DropUniqueConstraintChange;
+import liquibase.change.core.DropViewChange;
+import liquibase.change.core.InsertDataChange;
+import liquibase.change.core.LoadDataChange;
+import liquibase.change.core.LoadDataColumnConfig;
+import liquibase.change.core.ModifyDataTypeChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.database.structure.*;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.ForeignKey;
+import liquibase.database.structure.Index;
+import liquibase.database.structure.PrimaryKey;
+import liquibase.database.structure.Sequence;
+import liquibase.database.structure.Table;
+import liquibase.database.structure.UniqueConstraint;
+import liquibase.database.structure.View;
 import liquibase.database.typeconversion.TypeConverter;
 import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
-import liquibase.parser.core.xml.LiquibaseEntityResolver;
-import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
@@ -23,16 +67,6 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVWriter;
-import liquibase.util.xml.DefaultXmlWriter;
-import liquibase.util.xml.XmlWriter;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
-import java.util.*;
 
 public class DiffResult {
 
@@ -280,13 +314,13 @@ public class DiffResult {
         }
 
         return getMissingColumns().size() > 0 || getMissingForeignKeys().size() > 0 || getMissingIndexes().size() > 0
-                || getMissingPrimaryKeys().size() > 0 || getMissingSequences().size() > 0
-                || getMissingTables().size() > 0 || getMissingUniqueConstraints().size() > 0
-                || getMissingViews().size() > 0 || getUnexpectedColumns().size() > 0
-                || getUnexpectedForeignKeys().size() > 0 || getUnexpectedIndexes().size() > 0
-                || getUnexpectedPrimaryKeys().size() > 0 || getUnexpectedSequences().size() > 0
-                || getUnexpectedTables().size() > 0 || getUnexpectedUniqueConstraints().size() > 0
-                || getUnexpectedViews().size() > 0 || differencesInData;
+        || getMissingPrimaryKeys().size() > 0 || getMissingSequences().size() > 0
+        || getMissingTables().size() > 0 || getMissingUniqueConstraints().size() > 0
+        || getMissingViews().size() > 0 || getUnexpectedColumns().size() > 0
+        || getUnexpectedForeignKeys().size() > 0 || getUnexpectedIndexes().size() > 0
+        || getUnexpectedPrimaryKeys().size() > 0 || getUnexpectedSequences().size() > 0
+        || getUnexpectedTables().size() > 0 || getUnexpectedUniqueConstraints().size() > 0
+        || getUnexpectedViews().size() > 0 || differencesInData;
     }
 
     public void printResult(PrintStream out) throws DatabaseException {
@@ -340,18 +374,18 @@ public class DiffResult {
                     if (baseColumn.isDataTypeDifferent(column)) {
                         out.println("           from "
                                 + TypeConverterFactory.getInstance().findTypeConverter(referenceSnapshot.getDatabase())
-                                        .convertToDatabaseTypeString(baseColumn, referenceSnapshot.getDatabase())
+                                .convertToDatabaseTypeString(baseColumn, referenceSnapshot.getDatabase())
                                 + " to "
                                 + TypeConverterFactory
-                                        .getInstance()
-                                        .findTypeConverter(targetSnapshot.getDatabase())
-                                        .convertToDatabaseTypeString(
-                                                targetSnapshot.getColumn(column.getTable().getName(), column.getName()),
-                                                targetSnapshot.getDatabase()));
+                                .getInstance()
+                                .findTypeConverter(targetSnapshot.getDatabase())
+                                .convertToDatabaseTypeString(
+                                        targetSnapshot.getColumn(column.getTable().getName(), column.getName()),
+                                        targetSnapshot.getDatabase()));
                     }
                     if (baseColumn.isNullabilityDifferent(column)) {
                         Boolean nowNullable = targetSnapshot.getColumn(column.getTable().getName(), column.getName())
-                                .isNullable();
+                        .isNullable();
                         if (nowNullable == null) {
                             nowNullable = Boolean.TRUE;
                         }
@@ -385,18 +419,18 @@ public class DiffResult {
     }
 
     public void printChangeLog(String changeLogFile, Database targetDatabase) throws ParserConfigurationException,
-            IOException, DatabaseException {
+    IOException, DatabaseException {
         ChangeLogSerializer changeLogSerializer = serializerFactory.getSerializer(changeLogFile);
         this.printChangeLog(changeLogFile, targetDatabase, changeLogSerializer);
     }
 
     public void printChangeLog(PrintStream out, Database targetDatabase) throws ParserConfigurationException,
-            IOException, DatabaseException {
+    IOException, DatabaseException {
         this.printChangeLog(out, targetDatabase, new XMLChangeLogSerializer());
     }
 
     public void printChangeLog(String changeLogFile, Database targetDatabase, ChangeLogSerializer changeLogSerializer)
-            throws ParserConfigurationException, IOException, DatabaseException {
+    throws ParserConfigurationException, IOException, DatabaseException {
         File file = new File(changeLogFile);
         if (!file.exists()) {
             LogFactory.getLogger().info(file + " does not exist, creating");
@@ -458,7 +492,7 @@ public class DiffResult {
      * Prints changeLog that would bring the target database to be the same as the reference database
      */
     public void printChangeLog(PrintStream out, Database targetDatabase, ChangeLogSerializer changeLogSerializer)
-            throws ParserConfigurationException, IOException, DatabaseException {
+    throws ParserConfigurationException, IOException, DatabaseException {
         List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
         addMissingTableChanges(changeSets, targetDatabase);
         addMissingColumnChanges(changeSets, targetDatabase);
@@ -802,7 +836,7 @@ public class DiffResult {
 
     private boolean shouldModifyColumn(Column column) {
         return column.getView() == null
-                && !referenceSnapshot.getDatabase().isLiquibaseTable(column.getTable().getName());
+        && !referenceSnapshot.getDatabase().isLiquibaseTable(column.getTable().getName());
 
     }
 
@@ -831,14 +865,14 @@ public class DiffResult {
             columnConfig.setName(column.getName());
 
             String dataType = TypeConverterFactory.getInstance().findTypeConverter(database)
-                    .convertToDatabaseTypeString(column, database);
+            .convertToDatabaseTypeString(column, database);
 
             columnConfig.setType(dataType);
 
             Object defaultValue = column.getDefaultValue();
             if (defaultValue != null) {
                 String defaultValueString = TypeConverterFactory.getInstance().findTypeConverter(database)
-                        .getDataType(defaultValue).convertObjectToString(defaultValue, database);
+                .getDataType(defaultValue).convertObjectToString(defaultValue, database);
                 if (defaultValueString != null) {
                     defaultValueString = defaultValueString.replaceFirst("'", "").replaceAll("'$", "");
                 }
@@ -976,11 +1010,11 @@ public class DiffResult {
             for (Table table : referenceSnapshot.getTables()) {
                 List<Change> changes = new ArrayList<Change>();
                 List<Map> rs = ExecutorService
-                        .getInstance()
-                        .getExecutor(referenceSnapshot.getDatabase())
-                        .queryForList(
-                                new RawSqlStatement("SELECT * FROM "
-                                        + referenceSnapshot.getDatabase().escapeTableName(schema, table.getName())));
+                .getInstance()
+                .getExecutor(referenceSnapshot.getDatabase())
+                .queryForList(
+                        new RawSqlStatement("SELECT * FROM "
+                                + referenceSnapshot.getDatabase().escapeTableName(schema, table.getName())));
 
                 if (rs.size() == 0) {
                     continue;

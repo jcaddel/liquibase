@@ -1,9 +1,21 @@
 package liquibase.statement.core;
 
-import liquibase.database.structure.type.DataType;
-import liquibase.statement.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import java.util.*;
+import liquibase.database.structure.type.DataType;
+import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AutoIncrementConstraint;
+import liquibase.statement.ColumnConstraint;
+import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.NotNullConstraint;
+import liquibase.statement.PrimaryKeyConstraint;
+import liquibase.statement.UniqueConstraint;
 
 public class CreateTableStatement extends AbstractSqlStatement {
     private String schemaName;

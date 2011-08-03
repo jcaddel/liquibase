@@ -1,15 +1,25 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.exception.Warnings;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.core.ModifyDataTypeStatement;
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.CacheDatabase;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.H2Database;
+import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MaxDBDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.SybaseDatabase;
 import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
+import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.ModifyDataTypeStatement;
 
 public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataTypeStatement> {
 
@@ -26,6 +36,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
         return warnings;
     }
 
+    @Override
     public ValidationErrors validate(ModifyDataTypeStatement statement, Database database,
             SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
@@ -36,9 +47,10 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(ModifyDataTypeStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String alterTable = "ALTER TABLE "
-                + database.escapeTableName(statement.getSchemaName(), statement.getTableName());
+            + database.escapeTableName(statement.getSchemaName(), statement.getTableName());
 
         // add "MODIFY"
         alterTable += " " + getModifyString(database) + " ";
@@ -51,7 +63,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
 
         // add column type
         alterTable += TypeConverterFactory.getInstance().findTypeConverter(database)
-                .getDataType(statement.getNewDataType(), false);
+        .getDataType(statement.getNewDataType(), false);
 
         return new Sql[] { new UnparsedSql(alterTable) };
     }

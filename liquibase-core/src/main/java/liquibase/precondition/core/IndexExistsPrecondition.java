@@ -1,9 +1,13 @@
 package liquibase.precondition.core;
 
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
-import liquibase.exception.*;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.precondition.Precondition;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.util.StringUtils;
@@ -46,10 +50,12 @@ public class IndexExistsPrecondition implements Precondition {
         this.columnNames = columnNames;
     }
 
+    @Override
     public Warnings warn(Database database) {
         return new Warnings();
     }
 
+    @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
         if (getIndexName() == null && getTableName() == null && getColumnNames() == null) {
@@ -58,8 +64,9 @@ public class IndexExistsPrecondition implements Precondition {
         return validationErrors;
     }
 
+    @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
-            throws PreconditionFailedException, PreconditionErrorException {
+    throws PreconditionFailedException, PreconditionErrorException {
         try {
             if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database)
                     .hasIndex(getSchemaName(), getTableName(), getIndexName(), database, getColumnNames())) {
@@ -83,6 +90,7 @@ public class IndexExistsPrecondition implements Precondition {
         }
     }
 
+    @Override
     public String getName() {
         return "indexExists";
     }

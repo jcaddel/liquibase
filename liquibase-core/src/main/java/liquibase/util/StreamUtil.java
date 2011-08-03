@@ -1,6 +1,10 @@
 package liquibase.util;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.Reader;
 
 /**
  * Utilities for working with streams.
@@ -44,7 +48,7 @@ public class StreamUtil {
     public static String getStreamContents(InputStream ins, String charsetName) throws IOException {
 
         InputStreamReader reader = (charsetName != null) ? new InputStreamReader(ins, charsetName)
-                : new InputStreamReader(ins);
+        : new InputStreamReader(ins);
         return getReaderContents(reader);
     }
 
@@ -70,7 +74,7 @@ public class StreamUtil {
         } finally {
             try {
                 reader.close();
-            } catch (IOException ioe) {// NOPMD
+            } catch (IOException ioe) { // NOPMD
                 // can safely ignore
             }
         }

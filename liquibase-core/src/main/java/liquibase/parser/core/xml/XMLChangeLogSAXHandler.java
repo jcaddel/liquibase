@@ -7,7 +7,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.Stack;
+import java.util.TreeSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Matcher;
@@ -146,6 +156,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
                 Enumeration<URL> resourcesEnum = resourceAccessor.getResources(pathName);
                 SortedSet<URL> resources = new TreeSet<URL>(new Comparator<URL>() {
+                    @Override
                     public int compare(URL o1, URL o2) {
                         return o1.toString().compareTo(o2.toString());
                     }
@@ -428,7 +439,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     }
 
     protected boolean handleIncludedChangeLog(String fileName, boolean isRelativePath, String relativeBaseFileName)
-            throws LiquibaseException {
+    throws LiquibaseException {
         if (!(fileName.endsWith(".xml") || fileName.endsWith(".sql"))) {
             log.debug(relativeBaseFileName + "/" + fileName + " is not a recognized file type");
             return false;
@@ -448,7 +459,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
             }
         }
         DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor)
-                .parse(fileName, changeLogParameters, resourceAccessor);
+        .parse(fileName, changeLogParameters, resourceAccessor);
         PreconditionContainer preconditions = changeLog.getPreconditions();
         if (preconditions != null) {
             if (null == databaseChangeLog.getPreconditions()) {
@@ -464,7 +475,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     }
 
     private void setProperty(Object object, String attributeName, String attributeValue) throws IllegalAccessException,
-            InvocationTargetException, CustomChangeException {
+    InvocationTargetException, CustomChangeException {
         if (object instanceof CustomChangeWrapper) {
             if (attributeName.equals("class")) {
                 ((CustomChangeWrapper) object).setClass(changeLogParameters.expandExpressions(attributeValue));
@@ -617,50 +628,62 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
             this.attributes = attributes;
         }
 
+        @Override
         public int getLength() {
             return attributes.getLength();
         }
 
+        @Override
         public String getURI(int index) {
             return attributes.getURI(index);
         }
 
+        @Override
         public String getLocalName(int index) {
             return attributes.getLocalName(index);
         }
 
+        @Override
         public String getQName(int index) {
             return attributes.getQName(index);
         }
 
+        @Override
         public String getType(int index) {
             return attributes.getType(index);
         }
 
+        @Override
         public String getValue(int index) {
             return attributes.getValue(index);
         }
 
+        @Override
         public int getIndex(String uri, String localName) {
             return attributes.getIndex(uri, localName);
         }
 
+        @Override
         public int getIndex(String qName) {
             return attributes.getIndex(qName);
         }
 
+        @Override
         public String getType(String uri, String localName) {
             return attributes.getType(uri, localName);
         }
 
+        @Override
         public String getType(String qName) {
             return attributes.getType(qName);
         }
 
+        @Override
         public String getValue(String uri, String localName) {
             return changeLogParameters.expandExpressions(attributes.getValue(uri, localName));
         }
 
+        @Override
         public String getValue(String qName) {
             return changeLogParameters.expandExpressions(attributes.getValue(qName));
         }

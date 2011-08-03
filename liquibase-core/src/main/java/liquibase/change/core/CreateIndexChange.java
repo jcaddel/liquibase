@@ -1,13 +1,18 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeProperty;
+import liquibase.change.ChangeWithColumns;
+import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateIndexStatement;
 import liquibase.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Creates an index on an existing column.
@@ -54,6 +59,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.tableName = tableName;
     }
 
+    @Override
     public List<ColumnConfig> getColumns() {
         return columns;
     }
@@ -62,6 +68,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.columns = columns;
     }
 
+    @Override
     public void addColumn(ColumnConfig column) {
         columns.add(column);
     }
@@ -74,6 +81,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.tablespace = tablespace;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         List<String> columns = new ArrayList<String>();
         for (ColumnConfig column : getColumns()) {
@@ -82,8 +90,8 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
         return new SqlStatement[] { new CreateIndexStatement(getIndexName(),
                 getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName(), getTableName(),
-                this.isUnique(), getAssociatedWith(), columns.toArray(new String[getColumns().size()]))
-                .setTablespace(getTablespace()) };
+                        this.isUnique(), getAssociatedWith(), columns.toArray(new String[getColumns().size()]))
+        .setTablespace(getTablespace()) };
     }
 
     @Override
@@ -96,6 +104,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         return new Change[] { inverse };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Index " + getIndexName() + " created";
     }

@@ -1,15 +1,32 @@
 package liquibase.database.typeconversion;
 
+import java.text.ParseException;
+
+import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.structure.Column;
-import liquibase.database.structure.type.*;
-import liquibase.change.ColumnConfig;
+import liquibase.database.structure.type.BigIntType;
+import liquibase.database.structure.type.BlobType;
+import liquibase.database.structure.type.BooleanType;
+import liquibase.database.structure.type.CharType;
+import liquibase.database.structure.type.ClobType;
+import liquibase.database.structure.type.CurrencyType;
+import liquibase.database.structure.type.DataType;
+import liquibase.database.structure.type.DateTimeType;
+import liquibase.database.structure.type.DateType;
+import liquibase.database.structure.type.DoubleType;
+import liquibase.database.structure.type.FloatType;
+import liquibase.database.structure.type.IntType;
+import liquibase.database.structure.type.TextType;
+import liquibase.database.structure.type.TimeType;
+import liquibase.database.structure.type.TinyIntType;
+import liquibase.database.structure.type.UUIDType;
+import liquibase.database.structure.type.VarcharType;
 import liquibase.servicelocator.PrioritizedService;
-
-import java.text.ParseException;
 
 public interface TypeConverter extends PrioritizedService {
 
+    @Override
     int getPriority();
 
     boolean supports(Database database);

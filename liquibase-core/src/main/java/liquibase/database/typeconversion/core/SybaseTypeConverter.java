@@ -1,17 +1,25 @@
 package liquibase.database.typeconversion.core;
 
+import java.text.ParseException;
+
 import liquibase.database.Database;
 import liquibase.database.core.SybaseDatabase;
-import liquibase.database.structure.type.*;
-
-import java.text.ParseException;
+import liquibase.database.structure.type.BlobType;
+import liquibase.database.structure.type.BooleanType;
+import liquibase.database.structure.type.ClobType;
+import liquibase.database.structure.type.CurrencyType;
+import liquibase.database.structure.type.DataType;
+import liquibase.database.structure.type.DateType;
+import liquibase.database.structure.type.UUIDType;
 
 public class SybaseTypeConverter extends AbstractTypeConverter {
 
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean supports(Database database) {
         return database instanceof SybaseDatabase;
     }

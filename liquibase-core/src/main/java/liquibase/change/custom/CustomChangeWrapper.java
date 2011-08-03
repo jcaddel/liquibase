@@ -1,17 +1,22 @@
 package liquibase.change.custom;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.ChangeProperty;
-import liquibase.database.Database;
-import liquibase.exception.*;
-import liquibase.statement.SqlStatement;
-import liquibase.util.ObjectUtil;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import liquibase.change.AbstractChange;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeProperty;
+import liquibase.database.Database;
+import liquibase.exception.CustomChangeException;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
+import liquibase.statement.SqlStatement;
+import liquibase.util.ObjectUtil;
 
 /**
  * Adapts CustomChange implementations to the standard change system used by Liquibase. Custom change implementations
@@ -59,7 +64,7 @@ public class CustomChangeWrapper extends AbstractChange {
             } catch (ClassCastException e) { // fails in Ant in particular
                 try {
                     customChange = (CustomChange) Thread.currentThread().getContextClassLoader().loadClass(className)
-                            .newInstance();
+                    .newInstance();
                 } catch (ClassNotFoundException e1) {
                     customChange = (CustomChange) Class.forName(className).newInstance();
                 }
@@ -101,6 +106,7 @@ public class CustomChangeWrapper extends AbstractChange {
         return new Warnings();
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         SqlStatement[] statements = null;
         try {
@@ -125,7 +131,7 @@ public class CustomChangeWrapper extends AbstractChange {
 
     @Override
     public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException,
-            RollbackImpossibleException {
+    RollbackImpossibleException {
         SqlStatement[] statements = null;
         try {
             configureCustomChange();
@@ -164,6 +170,7 @@ public class CustomChangeWrapper extends AbstractChange {
         }
     }
 
+    @Override
     public String getConfirmationMessage() {
         return customChange.getConfirmationMessage();
     }

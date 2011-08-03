@@ -1,11 +1,11 @@
 package liquibase.database.core;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public class MaxDBDatabase extends AbstractDatabase {
 
@@ -79,6 +79,7 @@ public class MaxDBDatabase extends AbstractDatabase {
         systemTablesAndViews.add("VERSION");
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
@@ -88,10 +89,12 @@ public class MaxDBDatabase extends AbstractDatabase {
         return systemTablesAndViews;
     }
 
+    @Override
     public String getTypeName() {
         return "maxdb";
     }
 
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }
@@ -101,10 +104,12 @@ public class MaxDBDatabase extends AbstractDatabase {
         return true;
     }
 
+    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName());
     }
 
+    @Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:sapdb")) {
             return "com.sap.dbtech.jdbc.DriverSapDB";
@@ -112,6 +117,7 @@ public class MaxDBDatabase extends AbstractDatabase {
         return null;
     }
 
+    @Override
     public String getCurrentDateTimeFunction() {
         if (currentDateTimeFunction != null) {
             return currentDateTimeFunction;
@@ -121,7 +127,7 @@ public class MaxDBDatabase extends AbstractDatabase {
     }
 
     @Override
-    protected String getDefaultDatabaseSchemaName() throws DatabaseException {// NOPMD
+    protected String getDefaultDatabaseSchemaName() throws DatabaseException { // NOPMD
         return super.getDefaultDatabaseSchemaName().toUpperCase();
     }
 
@@ -157,6 +163,7 @@ public class MaxDBDatabase extends AbstractDatabase {
         return false;
     }
 
+    @Override
     public boolean supportsTablespaces() {
         return false;
     }

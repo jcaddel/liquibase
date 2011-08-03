@@ -1,13 +1,24 @@
 package liquibase.diff;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import liquibase.database.Database;
-import liquibase.database.structure.*;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.ForeignKey;
+import liquibase.database.structure.Index;
+import liquibase.database.structure.PrimaryKey;
+import liquibase.database.structure.Sequence;
+import liquibase.database.structure.Table;
+import liquibase.database.structure.UniqueConstraint;
+import liquibase.database.structure.View;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.util.StringUtils;
-
-import java.util.*;
 
 public class Diff {
 
@@ -257,8 +268,8 @@ public class Diff {
             if (!referenceSnapshot.getColumns().contains(targetColumn)
                     && (targetColumn.getTable() == null || !diffResult.getUnexpectedTables().contains(
                             targetColumn.getTable()))
-                    && (targetColumn.getView() == null || !diffResult.getUnexpectedViews().contains(
-                            targetColumn.getView()))) {
+                            && (targetColumn.getView() == null || !diffResult.getUnexpectedViews().contains(
+                                    targetColumn.getView()))) {
                 diffResult.addUnexpectedColumn(targetColumn);
             } else if (targetColumn.getTable() != null
                     && !diffResult.getUnexpectedTables().contains(targetColumn.getTable())) {

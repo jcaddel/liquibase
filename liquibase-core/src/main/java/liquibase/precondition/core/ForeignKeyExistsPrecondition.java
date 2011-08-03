@@ -1,9 +1,13 @@
 package liquibase.precondition.core;
 
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
-import liquibase.exception.*;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.precondition.Precondition;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.util.StringUtils;
@@ -37,27 +41,30 @@ public class ForeignKeyExistsPrecondition implements Precondition {
         this.foreignKeyName = foreignKeyName;
     }
 
+    @Override
     public Warnings warn(Database database) {
         return new Warnings();
     }
 
+    @Override
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
 
+    @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
-            throws PreconditionFailedException, PreconditionErrorException {
+    throws PreconditionFailedException, PreconditionErrorException {
         try {
             boolean checkPassed;
             if (getForeignKeyTableName() == null) {
                 checkPassed = DatabaseSnapshotGeneratorFactory.getInstance()
-                        .createSnapshot(database, getSchemaName(), null).getForeignKey(getForeignKeyName()) != null;
+                .createSnapshot(database, getSchemaName(), null).getForeignKey(getForeignKeyName()) != null;
             } else { // much faster if we can limit to correct table
                 checkPassed = DatabaseSnapshotGeneratorFactory
-                        .getInstance()
-                        .getGenerator(database)
-                        .getForeignKeyByForeignKeyTable(getSchemaName(), getForeignKeyTableName(), getForeignKeyName(),
-                                database) != null;
+                .getInstance()
+                .getGenerator(database)
+                .getForeignKeyByForeignKeyTable(getSchemaName(), getForeignKeyTableName(), getForeignKeyName(),
+                        database) != null;
             }
             if (!checkPassed) {
                 String message = "Foreign Key " + database.escapeStringForDatabase(getForeignKeyName());
@@ -72,6 +79,7 @@ public class ForeignKeyExistsPrecondition implements Precondition {
         }
     }
 
+    @Override
     public String getName() {
         return "foreignKeyConstraintExists";
     }

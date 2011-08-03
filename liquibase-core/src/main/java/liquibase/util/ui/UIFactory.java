@@ -6,7 +6,7 @@ public class UIFactory {
     private static final String UI_IMPL_CLASSNAME = "liquibase.util.ui.SwingUIFacade";
     private static UIFactory instance = new UIFactory();
 
-    private UIFacade facade;// = new SwingUIFacade();
+    private UIFacade facade; // = new SwingUIFacade();
 
     public static UIFactory getInstance() {
         return instance;

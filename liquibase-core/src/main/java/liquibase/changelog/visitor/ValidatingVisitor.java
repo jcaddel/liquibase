@@ -1,23 +1,26 @@
 package liquibase.changelog.visitor;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
-import liquibase.exception.*;
-import liquibase.logging.Logger;
-import liquibase.precondition.core.DBMSPrecondition;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.SetupException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
+import liquibase.logging.LogFactory;
 import liquibase.precondition.core.ErrorPrecondition;
 import liquibase.precondition.core.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
-import liquibase.logging.LogFactory;
 import liquibase.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class ValidatingVisitor implements ChangeSetVisitor {
 
@@ -62,10 +65,12 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         }
     }
 
+    @Override
     public Direction getDirection() {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
+    @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
         for (Change change : changeSet.getChanges()) {
             try {
@@ -82,7 +87,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                     if (changeSet.getOnValidationFail().equals(ChangeSet.ValidationFailOption.MARK_RAN)) {
                         LogFactory.getLogger().info(
                                 "Skipping changeSet " + changeSet + " due to validation error(s): "
-                                        + StringUtils.join(foundErrors.getErrorMessages(), ", "));
+                                + StringUtils.join(foundErrors.getErrorMessages(), ", "));
                         changeSet.setValidationFailed(true);
                     } else {
                         validationErrors.addAll(foundErrors, changeSet);
@@ -147,8 +152,8 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
     public boolean validationPassed() {
         return invalidMD5Sums.size() == 0 && failedPreconditions.size() == 0 && errorPreconditions.size() == 0
-                && duplicateChangeSets.size() == 0 && changeValidationExceptions.size() == 0
-                && setupExceptions.size() == 0 && !validationErrors.hasErrors();
+        && duplicateChangeSets.size() == 0 && changeValidationExceptions.size() == 0
+        && setupExceptions.size() == 0 && !validationErrors.hasErrors();
     }
 
     public Database getDatabase() {

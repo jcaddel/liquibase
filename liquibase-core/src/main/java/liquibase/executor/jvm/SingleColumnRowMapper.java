@@ -1,10 +1,14 @@
 package liquibase.executor.jvm;
 
+import java.math.BigDecimal;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+
 import liquibase.util.JdbcUtils;
 import liquibase.util.NumberUtils;
-
-import java.math.BigDecimal;
-import java.sql.*;
 
 /**
  * RowMapper implementation that converts a single column into a single result value per row. Expects to work on a
@@ -57,6 +61,7 @@ class SingleColumnRowMapper implements RowMapper {
      * @see #getColumnValue(java.sql.ResultSet,int,Class)
      * @see #convertValueToRequiredType(Object,Class)
      */
+    @Override
     public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
         // Validate column count.
         ResultSetMetaData rsmd = rs.getMetaData();
