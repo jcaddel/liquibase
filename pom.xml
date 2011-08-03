@@ -8,11 +8,11 @@
   </parent>
   <groupId>org.kuali.db.liquibase</groupId>
   <artifactId>liquibase</artifactId>
-  <version>2.0.3</version>
+  <version>2.0.4-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Liquibase</name>
   <description>Liquibase is a tool for managing and executing database changes.</description>
-  <url>${kuali.site.hostname}/db/liquibase/${project.version}</url>
+  <url>http://${kuali.site.hostname}/db/liquibase/${project.version}</url>
   <organization>
     <name>Liquibase.org</name>
     <url>http://www.liquibase.org</url>
