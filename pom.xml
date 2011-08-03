@@ -156,5 +156,17 @@
         </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>com.google.code.maven-svn-revision-number-plugin</groupId>
+        <artifactId>maven-svn-revision-number-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>generate-svn-info</id>
+            <phase>none</phase>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
 </project>
