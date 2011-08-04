@@ -8,10 +8,10 @@ The pom's have been altered:
 - All of the java based artifacts get deployed, including the example code
 
 Source has been cleaned up by:
-- Applying uniform code formatting (a slightly modified version of the default Sun formatting conventions)
+- Applying uniform code formatting
 - Organizing / sorting import statements
 - Removing .* import statements
-- A few other whitespace/formatting touch ups as pointed out by checkstyle
+- A few other whitespace/formatting touch ups
 
 The built in Maven lifecyles (clean, site, and default) work
 
