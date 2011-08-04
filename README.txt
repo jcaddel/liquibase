@@ -1,20 +1,18 @@
-This fork of liquibase has been Maven'ized and oriented towards being a Kuali version of Liquibase
+This fork of Liquibase has been Maven'ized and oriented towards being a Kuali version of Liquibase
 
-The pom's have been significantly altered:
+The pom's have been altered:
 - Top level pom inherits from the Kuali pom
-- org.kuali.* groupId's
+- groupId's changed to org.kuali.*
 - Stripped out quite a bit of configuration that was redundant or otherwise not needed
 - Changed the <scm> section to reflect the location of the source on GitHub
 - All of the java based artifacts get deployed, including the example code
 
-The full source tree has been modified as follows:
-
-- code formatting applied (a slightly modified version of the default Sun formatting conventions)
-- Import statements organized
-- .* imports replaced by explicit imports
+Source has been cleaned up by:
+- Applying uniform code formatting (a slightly modified version of the default Sun formatting conventions)
+- Organizing / sorting import statements
+- Removing .* import statements
 - A few other whitespace/formatting touch ups as pointed out by checkstyle
 
+The built in Maven lifecyles (clean, site, and default) work
 
-All three of the built in Maven lifecyles (clean, site, and default) work correctly.
-
-Also, the maven-release-plugin is what is used to produce release artifacts.
+The Maven Release plugin works
