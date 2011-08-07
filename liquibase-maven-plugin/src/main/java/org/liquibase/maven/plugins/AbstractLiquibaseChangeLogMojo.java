@@ -10,7 +10,6 @@ import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 
 /**
  * A Liquibase MOJO that requires the user to provide a DatabaseChangeLogFile to be able to perform any actions on the
@@ -18,12 +17,13 @@ import org.apache.maven.plugin.MojoFailureException;
  * 
  * @author Peter Murray
  */
-public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMojo {
+public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMojo2 {
 
     /**
      * Specifies the change log file to use for Liquibase.
      * 
      * @parameter expression="${liquibase.changeLogFile}"
+     * @required
      */
     protected String changeLogFile;
 
@@ -34,15 +34,6 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
      * @parameter expression="${liquibase.contexts}" default-value=""
      */
     protected String contexts;
-
-    @Override
-    protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
-        super.checkRequiredParametersAreSpecified();
-
-        if (changeLogFile == null) {
-            throw new MojoFailureException("The changeLogFile must be specified.");
-        }
-    }
 
     /**
      * Performs the actual Liquibase task on the database using the fully configured {@link liquibase.Liquibase}.

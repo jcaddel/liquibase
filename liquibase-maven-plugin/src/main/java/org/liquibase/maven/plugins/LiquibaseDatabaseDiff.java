@@ -91,13 +91,13 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
 
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
-        ClassLoader cl = null;
-        try {
-            cl = getMavenArtifactClassLoader();
-            Thread.currentThread().setContextClassLoader(cl);
-        } catch (MojoExecutionException e) {
-            throw new LiquibaseException("Could not create the class loader, " + e, e);
-        }
+        ClassLoader cl = getClass().getClassLoader();
+        // try {
+        // cl = getMavenArtifactClassLoader();
+        // Thread.currentThread().setContextClassLoader(cl);
+        // } catch (MojoExecutionException e) {
+        // throw new LiquibaseException("Could not create the class loader, " + e, e);
+        // }
 
         Database db = liquibase.getDatabase();
         Database referenceDatabase = CommandLineUtils.createDatabaseObject(cl, referenceUrl, referenceUsername,
@@ -129,9 +129,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         getLog().info(indent + "diffChangeLogFile: " + diffChangeLogFile);
     }
 
-    @Override
     protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
-        super.checkRequiredParametersAreSpecified();
 
         if (referenceUrl == null) {
             throw new MojoFailureException("A reference database or hibernate configuration file "

@@ -2,13 +2,17 @@
 // Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
-import java.io.*;
-import liquibase.resource.ResourceAccessor;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.resource.ResourceAccessor;
+
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 
 /**
  * Creates an SQL migration script using the provided DatabaseChangeLog(s) comparing what already exists in the database
@@ -19,6 +23,7 @@ import org.apache.maven.plugin.MojoFailureException;
  * @goal migrateSQL
  * @deprecated Use {@link LiquibaseUpdateSQL} or Maven goal "updateSQL" instead.
  */
+@Deprecated
 public class LiquibaseMigrateSQL extends AbstractLiquibaseUpdateMojo {
 
     /**
@@ -29,16 +34,8 @@ public class LiquibaseMigrateSQL extends AbstractLiquibaseUpdateMojo {
      */
     protected File migrationSqlOutputFile;
 
-    /** The writer fro writing the migration SQL. */
+    /** The writer from writing the migration SQL. */
     private Writer outputWriter;
-
-    @Override
-    public void configureFieldsAndValues(ResourceAccessor fo) throws MojoExecutionException, MojoFailureException {
-        getLog().warn(
-                "This plugin goal is DEPRICATED and will bre removed in a future "
-                        + "release, please use \"updateSQL\" instead of \"migrateSQL\".");
-        super.configureFieldsAndValues(fo);
-    }
 
     @Override
     protected boolean isPromptOnNonLocalDatabase() {

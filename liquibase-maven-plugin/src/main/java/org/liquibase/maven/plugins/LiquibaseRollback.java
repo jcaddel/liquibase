@@ -2,9 +2,13 @@
 // Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
-import java.text.*;
-import liquibase.exception.LiquibaseException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 import liquibase.Liquibase;
+import liquibase.exception.LiquibaseException;
+
 import org.apache.maven.plugin.MojoFailureException;
 
 /**
@@ -45,9 +49,7 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
     /** The type of the rollback that is being performed. */
     protected RollbackType type;
 
-    @Override
     protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
-        super.checkRequiredParametersAreSpecified();
 
         if (rollbackCount == -1 && rollbackDate == null && rollbackTag == null) {
             throw new MojoFailureException("One of the rollback options must be specified, "

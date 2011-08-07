@@ -1,13 +1,6 @@
 package org.liquibase.maven.plugins;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -39,11 +32,6 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
  * @requiresDependencyResolution test
  */
 public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
-
-    /**
-     * Suffix for fields that are representing a default value for a another field.
-     */
-    private static final String DEFAULT_FIELD_SUFFIX = "Default";
 
     /**
      * The fully qualified name of the JDBC driver to use. This is optional as the correct driver to use can almost
@@ -115,22 +103,6 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     protected boolean promptOnNonLocalDatabase;
 
     /**
-     * Allows for the maven project artifact to be included in the class loader for obtaining the Liquibase property and
-     * DatabaseChangeLog files.
-     * 
-     * @parameter expression="${liquibase.includeArtifact}" default-value="true"
-     */
-    protected boolean includeArtifact;
-
-    /**
-     * Allows for the maven test output directory to be included in the class loader for obtaining the Liquibase
-     * property and DatabaseChangeLog files.
-     * 
-     * @parameter expression="${liquibase.includeTestOutputDirectory}" default-value="true"
-     */
-    protected boolean includeTestOutputDirectory;
-
-    /**
      * Controls the verbosity of the output from invoking the plugin.
      * 
      * @parameter expression="${liquibase.verbose}" default-value="false"
@@ -139,29 +111,13 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     protected boolean verbose;
 
     /**
-     * Controls the level of logging from Liquibase when executing. The value can be "all", "finest", "finer", "fine",
-     * "info", "warning", "severe" or "off". The value is case insensitive.
+     * Controls logging from Liquibase when executing. The value can be "all", "finest", "finer", "fine", "info",
+     * "warning", "severe" or "off". The value is case insensitive.
      * 
      * @parameter expression="${liquibase.logging}" default-value="INFO"
      * @description Controls the verbosity of the plugin when executing
      */
     protected String logging;
-
-    /**
-     * The Liquibase properties file used to configure the Liquibase {@link liquibase.Liquibase}.
-     * 
-     * @parameter expression="${liquibase.propertyFile}"
-     */
-    protected String propertyFile;
-
-    /**
-     * Flag allowing for the Liquibase properties file to override any settings provided in the Maven plugin
-     * configuration. By default if a property is explicity specified it is not overridden if it also appears in the
-     * properties file.
-     * 
-     * @parameter expression="${liquibase.propertyFileWillOverride}" default-value="false"
-     */
-    protected boolean propertyFileWillOverride;
 
     /**
      * Flag for forcing the checksums to be cleared from the DatabaseChangeLog table.
@@ -171,7 +127,7 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     protected boolean clearCheckSums;
 
     /**
-     * Any properties provided here, will be set as System properties
+     * Any properties provided here, will be set as System properties prior to invoking Liquibase
      * 
      * @parameter
      */
@@ -192,11 +148,11 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     private Liquibase liquibase;
 
     /**
-     * Any properties specified here are passed through to Liquibase as change log parameters
+     * Any properties specified here get passed through to Liquibase as change log parameters
      * 
      * @parameter
      */
-    private Properties expressionVars;
+    private Properties changeLogParameters;
 
     /**
      * Set this to 'true' to skip execution
@@ -239,11 +195,11 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     protected Liquibase getLiquibaseObject(Database database) throws MojoExecutionException {
         Liquibase liquibase = createLiquibase(getFileOpener(this.getClass().getClassLoader()), database);
 
-        if (expressionVars == null) {
+        if (changeLogParameters == null) {
             return liquibase;
         }
-        getLog().debug("expressionVars = " + String.valueOf(expressionVars));
-        for (Map.Entry<Object, Object> var : expressionVars.entrySet()) {
+        getLog().debug("changeLogParameters = " + String.valueOf(changeLogParameters));
+        for (Map.Entry<Object, Object> var : changeLogParameters.entrySet()) {
             liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
         }
         return liquibase;
@@ -279,7 +235,7 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
             database = getDatabaseObject();
             this.liquibase = getLiquibaseObject(database);
 
-            getLog().info("Executing on Database: " + url);
+            getLog().info("Connecting to: " + url);
 
             if (!isConfirmExecution(liquibase)) {
                 throw new LiquibaseException("User decided not to run against non-local database");
@@ -292,11 +248,40 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
 
             performLiquibaseTask(liquibase);
         } catch (LiquibaseException e) {
-            throw new MojoExecutionException("Error setting up or running Liquibase: " + e.getMessage(), e);
+            throw new MojoExecutionException("Liquibase error: " + e.getMessage(), e);
         } finally {
-            cleanup(database);
+            cleanup(liquibase, database);
         }
         getLog().info(MavenUtils.LOG_SEPARATOR);
+    }
+
+    protected void cleanup(Liquibase liquibase, Database database) {
+        cleanup(liquibase);
+        cleanup(database);
+    }
+
+    protected void cleanup(Database db) {
+        if (db == null) {
+            return;
+        }
+        try {
+            db.rollback();
+            db.close();
+        } catch (DatabaseException e) {
+            getLog().error("Failed to close open connection to database.", e);
+        }
+
+    }
+
+    protected void cleanup(Liquibase liquibase) {
+        if (liquibase == null) {
+            return;
+        }
+        try {
+            liquibase.forceReleaseLocks();
+        } catch (LiquibaseException e) {
+            getLog().error(e.getMessage(), e);
+        }
     }
 
     protected Liquibase getLiquibase() {
@@ -325,34 +310,6 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
         }
     }
 
-    public void configureFieldsAndValues(ResourceAccessor fo) throws MojoExecutionException, MojoFailureException {
-        // Load the properties file if there is one, but only for values that the user has not
-        // already specified.
-        if (propertyFile != null) {
-            getLog().info("Parsing Liquibase Properties File");
-            getLog().info("  File: " + propertyFile);
-            try {
-                InputStream is = fo.getResourceAsStream(propertyFile);
-                if (is == null) {
-                    throw new MojoFailureException("Failed to resolve the properties file.");
-                }
-                parsePropertiesFile(is);
-                getLog().info(MavenUtils.LOG_SEPARATOR);
-            } catch (IOException e) {
-                throw new MojoExecutionException("Failed to resolve properties file", e);
-            }
-        }
-    }
-
-    protected ClassLoader getMavenArtifactClassLoader() throws MojoExecutionException {
-        try {
-            return MavenUtils.getArtifactClassloader(project, includeArtifact, includeTestOutputDirectory, getClass(),
-                    getLog(), verbose);
-        } catch (MalformedURLException e) {
-            throw new MojoExecutionException("Failed to create artifact classloader", e);
-        }
-    }
-
     protected ResourceAccessor getFileOpener(ClassLoader cl) {
         ResourceAccessor mFO = new MavenResourceAccessor(cl);
         ResourceAccessor fsFO = new FileSystemResourceAccessor(project.getBasedir().getAbsolutePath());
@@ -373,117 +330,8 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
         getLog().info(indent + "url: " + url);
         getLog().info(indent + "username: " + username);
         getLog().info(indent + "password: " + password);
-        getLog().info(indent + "properties file: " + propertyFile);
-        getLog().info(indent + "properties file will override? " + propertyFileWillOverride);
         getLog().info(indent + "prompt on non-local database? " + promptOnNonLocalDatabase);
         getLog().info(indent + "clear checksums? " + clearCheckSums);
-    }
-
-    protected void cleanup(Database db) {
-        // Release any locks that we may have on the database.
-        if (getLiquibase() != null) {
-            try {
-                getLiquibase().forceReleaseLocks();
-            } catch (LiquibaseException e) {
-                getLog().error(e.getMessage(), e);
-            }
-        }
-
-        // Clean up the connection
-        if (db != null) {
-            try {
-                db.rollback();
-                db.close();
-            } catch (DatabaseException e) {
-                getLog().error("Failed to close open connection to database.", e);
-            }
-        }
-    }
-
-    /**
-     * Parses a properties file and sets the assocaited fields in the plugin.
-     * 
-     * @param propertiesInputStream
-     *            The input stream which is the Liquibase properties that needs to be parsed.
-     * @throws org.apache.maven.plugin.MojoExecutionException
-     *             If there is a problem parsing the file.
-     */
-    protected void parsePropertiesFile(InputStream propertiesInputStream) throws MojoExecutionException {
-        if (propertiesInputStream == null) {
-            throw new MojoExecutionException("Properties file InputStream is null.");
-        }
-        Properties props = new Properties();
-        try {
-            props.load(propertiesInputStream);
-        } catch (IOException e) {
-            throw new MojoExecutionException("Could not load the properties Liquibase file", e);
-        }
-
-        for (Iterator<?> it = props.keySet().iterator(); it.hasNext();) {
-            String key = null;
-            try {
-                key = (String) it.next();
-                Field field = MavenUtils.getDeclaredField(this.getClass(), key);
-
-                if (propertyFileWillOverride) {
-                    getLog().debug("  properties file setting value: " + field.getName());
-                    setFieldValue(field, props.get(key).toString());
-                } else {
-                    if (!isCurrentFieldValueSpecified(field)) {
-                        getLog().debug("  properties file setting value: " + field.getName());
-                        setFieldValue(field, props.get(key).toString());
-                    }
-                }
-            } catch (Exception e) {
-                getLog().info("  '" + key + "' in properties file is not being used by this " + "task.");
-            }
-        }
-    }
-
-    /**
-     * This method will check to see if the user has specified a value different to that of the default value. This is
-     * not an ideal solution, but should cover most situations in the use of the plugin.
-     * 
-     * @param f
-     *            The Field to check if a user has specified a value for.
-     * @return <code>true</code> if the user has specified a value.
-     */
-    private boolean isCurrentFieldValueSpecified(Field f) throws IllegalAccessException {
-        Object currentValue = f.get(this);
-        if (currentValue == null) {
-            return false;
-        }
-
-        Object defaultValue = getDefaultValue(f);
-        if (defaultValue == null) {
-            return currentValue != null;
-        } else {
-            // There is a default value, check to see if the user has selected something other
-            // than the default
-            return !defaultValue.equals(f.get(this));
-        }
-    }
-
-    private Object getDefaultValue(Field field) throws IllegalAccessException {
-        List<Field> allFields = new ArrayList<Field>();
-        allFields.addAll(Arrays.asList(getClass().getDeclaredFields()));
-        allFields.addAll(Arrays.asList(AbstractLiquibaseMojo2.class.getDeclaredFields()));
-
-        for (Field f : allFields) {
-            if (f.getName().equals(field.getName() + DEFAULT_FIELD_SUFFIX)) {
-                f.setAccessible(true);
-                return f.get(this);
-            }
-        }
-        return null;
-    }
-
-    private void setFieldValue(Field field, String value) throws IllegalAccessException {
-        if (field.getType().equals(Boolean.class) || field.getType().equals(boolean.class)) {
-            field.set(this, Boolean.valueOf(value));
-        } else {
-            field.set(this, value);
-        }
     }
 
     private void addToSystemProperties() {
@@ -555,22 +403,6 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
         this.databaseClass = databaseClass;
     }
 
-    public boolean isIncludeArtifact() {
-        return includeArtifact;
-    }
-
-    public void setIncludeArtifact(boolean includeArtifact) {
-        this.includeArtifact = includeArtifact;
-    }
-
-    public boolean isIncludeTestOutputDirectory() {
-        return includeTestOutputDirectory;
-    }
-
-    public void setIncludeTestOutputDirectory(boolean includeTestOutputDirectory) {
-        this.includeTestOutputDirectory = includeTestOutputDirectory;
-    }
-
     public boolean isVerbose() {
         return verbose;
     }
@@ -585,22 +417,6 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
 
     public void setLogging(String logging) {
         this.logging = logging;
-    }
-
-    public String getPropertyFile() {
-        return propertyFile;
-    }
-
-    public void setPropertyFile(String propertyFile) {
-        this.propertyFile = propertyFile;
-    }
-
-    public boolean isPropertyFileWillOverride() {
-        return propertyFileWillOverride;
-    }
-
-    public void setPropertyFileWillOverride(boolean propertyFileWillOverride) {
-        this.propertyFileWillOverride = propertyFileWillOverride;
     }
 
     public boolean isClearCheckSums() {
@@ -619,12 +435,12 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
         this.systemProperties = systemProperties;
     }
 
-    public Properties getExpressionVars() {
-        return expressionVars;
+    public Properties getChangeLogParameters() {
+        return changeLogParameters;
     }
 
-    public void setExpressionVars(Properties expressionVars) {
-        this.expressionVars = expressionVars;
+    public void setChangeLogParameters(Properties expressionVars) {
+        this.changeLogParameters = expressionVars;
     }
 
     public boolean isSkip() {

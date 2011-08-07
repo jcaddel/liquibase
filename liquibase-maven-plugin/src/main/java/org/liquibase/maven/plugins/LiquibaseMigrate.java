@@ -1,10 +1,7 @@
 package org.liquibase.maven.plugins;
 
-import liquibase.exception.LiquibaseException;
 import liquibase.Liquibase;
-import liquibase.resource.ResourceAccessor;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
+import liquibase.exception.LiquibaseException;
 
 /**
  * Liquibase Migration Maven plugin. This plugin allows for DatabaseChangeLogs to be applied to a database as part of a
@@ -15,15 +12,8 @@ import org.apache.maven.plugin.MojoFailureException;
  * @goal migrate
  * @deprecated Use the LiquibaseUpdate class or Maven goal "update" instead.
  */
+@Deprecated
 public class LiquibaseMigrate extends AbstractLiquibaseUpdateMojo {
-
-    @Override
-    public void configureFieldsAndValues(ResourceAccessor fo) throws MojoExecutionException, MojoFailureException {
-        getLog().warn(
-                "This plugin goal is DEPRICATED and will be removed in a future "
-                        + "release, please use \"update\" instead of \"migrate\".");
-        super.configureFieldsAndValues(fo);
-    }
 
     @Override
     protected void doUpdate(Liquibase liquibase) throws LiquibaseException {
