@@ -4,19 +4,28 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
-import liquibase.*;
+import liquibase.Liquibase;
+import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.logging.LogFactory;
 import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.ResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.database.Database;
-import liquibase.exception.*;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.ui.UIFactory;
+
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.plugin.*;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
@@ -86,6 +95,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @parameter expression="${liquibase.emptyPassword}" default-value="false"
      * @deprecated Use an empty or null value for the password instead.
      */
+    @Deprecated
     protected boolean emptyPassword;
 
     /**
@@ -206,8 +216,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * 
      * @parameter
      */
-    private Map expressionVariables;
+    private Map<?, ?> expressionVariables;
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().info(MavenUtils.LOG_SEPARATOR);
 
@@ -223,7 +234,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
             getLog().warn(
                     "Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY
-                            + "' system property was set to false");
+                    + "' system property was set to false");
             return;
         }
 
@@ -266,7 +277,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
             getLog().debug("expressionVariables = " + String.valueOf(expressionVariables));
             if (expressionVariables != null) {
-                for (Map.Entry var : (Set<Map.Entry>) expressionVariables.entrySet()) {
+                for (Map.Entry<?, ?> var : expressionVariables.entrySet()) {
                     if (var.getValue() != null) {
                         this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
                     }
@@ -442,7 +453,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             throw new MojoExecutionException("Could not load the properties Liquibase file", e);
         }
 
-        for (Iterator it = props.keySet().iterator(); it.hasNext();) {
+        for (Iterator<?> it = props.keySet().iterator(); it.hasNext();) {
             String key = null;
             try {
                 key = (String) it.next();
@@ -509,15 +520,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void processSystemProperties() {
         if (systemProperties == null) {
             systemProperties = new Properties();
         }
         // Add all system properties configured by the user
-        Iterator iter = systemProperties.keySet().iterator();
+        Iterator<String> iter = systemProperties.stringPropertyNames().iterator();
         while (iter.hasNext()) {
-            String key = (String) iter.next();
+            String key = iter.next();
             String value = systemProperties.getProperty(key);
             System.setProperty(key, value);
         }

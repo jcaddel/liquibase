@@ -3,11 +3,20 @@
 package org.liquibase.maven.plugins;
 
 import java.io.File;
-import java.net.*;
-import java.sql.*;
-import java.util.*;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.Set;
+
 import liquibase.exception.LiquibaseException;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
@@ -31,15 +40,15 @@ public class MavenUtils {
      *             If any of the dependencies cannot be resolved into a URL.
      */
     public static ClassLoader getArtifactClassloader(MavenProject project, boolean includeArtifact,
-            boolean includeTestOutputDirectory, Class clazz, Log log, boolean verbose) throws MalformedURLException {
+            boolean includeTestOutputDirectory, Class<?> clazz, Log log, boolean verbose) throws MalformedURLException {
         if (verbose) {
             log.info("Loading artfacts into URLClassLoader");
         }
         Set<URL> urls = new HashSet<URL>();
 
-        Set dependencies = project.getDependencyArtifacts();
+        Set<?> dependencies = project.getDependencyArtifacts();
         if (dependencies != null && !dependencies.isEmpty()) {
-            for (Iterator it = dependencies.iterator(); it.hasNext();) {
+            for (Iterator<?> it = dependencies.iterator(); it.hasNext();) {
                 addArtifact(urls, (Artifact) it.next(), log, verbose);
             }
         } else {
@@ -82,7 +91,7 @@ public class MavenUtils {
      *             If there is a problem creating the URL for the file.
      */
     private static void addArtifact(Set<URL> urls, Artifact artifact, Log log, boolean verbose)
-            throws MalformedURLException {
+    throws MalformedURLException {
         File f = artifact.getFile();
         if (f == null) {
             log.warn("Artifact with no actual file, '" + artifact.getGroupId() + ":" + artifact.getArtifactId() + "'");
@@ -153,11 +162,11 @@ public class MavenUtils {
      * @throws NoSuchFieldException
      *             If the field was not found in the class or any of its super classes.
      */
-    public static Field getDeclaredField(Class clazz, String fieldName) throws NoSuchFieldException {
+    public static Field getDeclaredField(Class<?> clazz, String fieldName) throws NoSuchFieldException {
         Field f = getField(clazz, fieldName);
         if (f == null) {
             // Try the parent class
-            Class parent = clazz.getSuperclass();
+            Class<?> parent = clazz.getSuperclass();
             if (parent != null) {
                 return getDeclaredField(parent, fieldName);
             } else {
@@ -169,7 +178,7 @@ public class MavenUtils {
         }
     }
 
-    private static Field getField(Class clazz, String fieldName) {
+    private static Field getField(Class<?> clazz, String fieldName) {
         Field[] fields = clazz.getDeclaredFields();
         for (int i = 0; i < fields.length; i++) {
             if (fields[i].getName().equals(fieldName)) {
