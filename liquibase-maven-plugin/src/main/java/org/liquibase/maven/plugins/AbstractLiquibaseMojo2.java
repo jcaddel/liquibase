@@ -136,6 +136,13 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     protected Properties systemProperties;
 
     /**
+     * Pointer to a properties file containing extra properties for the JDBC driver
+     * 
+     * @parameter expression="${liquibase.driverProperties}"
+     */
+    protected String driverProperties;
+
+    /**
      * The Maven project the plugin is running under.
      * 
      * @parameter expression="${project}"
@@ -188,7 +195,7 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     protected Database getDatabaseObject() throws DatabaseException {
         String pw = ((password == null) ? "" : password);
         ClassLoader cl = this.getClass().getClassLoader();
-        return createDatabaseObject(cl, url, username, pw, driver, defaultSchemaName, databaseClass, null);
+        return createDatabaseObject(cl, url, username, pw, driver, defaultSchemaName, databaseClass, driverProperties);
     }
 
     /**
