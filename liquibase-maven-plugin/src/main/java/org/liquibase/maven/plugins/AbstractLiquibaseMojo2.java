@@ -356,7 +356,7 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     }
 
     /**
-     * Add any System level properties (if any) as needed
+     * Add any System level properties as needed
      */
     protected void addToSystemProperties() {
         if (systemProperties == null) {
