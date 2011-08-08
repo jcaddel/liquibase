@@ -43,7 +43,7 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     protected String driver;
 
     /**
-     * The Database URL to connect to when executing Liquibase.
+     * The jdbc URL to connect to when executing Liquibase.
      * 
      * @parameter expression="${liquibase.url}"
      * @required
@@ -90,7 +90,7 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
 
     /**
      * The class to use as the database object. This is optional as a default class to use can almost always be inferred
-     * by the JDBC url. If a class name is supplied here it will override the default class inferred by the url.
+     * by the JDBC url. If a class name is supplied here it will override the default.
      * 
      * @parameter expression="${liquibase.databaseClass}"
      */
@@ -105,7 +105,7 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     protected boolean promptOnNonLocalDatabase;
 
     /**
-     * Controls the verbosity of the output from invoking the plugin.
+     * Controls the verbosity of the plugin output
      * 
      * @parameter expression="${liquibase.verbose}" default-value="false"
      * @description Controls the verbosity of the plugin when executing
@@ -113,8 +113,8 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     protected boolean verbose;
 
     /**
-     * Controls logging from Liquibase when executing. The value can be "all", "finest", "finer", "fine", "info",
-     * "warning", "severe" or "off". The value is case insensitive.
+     * Controls the Liquibase logging level. The value can be "all", "finest", "finer", "fine", "info", "warning",
+     * "severe" or "off". The value is case insensitive.
      * 
      * @parameter expression="${liquibase.logging}" default-value="INFO"
      * @description Controls the verbosity of the plugin when executing
