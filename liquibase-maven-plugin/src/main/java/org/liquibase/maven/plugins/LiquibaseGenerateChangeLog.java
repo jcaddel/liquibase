@@ -9,6 +9,9 @@ import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoExecutionException;
 
 /**
+ * This goal takes a snapshot of a JDBC accessible database and creates a Liquibase compatible change set XML file from
+ * it
+ * 
  * @goal generateChangeLog
  */
 public class LiquibaseGenerateChangeLog extends AbstractLiquibaseMojo2 {
@@ -16,7 +19,8 @@ public class LiquibaseGenerateChangeLog extends AbstractLiquibaseMojo2 {
     /**
      * Specifies the location of the change log file to generate
      * 
-     * @parameter expression="${liquibase.changeLogFile}" default-value="${project.build.directory}/changelog.xml"
+     * @parameter expression="${liquibase.changeLogFile}"
+     *            default-value="${project.build.directory}/liquibase/changelog.xml"
      * @required
      */
     protected String changeLogFile;
