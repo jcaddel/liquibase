@@ -145,11 +145,6 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     protected MavenProject project;
 
     /**
-     * The {@link Liquibase} object used to modify the database.
-     */
-    private Liquibase liquibase;
-
-    /**
      * Any properties specified here get passed through to Liquibase as change log parameters
      * 
      * @parameter
@@ -219,12 +214,15 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
 
     protected void performTask() throws MojoExecutionException {
         Database database = null;
+        Liquibase liquibase = null;
         try {
             database = getDatabaseObject();
-            this.liquibase = getLiquibaseObject(database);
+            liquibase = getLiquibaseObject(database);
 
             getLog().info("Connecting to: " + url);
 
+            // Give them a chance to cancel if we are performing an action against a non-local database that performs a
+            // modification
             if (!isConfirmExecution(liquibase)) {
                 throw new LiquibaseException("User decided not to run against non-local database");
             }
@@ -297,10 +295,6 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
         } catch (LiquibaseException e) {
             getLog().error(e.getMessage(), e);
         }
-    }
-
-    protected Liquibase getLiquibase() {
-        return liquibase;
     }
 
     protected abstract void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException;
@@ -474,9 +468,4 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     public void setPromptOnNonLocalDatabase(boolean promptOnNonLocalDatabase) {
         this.promptOnNonLocalDatabase = promptOnNonLocalDatabase;
     }
-
-    public void setLiquibase(Liquibase liquibase) {
-        this.liquibase = liquibase;
-    }
-
 }
