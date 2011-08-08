@@ -1,5 +1,7 @@
 package org.liquibase.maven.plugins;
 
+import static liquibase.integration.commandline.CommandLineUtils.createDatabaseObject;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -8,7 +10,6 @@ import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.logging.LogFactory;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
@@ -88,7 +89,8 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     protected String defaultSchemaName;
 
     /**
-     * The class to use as the database object.
+     * The class to use as the database object. This is optional as a default class to use can almost always be inferred
+     * by the JDBC url. If a class name is supplied here it will override the default class inferred by the url.
      * 
      * @parameter expression="${liquibase.databaseClass}"
      */
@@ -188,8 +190,7 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     protected Database getDatabaseObject() throws DatabaseException {
         String pw = ((password == null) ? "" : password);
         ClassLoader cl = this.getClass().getClassLoader();
-        return CommandLineUtils.createDatabaseObject(cl, url, username, pw, driver, defaultSchemaName, databaseClass,
-                null);
+        return createDatabaseObject(cl, url, username, pw, driver, defaultSchemaName, databaseClass, null);
     }
 
     protected Liquibase getLiquibaseObject(Database database) throws MojoExecutionException {
@@ -216,20 +217,7 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
         return UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase());
     }
 
-    @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
-        getLog().info(MavenUtils.LOG_SEPARATOR);
-
-        if (skip) {
-            getLog().info("Skipping execution due to Maven configuration");
-            return;
-        }
-
-        updateCredentials();
-        addToSystemProperties();
-        updateLiquibaseLoggingLevel();
-        displayMojoSettings();
-
+    protected void performTask() throws MojoExecutionException {
         Database database = null;
         try {
             database = getDatabaseObject();
@@ -252,6 +240,33 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
         } finally {
             cleanup(liquibase, database);
         }
+    }
+
+    @Override
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        getLog().info(MavenUtils.LOG_SEPARATOR);
+
+        // They asked us to skip execution
+        if (skip) {
+            getLog().info("Skipping execution due to Maven configuration");
+            return;
+        }
+
+        // Might be using credentials from settings.xml
+        updateCredentials();
+
+        // Add System properties as requested
+        addToSystemProperties();
+
+        // Alter the liquibase logging level
+        updateLiquibaseLoggingLevel();
+
+        // Print diagnostic info if desired
+        printSettings("   ");
+
+        // Do the work
+        performTask();
+
         getLog().info(MavenUtils.LOG_SEPARATOR);
     }
 
@@ -294,14 +309,6 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
         return promptOnNonLocalDatabase;
     }
 
-    private void displayMojoSettings() {
-        if (verbose) {
-            getLog().info(MavenUtils.LOG_SEPARATOR);
-            printSettings("    ");
-            getLog().info(MavenUtils.LOG_SEPARATOR);
-        }
-    }
-
     protected Liquibase createLiquibase(ResourceAccessor fo, Database db) throws MojoExecutionException {
         try {
             return new Liquibase("", fo, db);
@@ -323,22 +330,27 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
      *            The indent string to use when printing the settings.
      */
     protected void printSettings(String indent) {
+        if (!verbose) {
+            return;
+        }
         if (indent == null) {
             indent = "";
         }
+        getLog().info(MavenUtils.LOG_SEPARATOR);
         getLog().info(indent + "driver: " + driver);
         getLog().info(indent + "url: " + url);
         getLog().info(indent + "username: " + username);
         getLog().info(indent + "password: " + password);
         getLog().info(indent + "prompt on non-local database? " + promptOnNonLocalDatabase);
         getLog().info(indent + "clear checksums? " + clearCheckSums);
+        getLog().info(MavenUtils.LOG_SEPARATOR);
     }
 
     private void addToSystemProperties() {
         if (systemProperties == null) {
             systemProperties = new Properties();
         }
-        // Add all system properties configured by the user
+        // Add any properties configured by the user as system properties
         Iterator<String> iter = systemProperties.stringPropertyNames().iterator();
         while (iter.hasNext()) {
             String key = iter.next();
