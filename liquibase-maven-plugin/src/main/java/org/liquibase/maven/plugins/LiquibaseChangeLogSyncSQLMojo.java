@@ -5,12 +5,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.apache.maven.plugin.MojoExecutionException;
-
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
+
+import org.apache.maven.plugin.MojoExecutionException;
 
 /**
  * Generates SQL that marks all unapplied changes as applied.
@@ -76,8 +76,8 @@ public class LiquibaseChangeLogSyncSQLMojo extends AbstractLiquibaseChangeLogMoj
     }
 
     @Override
-    protected void cleanup(Database db) {
-        super.cleanup(db);
+    protected void nullSafeCleanup(Database db) {
+        super.nullSafeCleanup(db);
         if (outputWriter != null) {
             try {
                 outputWriter.close();

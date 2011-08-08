@@ -84,8 +84,8 @@ public class LiquibaseMigrateSQL extends AbstractLiquibaseUpdateMojo {
     }
 
     @Override
-    protected void cleanup(Database db) {
-        super.cleanup(db);
+    protected void nullSafeCleanup(Database db) {
+        super.nullSafeCleanup(db);
         if (outputWriter != null) {
             try {
                 outputWriter.close();
