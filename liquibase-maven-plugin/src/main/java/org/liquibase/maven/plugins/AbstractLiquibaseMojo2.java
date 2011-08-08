@@ -182,12 +182,19 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
         }
     }
 
+    /**
+     * Create a database object from the mojo configuration info.
+     */
     protected Database getDatabaseObject() throws DatabaseException {
         String pw = ((password == null) ? "" : password);
         ClassLoader cl = this.getClass().getClassLoader();
         return createDatabaseObject(cl, url, username, pw, driver, defaultSchemaName, databaseClass, null);
     }
 
+    /**
+     * Initialize a Liquibase object using the database passed in. Also add any change log parameters configured on the
+     * mojo
+     */
     protected Liquibase getLiquibaseObject(Database database) throws MojoExecutionException {
         Liquibase liquibase = createLiquibase(getFileOpener(this.getClass().getClassLoader()), database);
 
@@ -201,17 +208,28 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
         return liquibase;
     }
 
+    /**
+     * This method actually pops up a window with a prompt for continuing if it detects that a database modifiying task
+     * is about to be run against a non-local database.
+     */
     protected boolean isConfirmExecution(Liquibase liquibase) throws DatabaseException {
+        // They may have turned off prompting
         if (!isPromptOnNonLocalDatabase()) {
             return true;
         }
+
+        // Might be a read-only task
         if (liquibase.isSafeToRunMigration()) {
             return true;
         }
 
+        // Splash a dialog asking if they are sure
         return UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase());
     }
 
+    /**
+     * Get a handle to a Database and Liquibase object, and invoke the performLiquibaseTask() method
+     */
     protected void performTask() throws MojoExecutionException {
         Database database = null;
         Liquibase liquibase = null;
@@ -236,7 +254,7 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
         } catch (LiquibaseException e) {
             throw new MojoExecutionException("Liquibase error: " + e.getMessage(), e);
         } finally {
-            cleanup(liquibase, database);
+            nullSafeCleanup(liquibase, database);
         }
     }
 
@@ -268,12 +286,12 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
         getLog().info(MavenUtils.LOG_SEPARATOR);
     }
 
-    protected void cleanup(Liquibase liquibase, Database database) {
-        cleanup(liquibase);
-        cleanup(database);
+    protected void nullSafeCleanup(Liquibase liquibase, Database database) {
+        nullSafeCleanup(liquibase);
+        nullSafeCleanup(database);
     }
 
-    protected void cleanup(Database db) {
+    protected void nullSafeCleanup(Database db) {
         if (db == null) {
             return;
         }
@@ -286,7 +304,7 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
 
     }
 
-    protected void cleanup(Liquibase liquibase) {
+    protected void nullSafeCleanup(Liquibase liquibase) {
         if (liquibase == null) {
             return;
         }
@@ -318,10 +336,7 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     }
 
     /**
-     * Prints the settings that have been set of defaulted for the plugin. These will only be shown in verbose mode.
-     * 
-     * @param indent
-     *            The indent string to use when printing the settings.
+     * Prints a few key settings for the plugin. These are only shown in verbose mode.
      */
     protected void printSettings(String indent) {
         if (!verbose) {
@@ -340,7 +355,10 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
         getLog().info(MavenUtils.LOG_SEPARATOR);
     }
 
-    private void addToSystemProperties() {
+    /**
+     * Add any System level properties (if any) as needed
+     */
+    protected void addToSystemProperties() {
         if (systemProperties == null) {
             systemProperties = new Properties();
         }
