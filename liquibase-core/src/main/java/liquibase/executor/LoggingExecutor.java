@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.SybaseASADatabase;
-import liquibase.database.core.SybaseDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.sql.visitor.SqlVisitor;
@@ -18,7 +15,6 @@ import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetNextChangeSetSequenceValueStatement;
 import liquibase.statement.core.LockDatabaseChangeLogStatement;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
 import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
 import liquibase.util.StreamUtil;
@@ -86,34 +82,39 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
         outputStatement(sql, new ArrayList<SqlVisitor>());
     }
 
+    protected String getErrorMsg(SqlStatement sql) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(sql.getClass().getSimpleName());
+        sb.append(" requires access to up to date database metadata which is not available in SQL output mode");
+        return sb.toString();
+    }
+
+    protected String getDelimiter(Database database) throws DatabaseException {
+        String linefeed = StreamUtil.getLineSeparator();
+        String delimiter = database.getDelimiter();
+        switch (database.getDelimiterStyle()) {
+        case DEFAULT:
+            return delimiter + linefeed;
+        case ROW:
+            return linefeed + delimiter + linefeed;
+        default:
+            throw new DatabaseException("Unknown delimiter style " + database.getDelimiterStyle());
+        }
+    }
+
     private void outputStatement(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         try {
-            if (SqlGeneratorFactory.getInstance().requiresCurrentDatabaseMetadata(sql, database)) {
-                throw new DatabaseException(sql.getClass().getSimpleName()
-                        + " requires access to up to date database metadata which is not available in SQL output mode");
+            SqlGeneratorFactory factory = SqlGeneratorFactory.getInstance();
+            if (factory.requiresCurrentDatabaseMetadata(sql, database)) {
+                throw new DatabaseException(getErrorMsg(sql));
             }
-            for (String statement : applyVisitors(sql, sqlVisitors)) {
+            String[] statements = applyVisitors(sql, sqlVisitors);
+            for (String statement : statements) {
                 if (statement == null) {
                     continue;
                 }
                 output.write(statement);
-
-                if (database instanceof MSSQLDatabase || database instanceof SybaseDatabase
-                        || database instanceof SybaseASADatabase) {
-                    output.write(StreamUtil.getLineSeparator());
-                    output.write("GO");
-                    // } else if (database instanceof OracleDatabase) {
-                    // output.write(StreamUtil.getLineSeparator());
-                    // output.write("/");
-                } else {
-                    String endDelimiter = ";";
-                    if (sql instanceof RawSqlStatement) {
-                        endDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
-                    }
-                    if (!statement.endsWith(endDelimiter)) {
-                        output.write(endDelimiter);
-                    }
-                }
+                output.write(getDelimiter(database));
                 output.write(StreamUtil.getLineSeparator());
                 output.write(StreamUtil.getLineSeparator());
             }
