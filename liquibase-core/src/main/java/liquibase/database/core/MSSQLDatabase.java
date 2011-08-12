@@ -1,11 +1,12 @@
 package liquibase.database.core;
 
-import liquibase.database.AbstractDatabase;
-import liquibase.database.DatabaseConnection;
-import liquibase.exception.DatabaseException;
-
 import java.util.HashSet;
 import java.util.Set;
+
+import liquibase.database.AbstractDatabase;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.DelimiterStyle;
+import liquibase.exception.DatabaseException;
 
 /**
  * Encapsulates MS-SQL database support.
@@ -14,11 +15,14 @@ public class MSSQLDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "Microsoft SQL Server";
     protected Set<String> systemTablesAndViews = new HashSet<String>();
 
+    @Override
     public String getTypeName() {
         return "mssql";
     }
 
     public MSSQLDatabase() {
+        super.setDelimiterStyle(DelimiterStyle.ROW);
+        super.setDelimiter("GO");
         systemTablesAndViews.add("syscolumns");
         systemTablesAndViews.add("syscomments");
         systemTablesAndViews.add("sysdepends");
@@ -43,6 +47,7 @@ public class MSSQLDatabase extends AbstractDatabase {
         systemTablesAndViews.add("sysconstraints");
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
@@ -52,6 +57,7 @@ public class MSSQLDatabase extends AbstractDatabase {
         return systemTablesAndViews;
     }
 
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }
@@ -61,11 +67,13 @@ public class MSSQLDatabase extends AbstractDatabase {
         return false;
     }
 
+    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         String databaseProductName = conn.getDatabaseProductName();
         return PRODUCT_NAME.equalsIgnoreCase(databaseProductName) || "SQLOLEDB".equalsIgnoreCase(databaseProductName);
     }
 
+    @Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:sqlserver")) {
             return "com.microsoft.sqlserver.jdbc.SQLServerDriver";
@@ -75,6 +83,7 @@ public class MSSQLDatabase extends AbstractDatabase {
         return null;
     }
 
+    @Override
     public String getCurrentDateTimeFunction() {
         if (currentDateTimeFunction != null) {
             return currentDateTimeFunction;
@@ -156,6 +165,7 @@ public class MSSQLDatabase extends AbstractDatabase {
     //
     // }
 
+    @Override
     public boolean supportsTablespaces() {
         return true;
     }

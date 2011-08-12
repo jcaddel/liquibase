@@ -1,16 +1,17 @@
 package liquibase.database.core;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.DelimiterStyle;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.core.GetViewDefinitionStatement;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Encapsulates Sybase ASE database support.
@@ -23,11 +24,14 @@ public class SybaseDatabase extends AbstractDatabase {
         return "Sybase SQL Server";
     }
 
+    @Override
     public String getTypeName() {
         return "sybase";
     }
 
     public SybaseDatabase() {
+        super.setDelimiterStyle(DelimiterStyle.ROW);
+        super.setDelimiter("GO");
         systemTablesAndViews.add("syscolumns");
         systemTablesAndViews.add("syscomments");
         systemTablesAndViews.add("sysdepends");
@@ -57,6 +61,7 @@ public class SybaseDatabase extends AbstractDatabase {
      * }
      */
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
@@ -75,6 +80,7 @@ public class SybaseDatabase extends AbstractDatabase {
         return systemTablesAndViews;
     }
 
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }
@@ -84,6 +90,7 @@ public class SybaseDatabase extends AbstractDatabase {
         return false;
     }
 
+    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         String dbProductName = conn.getDatabaseProductName();
         return isSybaseProductName(dbProductName);
@@ -95,6 +102,7 @@ public class SybaseDatabase extends AbstractDatabase {
                 || "sql server".equals(dbProductName) || "ASE".equals(dbProductName);
     }
 
+    @Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:sybase")) {
             return "com.sybase.jdbc3.jdbc.SybDriver";
@@ -104,6 +112,7 @@ public class SybaseDatabase extends AbstractDatabase {
         return null;
     }
 
+    @Override
     public String getCurrentDateTimeFunction() {
         if (currentDateTimeFunction != null) {
             return currentDateTimeFunction;
@@ -179,6 +188,7 @@ public class SybaseDatabase extends AbstractDatabase {
     //
     // }
 
+    @Override
     public boolean supportsTablespaces() {
         return true;
     }

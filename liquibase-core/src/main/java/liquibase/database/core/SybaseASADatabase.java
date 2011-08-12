@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package liquibase.database.core;
 
@@ -8,11 +8,12 @@ import java.util.Set;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.DelimiterStyle;
 import liquibase.exception.DatabaseException;
 
 /**
  * @author otaranenko
- * 
+ *
  */
 public class SybaseASADatabase extends AbstractDatabase {
 
@@ -114,10 +115,12 @@ public class SybaseASADatabase extends AbstractDatabase {
     }
 
     /**
-     * 
+     *
      */
     public SybaseASADatabase() {
         super();
+        super.setDelimiterStyle(DelimiterStyle.ROW);
+        super.setDelimiter("GO");
     }
 
     @Override
@@ -127,7 +130,7 @@ public class SybaseASADatabase extends AbstractDatabase {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see liquibase.database.Database#getCurrentDateTimeFunction()
      */
     @Override
@@ -141,7 +144,7 @@ public class SybaseASADatabase extends AbstractDatabase {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see liquibase.database.Database#getDefaultDriver(java.lang.String)
      */
     @Override
@@ -155,7 +158,7 @@ public class SybaseASADatabase extends AbstractDatabase {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see liquibase.database.Database#getTypeName()
      */
     @Override
@@ -166,7 +169,7 @@ public class SybaseASADatabase extends AbstractDatabase {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see liquibase.database.Database#isCorrectDatabaseImplementation(java.sql.Connection)
      */
     @Override
@@ -211,7 +214,7 @@ public class SybaseASADatabase extends AbstractDatabase {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see liquibase.database.Database#supportsInitiallyDeferrableColumns()
      */
     @Override
@@ -221,7 +224,7 @@ public class SybaseASADatabase extends AbstractDatabase {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see liquibase.database.Database#supportsTablespaces()
      */
     @Override
@@ -248,7 +251,7 @@ public class SybaseASADatabase extends AbstractDatabase {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see liquibase.database.AbstractDatabase#getAutoIncrementClause()
      */
     @Override
