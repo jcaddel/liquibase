@@ -79,7 +79,11 @@ import liquibase.util.StringUtils;
  * characteristics such as the datatype for "boolean" fields.
  */
 public abstract class AbstractDatabase implements Database {
+    public static final String DEFAULT_SQL_DELIMITER = ";";
+    public static final DelimiterStyle DEFAULT_DELIMITER_STYLE = DelimiterStyle.DEFAULT;
 
+    private String delimiter;
+    private DelimiterStyle delimiterStyle;
     private DatabaseConnection connection;
     private String defaultSchemaName;
 
@@ -93,12 +97,11 @@ public abstract class AbstractDatabase implements Database {
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+",
             Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private String databaseChangeLogTableName = System.getProperty("liquibase.databaseChangeLogTableName") == null ? "DatabaseChangeLog"
-            .toUpperCase() : System.getProperty("liquibase.databaseChangeLogTableName");
-    private String databaseChangeLogLockTableName = System.getProperty("liquibase.databaseChangeLogLockTableName") == null ? "DatabaseChangeLogLock"
-            .toUpperCase() : System.getProperty("liquibase.databaseChangeLogLockTableName");
-    private String liquibaseSchemaName = System.getProperty("liquibase.schemaName") == null ? null : System
-            .getProperty("liquibase.schemaName");
+    private String databaseChangeLogTableName = getDefaultDatabaseChangeLogTableName();
+
+    private String databaseChangeLogLockTableName = getDefaultDatabaseChangeLogLockTableName();
+
+    private String liquibaseSchemaName = System.getProperty("liquibase.schemaName");
 
     private Integer lastChangeSetSequenceValue;
 
@@ -107,6 +110,24 @@ public abstract class AbstractDatabase implements Database {
     private boolean hasDatabaseChangeLogLockTable = false;
 
     protected AbstractDatabase() {
+    }
+
+    private String getDefaultDatabaseChangeLogTableName() {
+        String s = System.getProperty("liquibase.databaseChangeLogTableName");
+        if (s == null) {
+            return "DatabaseChangeLog".toUpperCase();
+        } else {
+            return s;
+        }
+    }
+
+    private String getDefaultDatabaseChangeLogLockTableName() {
+        String s = System.getProperty("liquibase.databaseChangeLogLockTableName");
+        if (s == null) {
+            return "DatabaseChangeLogLock".toUpperCase();
+        } else {
+            return s;
+        }
     }
 
     @Override
@@ -996,7 +1017,7 @@ public abstract class AbstractDatabase implements Database {
                     "DATEEXECUTED", "ORDEREXECUTED", "TAG", "EXECTYPE").setOrderBy("DATEEXECUTED ASC",
                     "ORDEREXECUTED ASC");
             List<Map> results = ExecutorService.getInstance().getExecutor(this).queryForList(select);
-            for (Map rs : results) {
+            for (Map<?, ?> rs : results) {
                 String fileName = rs.get("FILENAME").toString();
                 String author = rs.get("AUTHOR").toString();
                 String id = rs.get("ID").toString();
@@ -1259,5 +1280,23 @@ public abstract class AbstractDatabase implements Database {
     @Override
     public void enableForeignKeyChecks() throws DatabaseException {
         throw new DatabaseException("ForeignKeyChecks Management not supported");
+    }
+
+    @Override
+    public String getDelimiter() {
+        return delimiter;
+    }
+
+    public void setDelimiter(String delimiter) {
+        this.delimiter = delimiter;
+    }
+
+    @Override
+    public DelimiterStyle getDelimiterStyle() {
+        return delimiterStyle;
+    }
+
+    public void setDelimiterStyle(DelimiterStyle delimiterStyle) {
+        this.delimiterStyle = delimiterStyle;
     }
 }

@@ -28,6 +28,16 @@ public interface Database extends DatabaseObject, PrioritizedService {
     String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase();
 
     /**
+     * Controls how the delimiter is printed when generating SQL statements
+     */
+    DelimiterStyle getDelimiterStyle();
+
+    /**
+     * This is the delimiter used to separate SQL statements
+     */
+    String getDelimiter();
+
+    /**
      * Is this AbstractDatabase subclass the correct one to use for the given connection.
      */
     boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException;
@@ -242,7 +252,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
     boolean isLocalDatabase() throws DatabaseException;
 
     void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors)
-            throws LiquibaseException, UnsupportedChangeException;
+    throws LiquibaseException, UnsupportedChangeException;
 
     /*
      * Executes the statements passed as argument to a target {@link Database}
@@ -257,14 +267,14 @@ public interface Database extends DatabaseObject, PrioritizedService {
     void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException;
 
     void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException,
-            UnsupportedChangeException, StatementNotSupportedOnDatabaseException, LiquibaseException;
+    UnsupportedChangeException, StatementNotSupportedOnDatabaseException, LiquibaseException;
 
     void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException,
-            UnsupportedChangeException, RollbackImpossibleException;
+    UnsupportedChangeException, RollbackImpossibleException;
 
     void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException,
-            UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException,
-            LiquibaseException;
+    UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException,
+    LiquibaseException;
 
     int getNextChangeSetSequenceValue() throws LiquibaseException;
 
