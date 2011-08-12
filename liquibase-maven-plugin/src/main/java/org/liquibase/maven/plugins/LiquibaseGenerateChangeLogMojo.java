@@ -14,16 +14,16 @@ import org.codehaus.plexus.util.StringUtils;
 
 /**
  * This goal takes a snapshot of a JDBC accessible database and creates a Liquibase change log XML file from it
- * 
+ *
  * @goal generateChangeLog
  */
-public class LiquibaseGenerateChangeLog extends AbstractLiquibaseMojo2 {
+public class LiquibaseGenerateChangeLogMojo extends AbstractLiquibaseMojo2 {
 
     private static final String EXPORT_DATA_TYPE = "data";
 
     /**
      * Specifies the location of the change log file to generate
-     * 
+     *
      * @parameter expression="${liquibase.changeLogFile}"
      *            default-value="${project.build.directory}/liquibase/changelog.xml"
      * @required
@@ -32,14 +32,14 @@ public class LiquibaseGenerateChangeLog extends AbstractLiquibaseMojo2 {
 
     /**
      * Specifies the author of the change log file. Defaults to the system property "user.name" if not specified
-     * 
+     *
      * @parameter expression="${liquibase.author}"
      */
     protected String author;
 
     /**
      * Specifies the types of database information to include in the change log.
-     * 
+     *
      * @parameter expression="${liquibase.types}"
      *            default-value="tables,columns,views,primaryKeys,uniqueConstraints,indexes,foregnKeys,sequences,data"
      */
@@ -48,7 +48,7 @@ public class LiquibaseGenerateChangeLog extends AbstractLiquibaseMojo2 {
     /**
      * Optional parameter for specifying a Liquibase "context" for this change log. Typically something like "dev",
      * "test", "staging", or "prod".
-     * 
+     *
      * @parameter expression="${liquibase.context}"
      */
     protected String context;
@@ -56,7 +56,7 @@ public class LiquibaseGenerateChangeLog extends AbstractLiquibaseMojo2 {
     /**
      * Data from tables is written into this directory in CSV format. If dataDir is not specified, all of the
      * information (schema + data) is written to one XML file
-     * 
+     *
      * @parameter expression="${liquibase.dataDir}" default-value="${project.build.directory}/liquibase/data"
      */
     protected String dataDir;
