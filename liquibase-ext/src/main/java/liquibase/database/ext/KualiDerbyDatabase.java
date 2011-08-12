@@ -10,32 +10,8 @@ import liquibase.logging.Logger;
 
 public class KualiDerbyDatabase extends DerbyDatabase {
     private static final int PRIORITY = 6;
-    static {
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-        System.out.println("wooohooo");
-    }
 
-    private Logger logger = LogFactory.getLogger();
+    private static final Logger logger = LogFactory.getLogger();
 
     @Override
     public void close() throws DatabaseException {

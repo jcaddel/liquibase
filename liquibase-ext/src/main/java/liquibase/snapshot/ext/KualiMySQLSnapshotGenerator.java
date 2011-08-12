@@ -15,10 +15,11 @@ import liquibase.snapshot.jvm.MySQLDatabaseSnapshotGenerator;
  * @author Jeff Caddel
  */
 public class KualiMySQLSnapshotGenerator extends MySQLDatabaseSnapshotGenerator {
-    public static final int KUALI_DB_PRIORITY = 6;
+    public static final int PRIORITY = 6;
 
-    public int getPriority() {
-        return KUALI_DB_PRIORITY;
+    @Override
+    public int getPriority(Database database) {
+        return PRIORITY;
     }
 
     /**
