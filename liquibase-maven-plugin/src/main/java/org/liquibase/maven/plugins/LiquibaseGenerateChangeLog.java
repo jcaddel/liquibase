@@ -1,20 +1,25 @@
 package org.liquibase.maven.plugins;
 
-import static liquibase.integration.commandline.CommandLineUtils.createDatabaseObject;
-import static liquibase.integration.commandline.CommandLineUtils.doGenerateChangeLog;
+import java.io.File;
+import java.io.IOException;
+
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.integration.commandline.CommandLineUtils;
+import liquibase.util.file.FilenameUtils;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.codehaus.plexus.util.StringUtils;
 
 /**
- * This goal takes a snapshot of a JDBC accessible database and creates a Liquibase compatible change set XML file from
- * it
+ * This goal takes a snapshot of a JDBC accessible database and creates a Liquibase change log XML file from it
  * 
  * @goal generateChangeLog
  */
 public class LiquibaseGenerateChangeLog extends AbstractLiquibaseMojo2 {
+
+    private static final String EXPORT_DATA_TYPE = "data";
 
     /**
      * Specifies the location of the change log file to generate
@@ -33,11 +38,10 @@ public class LiquibaseGenerateChangeLog extends AbstractLiquibaseMojo2 {
     protected String author;
 
     /**
-     * Specifies the types of database information to include in the change log. Valid values are tables, columns,
-     * views, primaryKeys, uniqueConstraints, indexes, foreignKeys, sequences, and data. Case insensitive. If not
-     * specified, all types are included.
+     * Specifies the types of database information to include in the change log.
      * 
      * @parameter expression="${liquibase.types}"
+     *            default-value="tables,columns,views,primaryKeys,uniqueConstraints,indexes,foregnKeys,sequences,data"
      */
     protected String types;
 
@@ -50,7 +54,8 @@ public class LiquibaseGenerateChangeLog extends AbstractLiquibaseMojo2 {
     protected String context;
 
     /**
-     * Data from tables is written into this directory in CSV format
+     * Data from tables is written into this directory in CSV format. If dataDir is not specified, all of the
+     * information (schema + data) is written to one XML file
      * 
      * @parameter expression="${liquibase.dataDir}" default-value="${project.build.directory}/liquibase/data"
      */
@@ -58,15 +63,60 @@ public class LiquibaseGenerateChangeLog extends AbstractLiquibaseMojo2 {
 
     @Override
     protected void performTask() throws MojoExecutionException {
-        ClassLoader cl = this.getClass().getClassLoader();
+        ClassLoader cl = getClass().getClassLoader();
         try {
-            Database database = createDatabaseObject(cl, url, username, password, driver, defaultSchemaName,
-                    databaseClass, driverProperties);
+            createDirectories();
+            Database database = CommandLineUtils.createDatabaseObject(cl, url, username, password, driver,
+                    defaultSchemaName, databaseClass, driverProperties);
 
-            doGenerateChangeLog(changeLogFile, database, defaultSchemaName, types, author, context, dataDir);
+            CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultSchemaName, types, author, context,
+                    dataDir);
         } catch (Exception e) {
             throw new MojoExecutionException("Liquibase error: " + e.getMessage(), e);
         }
+    }
+
+    protected boolean isExportData() {
+        if (StringUtils.isEmpty(dataDir)) {
+            return false;
+        }
+        if (StringUtils.isEmpty(types)) {
+            return true;
+        }
+        if (types.indexOf(EXPORT_DATA_TYPE) == -1) {
+            return false;
+        }
+        return true;
+    }
+
+    protected void createDirectories() throws IOException {
+        createDirectoryFromFilename(changeLogFile);
+        if (!isExportData()) {
+            return;
+        }
+        getLog().info("Creating " + dataDir);
+        createDir(new File(dataDir));
+    }
+
+    protected void createDir(File f) throws IOException {
+        if (f.exists()) {
+            return;
+        }
+        if (!f.mkdirs()) {
+            throw new IOException("Unable to create directory " + f.getAbsolutePath());
+        }
+    }
+
+    protected void createDirectoryFromFilename(String filename) throws IOException {
+        if (StringUtils.isEmpty(filename)) {
+            return;
+        }
+        File file = new File(filename);
+        if (file.exists()) {
+            return;
+        }
+        String path = FilenameUtils.getFullPathNoEndSeparator(filename);
+        createDir(new File(path));
     }
 
     @Override
