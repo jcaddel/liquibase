@@ -69,6 +69,9 @@ import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVWriter;
 
 public class DiffResult {
+    private static final String EXCLUDE_SCHEMA_SYSTEM_PROPERTY = "liquibase.schema.exclude";
+    private static final boolean EXCLUDE_SCHEMA = "true".equalsIgnoreCase(System
+            .getProperty(EXCLUDE_SCHEMA_SYSTEM_PROPERTY));
 
     private String idRoot = String.valueOf(new Date().getTime());
     private int changeNumber = 1;
@@ -314,13 +317,13 @@ public class DiffResult {
         }
 
         return getMissingColumns().size() > 0 || getMissingForeignKeys().size() > 0 || getMissingIndexes().size() > 0
-                || getMissingPrimaryKeys().size() > 0 || getMissingSequences().size() > 0
-                || getMissingTables().size() > 0 || getMissingUniqueConstraints().size() > 0
-                || getMissingViews().size() > 0 || getUnexpectedColumns().size() > 0
-                || getUnexpectedForeignKeys().size() > 0 || getUnexpectedIndexes().size() > 0
-                || getUnexpectedPrimaryKeys().size() > 0 || getUnexpectedSequences().size() > 0
-                || getUnexpectedTables().size() > 0 || getUnexpectedUniqueConstraints().size() > 0
-                || getUnexpectedViews().size() > 0 || differencesInData;
+        || getMissingPrimaryKeys().size() > 0 || getMissingSequences().size() > 0
+        || getMissingTables().size() > 0 || getMissingUniqueConstraints().size() > 0
+        || getMissingViews().size() > 0 || getUnexpectedColumns().size() > 0
+        || getUnexpectedForeignKeys().size() > 0 || getUnexpectedIndexes().size() > 0
+        || getUnexpectedPrimaryKeys().size() > 0 || getUnexpectedSequences().size() > 0
+        || getUnexpectedTables().size() > 0 || getUnexpectedUniqueConstraints().size() > 0
+        || getUnexpectedViews().size() > 0 || differencesInData;
     }
 
     public void printResult(PrintStream out) throws DatabaseException {
@@ -374,18 +377,18 @@ public class DiffResult {
                     if (baseColumn.isDataTypeDifferent(column)) {
                         out.println("           from "
                                 + TypeConverterFactory.getInstance().findTypeConverter(referenceSnapshot.getDatabase())
-                                        .convertToDatabaseTypeString(baseColumn, referenceSnapshot.getDatabase())
+                                .convertToDatabaseTypeString(baseColumn, referenceSnapshot.getDatabase())
                                 + " to "
                                 + TypeConverterFactory
-                                        .getInstance()
-                                        .findTypeConverter(targetSnapshot.getDatabase())
-                                        .convertToDatabaseTypeString(
-                                                targetSnapshot.getColumn(column.getTable().getName(), column.getName()),
-                                                targetSnapshot.getDatabase()));
+                                .getInstance()
+                                .findTypeConverter(targetSnapshot.getDatabase())
+                                .convertToDatabaseTypeString(
+                                        targetSnapshot.getColumn(column.getTable().getName(), column.getName()),
+                                        targetSnapshot.getDatabase()));
                     }
                     if (baseColumn.isNullabilityDifferent(column)) {
                         Boolean nowNullable = targetSnapshot.getColumn(column.getTable().getName(), column.getName())
-                                .isNullable();
+                        .isNullable();
                         if (nowNullable == null) {
                             nowNullable = Boolean.TRUE;
                         }
@@ -419,18 +422,18 @@ public class DiffResult {
     }
 
     public void printChangeLog(String changeLogFile, Database targetDatabase) throws ParserConfigurationException,
-            IOException, DatabaseException {
+    IOException, DatabaseException {
         ChangeLogSerializer changeLogSerializer = serializerFactory.getSerializer(changeLogFile);
         this.printChangeLog(changeLogFile, targetDatabase, changeLogSerializer);
     }
 
     public void printChangeLog(PrintStream out, Database targetDatabase) throws ParserConfigurationException,
-            IOException, DatabaseException {
+    IOException, DatabaseException {
         this.printChangeLog(out, targetDatabase, new XMLChangeLogSerializer());
     }
 
     public void printChangeLog(String changeLogFile, Database targetDatabase, ChangeLogSerializer changeLogSerializer)
-            throws ParserConfigurationException, IOException, DatabaseException {
+    throws ParserConfigurationException, IOException, DatabaseException {
         File file = new File(changeLogFile);
         if (!file.exists()) {
             LogFactory.getLogger().info(file + " does not exist, creating");
@@ -492,7 +495,7 @@ public class DiffResult {
      * Prints changeLog that would bring the target database to be the same as the reference database
      */
     public void printChangeLog(PrintStream out, Database targetDatabase, ChangeLogSerializer changeLogSerializer)
-            throws ParserConfigurationException, IOException, DatabaseException {
+    throws ParserConfigurationException, IOException, DatabaseException {
         List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
         addMissingTableChanges(changeSets, targetDatabase);
         addMissingColumnChanges(changeSets, targetDatabase);
@@ -685,11 +688,15 @@ public class DiffResult {
             change.setConstraintName(fk.getName());
 
             change.setReferencedTableName(fk.getPrimaryKeyTable().getName());
-            change.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema());
+            if (!EXCLUDE_SCHEMA) {
+                change.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema());
+            }
             change.setReferencedColumnNames(fk.getPrimaryKeyColumns());
 
             change.setBaseTableName(fk.getForeignKeyTable().getName());
-            change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema());
+            if (!EXCLUDE_SCHEMA) {
+                change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema());
+            }
             change.setBaseColumnNames(fk.getForeignKeyColumns());
 
             change.setDeferrable(fk.isDeferrable());
@@ -719,7 +726,9 @@ public class DiffResult {
 
             CreateSequenceChange change = new CreateSequenceChange();
             change.setSequenceName(sequence.getName());
-            change.setSchemaName(sequence.getSchema());
+            if (!EXCLUDE_SCHEMA) {
+                change.setSchemaName(sequence.getSchema());
+            }
 
             changes.add(generateChangeSet(change));
         }
@@ -745,7 +754,9 @@ public class DiffResult {
 
             CreateViewChange change = new CreateViewChange();
             change.setViewName(view.getName());
-            change.setSchemaName(view.getSchema());
+            if (!EXCLUDE_SCHEMA) {
+                change.setSchemaName(view.getSchema());
+            }
             String selectQuery = view.getDefinition();
             if (selectQuery == null) {
                 selectQuery = "COULD NOT DETERMINE VIEW QUERY";
@@ -836,7 +847,7 @@ public class DiffResult {
 
     private boolean shouldModifyColumn(Column column) {
         return column.getView() == null
-                && !referenceSnapshot.getDatabase().isLiquibaseTable(column.getTable().getName());
+        && !referenceSnapshot.getDatabase().isLiquibaseTable(column.getTable().getName());
 
     }
 
@@ -865,14 +876,14 @@ public class DiffResult {
             columnConfig.setName(column.getName());
 
             String dataType = TypeConverterFactory.getInstance().findTypeConverter(database)
-                    .convertToDatabaseTypeString(column, database);
+            .convertToDatabaseTypeString(column, database);
 
             columnConfig.setType(dataType);
 
             Object defaultValue = column.getDefaultValue();
             if (defaultValue != null) {
                 String defaultValueString = TypeConverterFactory.getInstance().findTypeConverter(database)
-                        .getDataType(defaultValue).convertObjectToString(defaultValue, database);
+                .getDataType(defaultValue).convertObjectToString(defaultValue, database);
                 if (defaultValueString != null) {
                     defaultValueString = defaultValueString.replaceFirst("'", "").replaceAll("'$", "");
                 }
@@ -905,6 +916,15 @@ public class DiffResult {
         }
     }
 
+    protected PrimaryKey getPrimaryKey(String tableName) {
+        for (PrimaryKey pk : getMissingPrimaryKeys()) {
+            if (pk.getTable().getName().equalsIgnoreCase(tableName)) {
+                return pk;
+            }
+        }
+        return null;
+    }
+
     private void addMissingTableChanges(List<ChangeSet> changes, Database database) {
         for (Table missingTable : getMissingTables()) {
             if (referenceSnapshot.getDatabase().isLiquibaseTable(missingTable.getName())) {
@@ -921,17 +941,13 @@ public class DiffResult {
             for (Column column : missingTable.getColumns()) {
                 ColumnConfig columnConfig = new ColumnConfig();
                 columnConfig.setName(column.getName());
-                columnConfig.setType(TypeConverterFactory.getInstance().findTypeConverter(database)
-                        .convertToDatabaseTypeString(column, database));
+                TypeConverter tc = TypeConverterFactory.getInstance().findTypeConverter(database);
+                String type = tc.convertToDatabaseTypeString(column, database);
+                columnConfig.setType(type);
 
                 ConstraintsConfig constraintsConfig = null;
                 if (column.isPrimaryKey()) {
-                    PrimaryKey primaryKey = null;
-                    for (PrimaryKey pk : getMissingPrimaryKeys()) {
-                        if (pk.getTable().getName().equalsIgnoreCase(missingTable.getName())) {
-                            primaryKey = pk;
-                        }
-                    }
+                    PrimaryKey primaryKey = getPrimaryKey(missingTable.getName());
 
                     if (primaryKey == null || primaryKey.getColumnNamesAsList().size() == 1) {
                         constraintsConfig = new ConstraintsConfig();
@@ -1010,11 +1026,11 @@ public class DiffResult {
             for (Table table : referenceSnapshot.getTables()) {
                 List<Change> changes = new ArrayList<Change>();
                 List<Map> rs = ExecutorService
-                        .getInstance()
-                        .getExecutor(referenceSnapshot.getDatabase())
-                        .queryForList(
-                                new RawSqlStatement("SELECT * FROM "
-                                        + referenceSnapshot.getDatabase().escapeTableName(schema, table.getName())));
+                .getInstance()
+                .getExecutor(referenceSnapshot.getDatabase())
+                .queryForList(
+                        new RawSqlStatement("SELECT * FROM "
+                                + referenceSnapshot.getDatabase().escapeTableName(schema, table.getName())));
 
                 if (rs.size() == 0) {
                     continue;
