@@ -18,13 +18,15 @@ import org.codehaus.plexus.configuration.PlexusConfiguration;
 
 /**
  * A base class for writing tests that validate the properties passed in to the plugins.
- * 
+ *
  * @author Peter Murray
  */
 public abstract class AbstractLiquibaseMojoTest extends AbstractMojoTestCase {
 
+    public static final String ARTIFACT_ID = "liquibase-maven-plugin";
+
     protected void loadPropertiesFileIfPresent(AbstractLiquibaseMojo mojo) throws MojoExecutionException,
-    MojoFailureException {
+            MojoFailureException {
 
         File rootDir = new File(getBasedir(), "target/test-classes");
         ResourceAccessor fo = new FileSystemResourceAccessor(rootDir.getAbsolutePath());
@@ -35,7 +37,7 @@ public abstract class AbstractLiquibaseMojoTest extends AbstractMojoTestCase {
         File testPom = new File(getBasedir(), "target/test-classes/" + configFile);
         assertTrue("The configuration pom could not be found, " + testPom.getAbsolutePath(), testPom.exists());
 
-        PlexusConfiguration config = extractPluginConfiguration("liquibase-plugin", testPom);
+        PlexusConfiguration config = extractPluginConfiguration(ARTIFACT_ID, testPom);
         assertNotNull("There should be a configuration for the plugin in the pom", config);
         return config;
     }
