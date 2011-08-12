@@ -82,8 +82,8 @@ public abstract class AbstractDatabase implements Database {
     public static final String DEFAULT_SQL_DELIMITER = ";";
     public static final DelimiterStyle DEFAULT_DELIMITER_STYLE = DelimiterStyle.DEFAULT;
 
-    private String delimiter;
-    private DelimiterStyle delimiterStyle;
+    private String delimiter = DEFAULT_SQL_DELIMITER;
+    private DelimiterStyle delimiterStyle = DEFAULT_DELIMITER_STYLE;
     private DatabaseConnection connection;
     private String defaultSchemaName;
 
@@ -435,7 +435,7 @@ public abstract class AbstractDatabase implements Database {
     /**
      * This method will check the database ChangeLog table used to keep track of the changes in the file. If the table
      * does not exist it will create one otherwise it will not do anything besides outputting a log message.
-     * 
+     *
      * @param updateExistingNullChecksums
      * @param contexts
      */
@@ -640,7 +640,7 @@ public abstract class AbstractDatabase implements Database {
 
     /**
      * Drops all objects owned by the connected user.
-     * 
+     *
      * @param schema
      */
     @Override
@@ -1157,9 +1157,9 @@ public abstract class AbstractDatabase implements Database {
 
     /**
      * Default implementation, just look for "local" IPs
-     * 
+     *
      * @throws liquibase.exception.DatabaseException
-     * 
+     *
      */
     @Override
     public boolean isLocalDatabase() throws DatabaseException {
@@ -1181,11 +1181,11 @@ public abstract class AbstractDatabase implements Database {
 
     /*
      * Executes the statements passed as argument to a target {@link Database}
-     * 
+     *
      * @param statements an array containing the SQL statements to be issued
-     * 
+     *
      * @param database the target {@link Database}
-     * 
+     *
      * @throws DatabaseException if there were problems issuing the statements
      */
     @Override
