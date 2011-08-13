@@ -3,12 +3,11 @@ package liquibase.database.ext;
 import java.sql.Driver;
 
 import liquibase.database.DatabaseConnection;
-import liquibase.database.core.DerbyDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 
-public class KualiDerbyDatabase extends DerbyDatabase {
+public class DerbyDatabase extends liquibase.database.core.DerbyDatabase {
     private static final int PRIORITY = 6;
 
     private static final Logger logger = LogFactory.getLogger();

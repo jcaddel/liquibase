@@ -7,14 +7,13 @@ import liquibase.database.Database;
 import liquibase.database.structure.View;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.jvm.MySQLDatabaseSnapshotGenerator;
 
 /**
  * Provides MySQL specific logic for capturing a snapshot of a database via JDBC
  *
  * @author Jeff Caddel
  */
-public class KualiMySQLSnapshotGenerator extends MySQLDatabaseSnapshotGenerator {
+public class MySQLSnapshotGenerator extends liquibase.snapshot.jvm.MySQLDatabaseSnapshotGenerator {
     public static final int PRIORITY = 6;
 
     @Override

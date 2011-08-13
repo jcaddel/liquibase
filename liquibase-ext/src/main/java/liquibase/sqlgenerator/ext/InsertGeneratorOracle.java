@@ -18,7 +18,7 @@ import liquibase.statement.core.InsertStatement;
 
 public class InsertGeneratorOracle extends InsertGenerator {
     private static final int MAX_TEXT_LENGTH = 4000;
-    private static final int PRIORITY = 6;
+    private static final int PRIORITY = -1;
 
     @Override
     public int getPriority() {
