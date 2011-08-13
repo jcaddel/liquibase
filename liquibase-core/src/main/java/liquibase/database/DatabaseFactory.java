@@ -81,6 +81,7 @@ public class DatabaseFactory {
         }
 
         returnDatabase.setConnection(connection);
+        LogFactory.getLogger().info("Database: " + returnDatabase.getClass());
         return returnDatabase;
     }
 
