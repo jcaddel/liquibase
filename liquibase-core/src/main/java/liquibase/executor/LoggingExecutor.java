@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import liquibase.database.Database;
+import liquibase.database.DelimiterStyle;
 import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.sql.visitor.SqlVisitor;
@@ -21,6 +22,16 @@ import liquibase.util.StreamUtil;
 
 @LiquibaseService(skip = true)
 public class LoggingExecutor extends AbstractExecutor implements Executor {
+    private static final String DELIMITER_STYLE_KEY = "liquibase.delimiter.style";
+    protected final DelimiterStyle delimiterStyle = getGlobalDelimiterStyle();
+
+    protected DelimiterStyle getGlobalDelimiterStyle() {
+        String delimiterStyle = System.getProperty(DELIMITER_STYLE_KEY);
+        if (delimiterStyle == null) {
+            return null;
+        }
+        return DelimiterStyle.valueOf(delimiterStyle);
+    }
 
     private Writer output;
     private Executor delegatedReadExecutor;
@@ -91,8 +102,9 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
 
     protected String getDelimiter(Database database) throws DatabaseException {
         String linefeed = StreamUtil.getLineSeparator();
+        DelimiterStyle style = (delimiterStyle == null) ? database.getDelimiterStyle() : delimiterStyle;
         String delimiter = database.getDelimiter();
-        switch (database.getDelimiterStyle()) {
+        switch (style) {
         case DEFAULT:
             return delimiter + linefeed;
         case ROW:
@@ -115,7 +127,6 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
                 }
                 output.write(statement);
                 output.write(getDelimiter(database));
-                output.write(StreamUtil.getLineSeparator());
                 output.write(StreamUtil.getLineSeparator());
             }
         } catch (IOException e) {
