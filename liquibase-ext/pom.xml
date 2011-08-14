@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.kuali.db.liquibase</groupId>
@@ -9,11 +10,31 @@
   </parent>
   <artifactId>liquibase-ext</artifactId>
   <name>Liquibase Extensions</name>
+  <properties>
+    <oracle.version>10.2.0.3.0</oracle.version>
+    <mysql.version>5.1.13</mysql.version>
+  </properties>
   <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.kuali.db.liquibase</groupId>
       <artifactId>liquibase-core</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>${mysql.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.oracle</groupId>
+      <artifactId>ojdbc14</artifactId>
+      <version>${oracle.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>
