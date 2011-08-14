@@ -18,16 +18,42 @@ public class MainTest {
     private static final String[] CONSTRAINTS = { "foreignKeys" };
     private static final String[] DATA = { "data" };
 
-    public void execute(String[] args) {
-        try {
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
+    @Test
+    public void exportRiceMySQLViews() throws Exception {
+        String type = "mysql";
+        JDBC jdbc = getJDBC(type, "rice");
+        GAV gav = getRiceGAV();
+        gav.setClassifier(type);
+        File changeLog = getChangeLogFile(gav, "views.xml");
+        String[] other = { "--diffTypes=views" };
+        Args args = new Args();
+        args.setGav(gav);
+        args.setJdbc(jdbc);
+        args.setOther(other);
+        args.setChangeLog(changeLog);
+        args.setCommand("generateChangeLog");
+        executeMain(args);
+    }
+
+    @Test
+    public void cycleRice() throws Exception {
+        cycleApp("rice", "mysql");
+        cycleApp("rice", "oracle");
     }
 
     protected void executeMain(Args args) throws Exception {
         String[] argsArray = toArray(args);
         Main.main(argsArray);
+    }
+
+    protected GAV getGAV(String app) {
+        if (app.equalsIgnoreCase("rice")) {
+            return getRiceGAV();
+        } else if (app.equalsIgnoreCase("student")) {
+            return getStudentGAV();
+        } else {
+            throw new RuntimeException("Unknown app " + app);
+        }
     }
 
     protected GAV getRiceGAV() {
@@ -41,12 +67,33 @@ public class MainTest {
         return gav;
     }
 
-    protected JDBC getRiceJDBC(String type) {
+    protected GAV getStudentGAV() {
+        String groupId = "org.kuali.student.db.liquibase";
+        String artifactId = "ks-embedded";
+        String version = "1.3-build-112";
+        GAV gav = new GAV();
+        gav.setGroupId(groupId);
+        gav.setArtifactId(artifactId);
+        gav.setVersion(version);
+        return gav;
+    }
+
+    protected JDBC getJDBC(String type, String app) {
+        String username = null;
+        String password = null;
         String url = null;
-        String username = "RICE";
-        String password = "RICE";
+        if (app.equalsIgnoreCase("rice")) {
+            username = "RICE";
+            password = "RICE";
+        } else if (app.equalsIgnoreCase("student")) {
+            username = "KSEMBEDDED";
+            password = "KSEMBEDDED";
+        } else {
+            throw new RuntimeException("Unsupported app " + app);
+        }
+
         if (type.equalsIgnoreCase("mysql")) {
-            url = "jdbc:mysql://localhost/RICE";
+            url = "jdbc:mysql://localhost/" + username;
         } else if (type.equalsIgnoreCase("oracle")) {
             url = "jdbc:oracle:thin:@localhost:1521:XE";
         } else {
@@ -81,34 +128,18 @@ public class MainTest {
         return list.toArray(new String[list.size()]);
     }
 
-    @Test
-    public void exportRiceMySQLViews() throws Exception {
-        String type = "mysql";
-        JDBC jdbc = getRiceJDBC(type);
-        GAV gav = getRiceGAV();
-        gav.setClassifier(type);
-        File changeLog = getChangeLogFile(gav, "views.xml");
-        String[] other = { "--diffTypes=views" };
-        Args args = new Args();
-        args.setGav(gav);
-        args.setJdbc(jdbc);
-        args.setOther(other);
-        args.setChangeLog(changeLog);
-        args.setCommand("generateChangeLog");
-        executeMain(args);
-    }
-
     protected String[] toOther(String[] types) {
         return new String[] { "--diffTypes=" + toCSV(types) };
     }
 
-    protected String getWorkingDir() {
-        return "." + FS + "target";
+    protected void cycleApp(String app) throws Exception {
+        cycleApp(app, "mysql");
+        cycleApp(app, "oracle");
     }
 
-    protected void cycleRice(String db) throws Exception {
-        JDBC jdbc = getRiceJDBC(db);
-        GAV gav = getRiceGAV();
+    protected void cycleApp(String app, String db) throws Exception {
+        GAV gav = getGAV(app);
+        JDBC jdbc = getJDBC(app, db);
         gav.setClassifier(db);
 
         Args args = new Args();
@@ -130,12 +161,6 @@ public class MainTest {
         args.setOther(other);
         args.setChangeLog(getChangeLogFile(gav, "data.xml"));
         executeMain(args);
-    }
-
-    @Test
-    public void cycleRice() throws Exception {
-        cycleRice("mysql");
-        cycleRice("oracle");
     }
 
     protected String getBaseDir(String workingDirectory, GAV gav) {
@@ -198,6 +223,10 @@ public class MainTest {
         } else {
             return FS + s;
         }
+    }
+
+    protected String getWorkingDir() {
+        return "." + FS + "target";
     }
 
 }
