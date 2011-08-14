@@ -9,13 +9,14 @@ import java.util.List;
 import org.junit.Test;
 
 public class MainTest {
-    private static final String FS = System.getProperty("file.separator");
-    private static final String[] SCHEMA_TYPES = { "tables", "columns", "primaryKeys", "uniqueConstraints", "indexes",
-            "sequences", "views" };
-
-    public static void main(String[] args) {
-        new MainTest().execute(args);
+    static {
+        System.setProperty(Main.SYSTEM_EXIT_KEY, "false");
     }
+    private static final String FS = System.getProperty("file.separator");
+    private static final String[] SCHEMA = { "tables", "columns", "primaryKeys", "uniqueConstraints", "indexes",
+            "sequences", "views" };
+    private static final String[] CONSTRAINTS = { "foreignKeys" };
+    private static final String[] DATA = { "data" };
 
     public void execute(String[] args) {
         try {
@@ -30,9 +31,11 @@ public class MainTest {
     }
 
     protected GAV getRiceGAV() {
-        String artifactId = "rice";
+        String groupId = "org.kuali.rice.db.liquibase";
+        String artifactId = "rice-master";
         String version = "2.0.0-m7";
         GAV gav = new GAV();
+        gav.setGroupId(groupId);
         gav.setArtifactId(artifactId);
         gav.setVersion(version);
         return gav;
@@ -73,10 +76,10 @@ public class MainTest {
 
     @Test
     public void exportRiceMySQLViews() throws Exception {
+        JDBC jdbc = getRiceMySQL();
         GAV gav = getRiceGAV();
         gav.setClassifier("mysql");
         File changeLog = getChangeLogFile(gav, "views.xml");
-        JDBC jdbc = getRiceMySQL();
         String[] other = { "--diffTypes=views" };
         Args args = new Args();
         args.setGav(gav);
@@ -87,26 +90,45 @@ public class MainTest {
         executeMain(args);
     }
 
-    protected void generateChangeLog(Args args) throws Exception {
-        GAV gav = args.getGav();
-        JDBC jdbc = args.getJdbc();
-        String[] other = args.getOther();
-        File changeLog = getChangeLogFile(gav, "schema.xml");
-        List<String> list = new ArrayList<String>();
-        list.add("--changeLogFile=" + changeLog.getAbsolutePath());
-        list.add("--url=" + jdbc.getUrl());
-        list.add("--username=" + jdbc.getUsername());
-        list.add("--password=" + jdbc.getPassword());
-        if (other != null) {
-            Collections.addAll(list, other);
-        }
-        list.add("generateChangeLog");
+    protected String[] toOther(String[] types) {
+        return new String[] { "--diffTypes=" + toCSV(types) };
+    }
+
+    protected String getWorkingDir() {
+        return "." + FS + "target";
+    }
+
+    @Test
+    public void cycleRiceMySQL() throws Exception {
+        JDBC jdbc = getRiceMySQL();
+        GAV gav = getRiceGAV();
+        gav.setClassifier("mysql");
+
+        Args args = new Args();
+        args.setGav(gav);
+        args.setJdbc(jdbc);
+        args.setCommand("generateChangeLog");
+
+        args.setOther(toOther(SCHEMA));
+        args.setChangeLog(getChangeLogFile(gav, "schema.xml"));
+        executeMain(args);
+
+        args.setOther(toOther(CONSTRAINTS));
+        args.setChangeLog(getChangeLogFile(gav, "constraints.xml"));
+        executeMain(args);
+
+        String basedir = getBaseDir(getWorkingDir(), gav) + FS + "data";
+        File dataDir = mkdirs(basedir);
+        String[] other = { "--dataDir=" + dataDir.getAbsolutePath(), "--diffTypes=" + toCSV(DATA) };
+        args.setOther(other);
+        args.setChangeLog(getChangeLogFile(gav, "data.xml"));
+        executeMain(args);
     }
 
     protected String getBaseDir(String workingDirectory, GAV gav) {
         StringBuilder sb = new StringBuilder();
         sb.append(workingDirectory);
-        sb.append(getDirFragment(gav.getGroupId()));
+        sb.append(getDirFragment(gav.getGroupId(), true));
         sb.append(getDirFragment(gav.getArtifactId()));
         sb.append(getDirFragment(gav.getVersion()));
         sb.append(getDirFragment(gav.getClassifier()));
@@ -144,17 +166,25 @@ public class MainTest {
     }
 
     protected File getChangeLogFile(GAV gav, String filename) throws IOException {
-        String basedir = getBaseDir("." + FS + "target", gav);
+        String basedir = getBaseDir(getWorkingDir(), gav);
         File dir = mkdirs(basedir);
         File changeLog = new File(dir.getCanonicalFile() + FS + filename);
         return changeLog;
     }
 
     protected String getDirFragment(String s) {
+        return getDirFragment(s, false);
+    }
+
+    protected String getDirFragment(String s, boolean replace) {
         if (toEmpty(s).equals("")) {
             return "";
         }
-        return FS + s;
+        if (replace) {
+            return FS + s.replace(".", FS);
+        } else {
+            return FS + s;
+        }
     }
 
 }

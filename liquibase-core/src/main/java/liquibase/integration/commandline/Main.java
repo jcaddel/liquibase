@@ -51,6 +51,32 @@ import liquibase.util.StringUtils;
  * Class for executing Liquibase via the command line.
  */
 public class Main {
+    /**
+     * Setting this system property to "false" will prevent Liquibase from calling System.exit() when it has completed
+     * executing
+     */
+    public static final String SYSTEM_EXIT_KEY = "liquibase.system.exit";
+    private static final boolean SYSTEM_EXIT = getSystemExit();
+
+    private static void exit(int status) {
+        if (!SYSTEM_EXIT) {
+            return;
+        }
+        System.exit(status);
+    }
+
+    protected static boolean getSystemExit() {
+        String value = System.getProperty(SYSTEM_EXIT_KEY);
+        if (value == null) {
+            return true;
+        }
+        if ("false".equalsIgnoreCase(value)) {
+            return Boolean.FALSE;
+        } else {
+            return Boolean.TRUE;
+        }
+    }
+
     protected ClassLoader classLoader;
 
     protected String driver;
@@ -110,7 +136,7 @@ public class Main {
                 main.parseOptions(args);
             } catch (CommandLineParsingException e) {
                 main.printHelp(Arrays.asList(e.getMessage()), System.out);
-                System.exit(-2);
+                exit(-2);
             }
 
             File propertiesFile = new File(main.defaultsFile);
@@ -149,7 +175,7 @@ public class Main {
                     LogFactory.getLogger().severe(message, e);
                     System.out.println(generateLogLevelWarningMessage());
                 }
-                System.exit(-1);
+                exit(-1);
             }
 
             if ("update".equals(main.command)) {
@@ -167,9 +193,9 @@ public class Main {
             } catch (Exception e1) {
                 e.printStackTrace();
             }
-            System.exit(-3);
+            exit(-3);
         }
-        System.exit(0);
+        exit(0);
     }
 
     private static String generateLogLevelWarningMessage() {
