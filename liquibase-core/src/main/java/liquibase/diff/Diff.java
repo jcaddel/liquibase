@@ -10,6 +10,7 @@ import liquibase.database.Database;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.ForeignKey;
 import liquibase.database.structure.Index;
+import liquibase.database.structure.MetadataType;
 import liquibase.database.structure.PrimaryKey;
 import liquibase.database.structure.Sequence;
 import liquibase.database.structure.Table;
@@ -39,6 +40,7 @@ public class Diff {
     private boolean diffForeignKeys = true;
     private boolean diffSequences = true;
     private boolean diffData = false;
+    private Set<MetadataType> metadataTypes;
 
     public Diff(Database referenceDatabase, Database targetDatabase) {
         this.referenceDatabase = referenceDatabase;
@@ -70,7 +72,7 @@ public class Diff {
     public DiffResult compare() throws DatabaseException {
         if (referenceSnapshot == null) {
             referenceSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase, null,
-                    statusListeners);
+                    statusListeners, metadataTypes);
         }
 
         if (targetSnapshot == null) {
@@ -78,7 +80,7 @@ public class Diff {
                 targetSnapshot = new DatabaseSnapshot(referenceDatabase, null);
             } else {
                 targetSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(targetDatabase, null,
-                        statusListeners);
+                        statusListeners, metadataTypes);
             }
         }
 
@@ -120,20 +122,33 @@ public class Diff {
         return diffResult;
     }
 
-    public void setDiffTypes(String diffTypes) {
-        if (StringUtils.trimToNull(diffTypes) != null) {
-            Set<String> types = new HashSet<String>(Arrays.asList(diffTypes.toLowerCase().split("\\s*,\\s*")));
-
-            diffTables = types.contains("tables");
-            diffColumns = types.contains("columns");
-            diffViews = types.contains("views");
-            diffPrimaryKeys = types.contains("primaryKeys".toLowerCase());
-            diffUniqueConstraints = types.contains("uniqueConstraints".toLowerCase());
-            diffIndexes = types.contains("indexes");
-            diffForeignKeys = types.contains("foreignKeys".toLowerCase());
-            diffSequences = types.contains("sequences");
-            diffData = types.contains("data");
+    protected Set<MetadataType> getMetadataTypes(Set<String> types) {
+        Set<MetadataType> set = new HashSet<MetadataType>();
+        for (String type : types) {
+            MetadataType mdType = MetadataType.valueOf(type.toUpperCase());
+            set.add(mdType);
         }
+        return set;
+    }
+
+    public void setDiffTypes(String diffTypes) {
+        if (StringUtils.trimToNull(diffTypes) == null) {
+            return;
+        }
+        Set<String> types = new HashSet<String>(Arrays.asList(diffTypes.toLowerCase().split("\\s*,\\s*")));
+
+        Set<MetadataType> metadataTypes = getMetadataTypes(types);
+        setMetadataTypes(metadataTypes);
+
+        diffTables = types.contains("tables");
+        diffColumns = types.contains("columns");
+        diffViews = types.contains("views");
+        diffPrimaryKeys = types.contains("primaryKeys".toLowerCase());
+        diffUniqueConstraints = types.contains("uniqueConstraints".toLowerCase());
+        diffIndexes = types.contains("indexes");
+        diffForeignKeys = types.contains("foreignKeys".toLowerCase());
+        diffSequences = types.contains("sequences");
+        diffData = types.contains("data");
     }
 
     public boolean shouldDiffTables() {
@@ -355,7 +370,7 @@ public class Diff {
 
     /**
      * Removes duplicate Indexes from the DiffResult object.
-     * 
+     *
      * @param indexes
      *            [IN/OUT] - A set of Indexes to be updated.
      */
@@ -395,7 +410,7 @@ public class Diff {
 
     /**
      * Removes duplicate Unique Constraints from the DiffResult object.
-     * 
+     *
      * @param uniqueConstraints
      *            [IN/OUT] - A set of Unique Constraints to be updated.
      */
@@ -430,4 +445,13 @@ public class Diff {
 
         uniqueConstraints.removeAll(constraintsToRemove);
     }
+
+    public Set<MetadataType> getMetadataTypes() {
+        return metadataTypes;
+    }
+
+    public void setMetadataTypes(Set<MetadataType> metadataTypes) {
+        this.metadataTypes = metadataTypes;
+    }
+
 }

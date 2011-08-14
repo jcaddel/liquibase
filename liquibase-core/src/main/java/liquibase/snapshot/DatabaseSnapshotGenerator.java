@@ -1,16 +1,15 @@
 package liquibase.snapshot;
 
+import java.util.List;
+import java.util.Set;
+
 import liquibase.database.Database;
-import liquibase.database.AbstractDatabase;
-import liquibase.database.structure.Table;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.ForeignKey;
+import liquibase.database.structure.MetadataType;
+import liquibase.database.structure.Table;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
-import liquibase.servicelocator.PrioritizedService;
-
-import java.util.Set;
-import java.util.List;
 
 public interface DatabaseSnapshotGenerator {
     /**
@@ -19,7 +18,7 @@ public interface DatabaseSnapshotGenerator {
     public static final int PRIORITY_DEFAULT = 1;
     /**
      * Generator specific to database, higher priority.
-     * 
+     *
      */
     public static final int PRIORITY_DATABASE = 5;
 
@@ -29,6 +28,9 @@ public interface DatabaseSnapshotGenerator {
 
     DatabaseSnapshot createSnapshot(Database database, String schema, Set<DiffStatusListener> listeners)
             throws DatabaseException;
+
+    DatabaseSnapshot createSnapshot(Database database, String schema, Set<DiffStatusListener> listeners,
+            Set<MetadataType> metadataTypes) throws DatabaseException;
 
     Table getDatabaseChangeLogTable(Database database) throws DatabaseException;
 

@@ -23,6 +23,7 @@ import liquibase.database.structure.ForeignKey;
 import liquibase.database.structure.ForeignKeyConstraintType;
 import liquibase.database.structure.ForeignKeyInfo;
 import liquibase.database.structure.Index;
+import liquibase.database.structure.MetadataType;
 import liquibase.database.structure.PrimaryKey;
 import liquibase.database.structure.Sequence;
 import liquibase.database.structure.Table;
@@ -251,7 +252,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
     /**
      * Configuration of column's type.
-     * 
+     *
      * @param column
      *            Column to configure
      * @param rs
@@ -270,9 +271,8 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
     }
 
     @Override
-    public DatabaseSnapshot createSnapshot(Database database, String requestedSchema, Set<DiffStatusListener> listeners)
-            throws DatabaseException {
-
+    public DatabaseSnapshot createSnapshot(Database database, String requestedSchema,
+            Set<DiffStatusListener> listeners, Set<MetadataType> metadataTypes) throws DatabaseException {
         if (requestedSchema == null) {
             requestedSchema = database.getDefaultSchemaName();
         }
@@ -284,19 +284,87 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
             DatabaseSnapshot snapshot = new DatabaseSnapshot(database, requestedSchema);
 
-            readTables(snapshot, requestedSchema, databaseMetaData);
-            readViews(snapshot, requestedSchema, databaseMetaData);
-            readForeignKeyInformation(snapshot, requestedSchema, databaseMetaData);
-            readPrimaryKeys(snapshot, requestedSchema, databaseMetaData);
-            readColumns(snapshot, requestedSchema, databaseMetaData);
-            readUniqueConstraints(snapshot, requestedSchema, databaseMetaData);
-            readIndexes(snapshot, requestedSchema, databaseMetaData);
-            readSequences(snapshot, requestedSchema, databaseMetaData);
+            // Can get sequences without inspecting any other metadata
+            if (isReadMetadata(MetadataType.SEQUENCES, metadataTypes)) {
+                readSequences(snapshot, requestedSchema, databaseMetaData);
+            }
+
+            // Views might be used in readColumns()
+            if (isReadViews(metadataTypes)) {
+                readViews(snapshot, requestedSchema, databaseMetaData);
+            }
+
+            // Always need tables unless they are only asking for views or sequences
+            if (isReadTables(metadataTypes)) {
+                readTables(snapshot, requestedSchema, databaseMetaData);
+            }
+
+            if (isReadMetadata(MetadataType.FOREIGNKEYS, metadataTypes)) {
+                readForeignKeyInformation(snapshot, requestedSchema, databaseMetaData);
+            }
+            if (isReadMetadata(MetadataType.PRIMARYKEYS, metadataTypes)) {
+                readPrimaryKeys(snapshot, requestedSchema, databaseMetaData);
+            }
+            if (isReadMetadata(MetadataType.COLUMNS, metadataTypes)) {
+                readColumns(snapshot, requestedSchema, databaseMetaData);
+            }
+            if (isReadMetadata(MetadataType.UNIQUECONSTRAINTS, metadataTypes)) {
+                readUniqueConstraints(snapshot, requestedSchema, databaseMetaData);
+            }
+            if (isReadMetadata(MetadataType.INDEXES, metadataTypes)) {
+                readIndexes(snapshot, requestedSchema, databaseMetaData);
+            }
 
             return snapshot;
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }
+
+    }
+
+    protected boolean isReadViews(Set<MetadataType> metadataTypes) {
+        return isReadMetadata(new MetadataType[] { MetadataType.VIEWS, MetadataType.COLUMNS }, metadataTypes);
+    }
+
+    protected boolean isReadTables(Set<MetadataType> metadataTypes) {
+        Set<MetadataType> set = new HashSet<MetadataType>();
+        set.add(MetadataType.TABLES);
+        set.add(MetadataType.COLUMNS);
+        set.add(MetadataType.FOREIGNKEYS);
+        set.add(MetadataType.INDEXES);
+        set.add(MetadataType.UNIQUECONSTRAINTS);
+        set.add(MetadataType.PRIMARYKEYS);
+        MetadataType[] types = set.toArray(new MetadataType[set.size()]);
+        return isReadMetadata(types, metadataTypes);
+    }
+
+    protected boolean isReadMetadata(MetadataType type, Set<MetadataType> metadataTypes) {
+        return isReadMetadata(new MetadataType[] { type }, metadataTypes);
+    }
+
+    protected boolean isReadMetadata(MetadataType[] types, Set<MetadataType> metadataTypes) {
+        if (metadataTypes == null) {
+            return true;
+        }
+        if (types == null) {
+            return true;
+        }
+        return isContains(types, metadataTypes);
+    }
+
+    protected boolean isContains(MetadataType[] types, Set<MetadataType> metadataTypes) {
+        for (MetadataType type : types) {
+            if (metadataTypes.contains(type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public DatabaseSnapshot createSnapshot(Database database, String requestedSchema, Set<DiffStatusListener> listeners)
+            throws DatabaseException {
+        return createSnapshot(database, requestedSchema, listeners, null);
     }
 
     protected DatabaseMetaData getMetaData(Database database) throws SQLException {
@@ -477,7 +545,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
         String dbSchema = database.convertRequestedSchemaToSchema(schema);
         // First we try to find all database-specific FKs.
-        // TODO: there are some filters bellow in for loop. Are they needed here too?
+        // TODO: there are some filters below in for loop. Are they needed here too?
         snapshot.getForeignKeys().addAll(getAdditionalForeignKeys(dbSchema, database));
 
         // Then tries to find all other standard FKs
@@ -542,7 +610,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
     /**
      * Generation of Foreign Key based on information about it.
-     * 
+     *
      * @param fkInfo
      *            contains all needed properties of FK
      * @param database
@@ -613,7 +681,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
     /**
      * It finds <u>only</u> all database-specific Foreign Keys. By default it returns an empty ArrayList.
-     * 
+     *
      * @param schemaName
      *            current shemaName
      * @param database
@@ -655,7 +723,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
     /**
      * Fill foreign key information from the current register of a getImportedKeys resultset
-     * 
+     *
      * @param rs
      *            The resultset returned by getImportedKeys
      * @return Foreign key information
@@ -984,4 +1052,5 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
         return returnType;
     }
+
 }

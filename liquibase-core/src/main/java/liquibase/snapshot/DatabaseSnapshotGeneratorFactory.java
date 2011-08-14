@@ -8,6 +8,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import liquibase.database.Database;
+import liquibase.database.structure.MetadataType;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.ServiceLocator;
@@ -20,7 +21,8 @@ public class DatabaseSnapshotGeneratorFactory {
 
     private DatabaseSnapshotGeneratorFactory() {
         try {
-            Class[] classes = ServiceLocator.getInstance().findClasses(DatabaseSnapshotGenerator.class);
+            Class<? extends DatabaseSnapshotGenerator>[] classes = ServiceLocator.getInstance().findClasses(
+                    DatabaseSnapshotGenerator.class);
 
             for (Class<? extends DatabaseSnapshotGenerator> clazz : classes) {
                 register(clazz.getConstructor().newInstance());
@@ -45,7 +47,7 @@ public class DatabaseSnapshotGeneratorFactory {
 
     /**
      * Get generators supporting database, sorted from highest priority to lowest.
-     * 
+     *
      * @param database
      * @return
      */
@@ -72,7 +74,16 @@ public class DatabaseSnapshotGeneratorFactory {
      */
     public DatabaseSnapshot createSnapshot(Database database, String schema, Set<DiffStatusListener> listeners)
             throws DatabaseException {
-        return getGenerator(database).createSnapshot(database, schema, listeners);
+        return createSnapshot(database, schema, listeners, null);
+    }
+
+    /**
+     * Get generator for database with highest priority.
+     */
+    public DatabaseSnapshot createSnapshot(Database database, String schema, Set<DiffStatusListener> listeners,
+            Set<MetadataType> metadataTypes) throws DatabaseException {
+        DatabaseSnapshotGenerator generator = getGenerator(database);
+        return generator.createSnapshot(database, schema, listeners, metadataTypes);
     }
 
     /**
