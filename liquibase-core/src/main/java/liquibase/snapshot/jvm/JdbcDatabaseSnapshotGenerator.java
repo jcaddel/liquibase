@@ -299,19 +299,19 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 readTables(snapshot, requestedSchema, databaseMetaData);
             }
 
-            if (isReadMetadata(MetadataType.FOREIGNKEYS, metadataTypes)) {
+            if (isReadForeignKeys(metadataTypes)) {
                 readForeignKeyInformation(snapshot, requestedSchema, databaseMetaData);
             }
-            if (isReadMetadata(MetadataType.PRIMARYKEYS, metadataTypes)) {
+            if (isReadPrimaryKeys(metadataTypes)) {
                 readPrimaryKeys(snapshot, requestedSchema, databaseMetaData);
             }
-            if (isReadMetadata(MetadataType.COLUMNS, metadataTypes)) {
+            if (isReadColumns(metadataTypes)) {
                 readColumns(snapshot, requestedSchema, databaseMetaData);
             }
-            if (isReadMetadata(MetadataType.UNIQUECONSTRAINTS, metadataTypes)) {
+            if (isReadUniqueConstraints(metadataTypes)) {
                 readUniqueConstraints(snapshot, requestedSchema, databaseMetaData);
             }
-            if (isReadMetadata(MetadataType.INDEXES, metadataTypes)) {
+            if (isReadIndexes(metadataTypes)) {
                 readIndexes(snapshot, requestedSchema, databaseMetaData);
             }
 
@@ -322,8 +322,32 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
     }
 
+    protected boolean isReadSequences(Set<MetadataType> metadataTypes) {
+        return isReadMetadata(new MetadataType[] { MetadataType.VIEWS, MetadataType.COLUMNS }, metadataTypes);
+    }
+
     protected boolean isReadViews(Set<MetadataType> metadataTypes) {
         return isReadMetadata(new MetadataType[] { MetadataType.VIEWS, MetadataType.COLUMNS }, metadataTypes);
+    }
+
+    protected boolean isReadForeignKeys(Set<MetadataType> metadataTypes) {
+        return isReadMetadata(MetadataType.FOREIGNKEYS, metadataTypes);
+    }
+
+    protected boolean isReadPrimaryKeys(Set<MetadataType> metadataTypes) {
+        return isReadMetadata(MetadataType.PRIMARYKEYS, metadataTypes);
+    }
+
+    protected boolean isReadColumns(Set<MetadataType> metadataTypes) {
+        return isReadMetadata(MetadataType.COLUMNS, metadataTypes);
+    }
+
+    protected boolean isReadUniqueConstraints(Set<MetadataType> metadataTypes) {
+        return isReadMetadata(MetadataType.UNIQUECONSTRAINTS, metadataTypes);
+    }
+
+    protected boolean isReadIndexes(Set<MetadataType> metadataTypes) {
+        return isReadMetadata(MetadataType.INDEXES, metadataTypes);
     }
 
     protected boolean isReadTables(Set<MetadataType> metadataTypes) {
@@ -334,6 +358,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         set.add(MetadataType.INDEXES);
         set.add(MetadataType.UNIQUECONSTRAINTS);
         set.add(MetadataType.PRIMARYKEYS);
+        set.add(MetadataType.DATA);
         MetadataType[] types = set.toArray(new MetadataType[set.size()]);
         return isReadMetadata(types, metadataTypes);
     }

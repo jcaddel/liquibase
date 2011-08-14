@@ -18,10 +18,10 @@ public class MainTest {
     private static final String[] CONSTRAINTS = { "foreignKeys" };
     private static final String[] DATA = { "data" };
 
-    @Test
+    // @Test
     public void exportRiceMySQLViews() throws Exception {
         String type = "mysql";
-        JDBC jdbc = getJDBC(type, "rice");
+        JDBC jdbc = getJDBC("rice", type);
         GAV gav = getRiceGAV();
         gav.setClassifier(type);
         File changeLog = getChangeLogFile(gav, "views.xml");
@@ -46,13 +46,13 @@ public class MainTest {
         Main.main(argsArray);
     }
 
-    protected GAV getGAV(String app) {
+    protected GAV getGAV(String app) throws Exception {
         if (app.equalsIgnoreCase("rice")) {
             return getRiceGAV();
         } else if (app.equalsIgnoreCase("student")) {
             return getStudentGAV();
         } else {
-            throw new RuntimeException("Unknown app " + app);
+            throw new Exception("Unknown app " + app);
         }
     }
 
@@ -78,7 +78,7 @@ public class MainTest {
         return gav;
     }
 
-    protected JDBC getJDBC(String type, String app) {
+    protected JDBC getJDBC(String app, String type) throws Exception {
         String username = null;
         String password = null;
         String url = null;
@@ -89,7 +89,7 @@ public class MainTest {
             username = "KSEMBEDDED";
             password = "KSEMBEDDED";
         } else {
-            throw new RuntimeException("Unsupported app " + app);
+            throw new Exception("Unsupported app " + app);
         }
 
         if (type.equalsIgnoreCase("mysql")) {
@@ -97,7 +97,7 @@ public class MainTest {
         } else if (type.equalsIgnoreCase("oracle")) {
             url = "jdbc:oracle:thin:@localhost:1521:XE";
         } else {
-            throw new RuntimeException("Unsupported type " + type);
+            throw new Exception("Unsupported type " + type);
         }
 
         JDBC jdbc = new JDBC();
@@ -147,20 +147,24 @@ public class MainTest {
         args.setJdbc(jdbc);
         args.setCommand("generateChangeLog");
 
+        // Export schema information
         args.setOther(toOther(SCHEMA));
         args.setChangeLog(getChangeLogFile(gav, "schema.xml"));
         executeMain(args);
 
+        // Export data
+        String basedir = getBaseDir(getWorkingDir(), gav) + FS + "data";
+        File dataDir = mkdirs(basedir);
+        String[] other = { "--dataDir=" + dataDir.getCanonicalPath(), "--diffTypes=" + toCSV(DATA) };
+        args.setOther(other);
+        args.setChangeLog(getChangeLogFile(gav, "data.xml"));
+        executeMain(args);
+
+        // Export constraints
         args.setOther(toOther(CONSTRAINTS));
         args.setChangeLog(getChangeLogFile(gav, "constraints.xml"));
         executeMain(args);
 
-        String basedir = getBaseDir(getWorkingDir(), gav) + FS + "data";
-        File dataDir = mkdirs(basedir);
-        String[] other = { "--dataDir=" + dataDir.getAbsolutePath(), "--diffTypes=" + toCSV(DATA) };
-        args.setOther(other);
-        args.setChangeLog(getChangeLogFile(gav, "data.xml"));
-        executeMain(args);
     }
 
     protected String getBaseDir(String workingDirectory, GAV gav) {
