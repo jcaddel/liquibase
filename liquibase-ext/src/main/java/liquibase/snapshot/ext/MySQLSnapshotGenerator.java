@@ -24,7 +24,7 @@ public class MySQLSnapshotGenerator extends liquibase.snapshot.jvm.MySQLDatabase
     /**
      * When a view is created in MySQL, the original SQL statement is parsed, and has some formatting applied to it
      * before being stored. The parsed version always contains the database name prefixed to the table names eg "select
-     * * from `foo`.`bar`" This makes the SQL non-portable if you want to extract it and use it in another database. The
+     * * from `foo`.`bar`" This makes the SQL non-portable if you want to extract it for use in another database. The
      * logic here, strips the database name from the SQL. It changes "select * from `foo`.`bar`" to "select * from bar"
      */
     @Override
