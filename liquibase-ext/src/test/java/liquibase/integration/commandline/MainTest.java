@@ -147,24 +147,20 @@ public class MainTest {
         args.setJdbc(jdbc);
         args.setCommand("generateChangeLog");
 
-        // Export schema information
         args.setOther(toOther(SCHEMA));
         args.setChangeLog(getChangeLogFile(gav, "schema.xml"));
         executeMain(args);
 
-        // Export data
+        args.setOther(toOther(CONSTRAINTS));
+        args.setChangeLog(getChangeLogFile(gav, "constraints.xml"));
+        executeMain(args);
+
         String basedir = getBaseDir(getWorkingDir(), gav) + FS + "data";
         File dataDir = mkdirs(basedir);
         String[] other = { "--dataDir=" + dataDir.getCanonicalPath(), "--diffTypes=" + toCSV(DATA) };
         args.setOther(other);
         args.setChangeLog(getChangeLogFile(gav, "data.xml"));
         executeMain(args);
-
-        // Export constraints
-        args.setOther(toOther(CONSTRAINTS));
-        args.setChangeLog(getChangeLogFile(gav, "constraints.xml"));
-        executeMain(args);
-
     }
 
     protected String getBaseDir(String workingDirectory, GAV gav) {
