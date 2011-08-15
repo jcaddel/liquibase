@@ -56,6 +56,7 @@ import liquibase.database.structure.View;
 import liquibase.database.typeconversion.TypeConverter;
 import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.serializer.ChangeLogSerializer;
@@ -63,15 +64,21 @@ import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVWriter;
 
 public class DiffResult {
-    private static final String EXCLUDE_SCHEMA_SYSTEM_PROPERTY = "liquibase.schema.exclude";
-    private static final boolean EXCLUDE_SCHEMA = "true".equalsIgnoreCase(System
-            .getProperty(EXCLUDE_SCHEMA_SYSTEM_PROPERTY));
+    private static final String FS = System.getProperty("file.separator");
+    public static final String EXCLUDE_SCHEMA_SYSTEM_PROPERTY = "liquibase.schema.exclude";
+    private static final boolean EXCLUDE_SCHEMA = getExcludeSchema();
+
+    private static final boolean getExcludeSchema() {
+        String property = System.getProperty(EXCLUDE_SCHEMA_SYSTEM_PROPERTY);
+        return "true".equalsIgnoreCase(property);
+    }
 
     private String idRoot = String.valueOf(new Date().getTime());
     private int changeNumber = 1;
@@ -317,13 +324,13 @@ public class DiffResult {
         }
 
         return getMissingColumns().size() > 0 || getMissingForeignKeys().size() > 0 || getMissingIndexes().size() > 0
-        || getMissingPrimaryKeys().size() > 0 || getMissingSequences().size() > 0
-        || getMissingTables().size() > 0 || getMissingUniqueConstraints().size() > 0
-        || getMissingViews().size() > 0 || getUnexpectedColumns().size() > 0
-        || getUnexpectedForeignKeys().size() > 0 || getUnexpectedIndexes().size() > 0
-        || getUnexpectedPrimaryKeys().size() > 0 || getUnexpectedSequences().size() > 0
-        || getUnexpectedTables().size() > 0 || getUnexpectedUniqueConstraints().size() > 0
-        || getUnexpectedViews().size() > 0 || differencesInData;
+                || getMissingPrimaryKeys().size() > 0 || getMissingSequences().size() > 0
+                || getMissingTables().size() > 0 || getMissingUniqueConstraints().size() > 0
+                || getMissingViews().size() > 0 || getUnexpectedColumns().size() > 0
+                || getUnexpectedForeignKeys().size() > 0 || getUnexpectedIndexes().size() > 0
+                || getUnexpectedPrimaryKeys().size() > 0 || getUnexpectedSequences().size() > 0
+                || getUnexpectedTables().size() > 0 || getUnexpectedUniqueConstraints().size() > 0
+                || getUnexpectedViews().size() > 0 || differencesInData;
     }
 
     public void printResult(PrintStream out) throws DatabaseException {
@@ -377,18 +384,18 @@ public class DiffResult {
                     if (baseColumn.isDataTypeDifferent(column)) {
                         out.println("           from "
                                 + TypeConverterFactory.getInstance().findTypeConverter(referenceSnapshot.getDatabase())
-                                .convertToDatabaseTypeString(baseColumn, referenceSnapshot.getDatabase())
+                                        .convertToDatabaseTypeString(baseColumn, referenceSnapshot.getDatabase())
                                 + " to "
                                 + TypeConverterFactory
-                                .getInstance()
-                                .findTypeConverter(targetSnapshot.getDatabase())
-                                .convertToDatabaseTypeString(
-                                        targetSnapshot.getColumn(column.getTable().getName(), column.getName()),
-                                        targetSnapshot.getDatabase()));
+                                        .getInstance()
+                                        .findTypeConverter(targetSnapshot.getDatabase())
+                                        .convertToDatabaseTypeString(
+                                                targetSnapshot.getColumn(column.getTable().getName(), column.getName()),
+                                                targetSnapshot.getDatabase()));
                     }
                     if (baseColumn.isNullabilityDifferent(column)) {
                         Boolean nowNullable = targetSnapshot.getColumn(column.getTable().getName(), column.getName())
-                        .isNullable();
+                                .isNullable();
                         if (nowNullable == null) {
                             nowNullable = Boolean.TRUE;
                         }
@@ -422,18 +429,18 @@ public class DiffResult {
     }
 
     public void printChangeLog(String changeLogFile, Database targetDatabase) throws ParserConfigurationException,
-    IOException, DatabaseException {
+            IOException, DatabaseException {
         ChangeLogSerializer changeLogSerializer = serializerFactory.getSerializer(changeLogFile);
         this.printChangeLog(changeLogFile, targetDatabase, changeLogSerializer);
     }
 
     public void printChangeLog(PrintStream out, Database targetDatabase) throws ParserConfigurationException,
-    IOException, DatabaseException {
+            IOException, DatabaseException {
         this.printChangeLog(out, targetDatabase, new XMLChangeLogSerializer());
     }
 
     public void printChangeLog(String changeLogFile, Database targetDatabase, ChangeLogSerializer changeLogSerializer)
-    throws ParserConfigurationException, IOException, DatabaseException {
+            throws ParserConfigurationException, IOException, DatabaseException {
         File file = new File(changeLogFile);
         if (!file.exists()) {
             LogFactory.getLogger().info(file + " does not exist, creating");
@@ -495,7 +502,7 @@ public class DiffResult {
      * Prints changeLog that would bring the target database to be the same as the reference database
      */
     public void printChangeLog(PrintStream out, Database targetDatabase, ChangeLogSerializer changeLogSerializer)
-    throws ParserConfigurationException, IOException, DatabaseException {
+            throws ParserConfigurationException, IOException, DatabaseException {
         List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
         addMissingTableChanges(changeSets, targetDatabase);
         addMissingColumnChanges(changeSets, targetDatabase);
@@ -847,7 +854,7 @@ public class DiffResult {
 
     private boolean shouldModifyColumn(Column column) {
         return column.getView() == null
-        && !referenceSnapshot.getDatabase().isLiquibaseTable(column.getTable().getName());
+                && !referenceSnapshot.getDatabase().isLiquibaseTable(column.getTable().getName());
 
     }
 
@@ -876,14 +883,14 @@ public class DiffResult {
             columnConfig.setName(column.getName());
 
             String dataType = TypeConverterFactory.getInstance().findTypeConverter(database)
-            .convertToDatabaseTypeString(column, database);
+                    .convertToDatabaseTypeString(column, database);
 
             columnConfig.setType(dataType);
 
             Object defaultValue = column.getDefaultValue();
             if (defaultValue != null) {
                 String defaultValueString = TypeConverterFactory.getInstance().findTypeConverter(database)
-                .getDataType(defaultValue).convertObjectToString(defaultValue, database);
+                        .getDataType(defaultValue).convertObjectToString(defaultValue, database);
                 if (defaultValueString != null) {
                     defaultValueString = defaultValueString.replaceFirst("'", "").replaceAll("'$", "");
                 }
@@ -1020,144 +1027,207 @@ public class DiffResult {
         }
     }
 
+    protected List<Map> getList(Database database, String schema, Table table) throws DatabaseException {
+        ExecutorService service = ExecutorService.getInstance();
+        Executor executor = service.getExecutor(referenceSnapshot.getDatabase());
+        String sql = "SELECT * FROM " + database.escapeTableName(schema, table.getName());
+        SqlStatement ss = new RawSqlStatement(sql);
+        return executor.queryForList(ss);
+    }
+
+    protected List<String> getColumnNames(Table table) {
+        List<String> columnNames = new ArrayList<String>();
+        for (Column column : table.getColumns()) {
+            columnNames.add(column.getName());
+        }
+        return columnNames;
+    }
+
+    protected String getFilename(Table table) {
+        String fileName = table.getName().toLowerCase() + ".csv";
+        if (dataDir != null) {
+            fileName = dataDir + FS + fileName;
+        }
+
+        File parentDir = new File(dataDir);
+        if (!parentDir.exists()) {
+            parentDir.mkdirs();
+        }
+        if (!parentDir.isDirectory()) {
+            throw new RuntimeException(parentDir + " is not a directory");
+        }
+        return fileName;
+    }
+
+    protected void printColumnNames(List<String> columnNames, CSVWriter out) {
+        String[] line = new String[columnNames.size()];
+        for (int i = 0; i < columnNames.size(); i++) {
+            line[i] = columnNames.get(i);
+        }
+        out.writeNext(line);
+    }
+
+    protected void updateDataTypes(int index, String[] dataTypes, Object value) {
+        String existingDataType = dataTypes[index];
+        if (existingDataType != null) {
+            return;
+        }
+        if (value == null) {
+            return;
+        }
+        String dataType = getDataType(value);
+        dataTypes[index] = dataType;
+    }
+
+    protected String getDataType(Object value) {
+        if (value instanceof Number) {
+            return "NUMERIC";
+        } else if (value instanceof Boolean) {
+            return "BOOLEAN";
+        } else if (value instanceof Date) {
+            return "DATE";
+        } else {
+            return "STRING";
+        }
+    }
+
+    protected String getPrintValue(Object value) {
+        if (value == null) {
+            return "NULL";
+        }
+        if (value instanceof Date) {
+            return new ISODateFormat().format(((Date) value));
+        } else {
+            return value.toString();
+        }
+    }
+
+    protected String[] getStringArray(List<String> columnNames, Map<String, Object> row, String[] dataTypes) {
+        String[] line = new String[columnNames.size()];
+        for (int i = 0; i < columnNames.size(); i++) {
+            Object value = row.get(columnNames.get(i).toUpperCase());
+            updateDataTypes(i, dataTypes, value);
+            line[i] = getPrintValue(value);
+        }
+        return line;
+    }
+
+    protected String[] printCSV(Table table, List<String> columnNames, List<Map> rs, String filename)
+            throws IOException {
+
+        CSVWriter outputFile = new CSVWriter(new FileWriter(filename));
+        printColumnNames(columnNames, outputFile);
+        String[] dataTypes = new String[columnNames.size()];
+        for (Map<String, Object> row : rs) {
+            String[] line = getStringArray(columnNames, row, dataTypes);
+            outputFile.writeNext(line);
+        }
+        outputFile.flush();
+        outputFile.close();
+        return dataTypes;
+    }
+
+    protected void doCSV(Table table, List<String> columnNames, List<Map> rs, List<Change> changes, String schema)
+            throws IOException {
+        String fileName = getFilename(table);
+        String[] dataTypes = printCSV(table, columnNames, rs, fileName);
+
+        LoadDataChange change = new LoadDataChange();
+        change.setFile(fileName);
+        change.setEncoding("UTF-8");
+        change.setSchemaName(schema);
+        change.setTableName(table.getName());
+
+        for (int i = 0; i < columnNames.size(); i++) {
+            String colName = columnNames.get(i);
+            LoadDataColumnConfig columnConfig = new LoadDataColumnConfig();
+            columnConfig.setHeader(colName);
+            columnConfig.setName(colName);
+            columnConfig.setType(dataTypes[i]);
+
+            change.addColumn(columnConfig);
+        }
+
+        changes.add(change);
+    }
+
+    protected InsertDataChange getInsertDataChange(Table table, String schema, List<String> columnNames, Map row) {
+        InsertDataChange change = new InsertDataChange();
+        change.setSchemaName(schema);
+        change.setTableName(table.getName());
+
+        // loop over all columns for this row
+        for (int i = 0; i < columnNames.size(); i++) {
+            ColumnConfig column = new ColumnConfig();
+            column.setName(columnNames.get(i));
+            Object value = row.get(columnNames.get(i).toUpperCase());
+            if (value == null) {
+                column.setValue(null);
+            } else if (value instanceof Number) {
+                column.setValueNumeric((Number) value);
+            } else if (value instanceof Boolean) {
+                column.setValueBoolean((Boolean) value);
+            } else if (value instanceof Date) {
+                column.setValueDate((Date) value);
+            } else { // string
+                column.setValue(value.toString().replace("\\", "\\\\"));
+            }
+            change.addColumn(column);
+        }
+        return change;
+
+    }
+
+    protected List<Change> getChanges(Table table, List<Map> rs, String schema) throws IOException {
+        List<Change> changes = new ArrayList<Change>();
+        List<String> columnNames = getColumnNames(table);
+
+        // if dataDir is not null, print out a csv file and use loadData tag
+        if (dataDir != null) {
+            doCSV(table, columnNames, rs, changes, schema);
+        } else { // if dataDir is null, build and use insert tags
+            for (Map row : rs) {
+                Change change = getInsertDataChange(table, schema, columnNames, row);
+                // for each row, add a new change
+                // (there will be one group per table)
+                changes.add(change);
+            }
+        }
+        return changes;
+    }
+
     private void addInsertDataChanges(List<ChangeSet> changeSets, String dataDir) throws DatabaseException, IOException {
+        Database database = referenceSnapshot.getDatabase();
         try {
             String schema = referenceSnapshot.getSchema();
             for (Table table : referenceSnapshot.getTables()) {
-                List<Change> changes = new ArrayList<Change>();
-                List<Map> rs = ExecutorService
-                .getInstance()
-                .getExecutor(referenceSnapshot.getDatabase())
-                .queryForList(
-                        new RawSqlStatement("SELECT * FROM "
-                                + referenceSnapshot.getDatabase().escapeTableName(schema, table.getName())));
+                // Extract data from this table
+                List<Map> rs = getList(database, schema, table);
 
+                // Table is empty
                 if (rs.size() == 0) {
                     continue;
                 }
 
-                List<String> columnNames = new ArrayList<String>();
-                for (Column column : table.getColumns()) {
-                    columnNames.add(column.getName());
+                // Convert the data to one or more change objects
+                List<Change> changes = getChanges(table, rs, schema);
+
+                // Double check that changes exist
+                if (changes.size() == 0) {
+                    continue;
                 }
 
-                // if dataDir is not null, print out a csv file and use loadData
-                // tag
-                if (dataDir != null) {
-                    String fileName = table.getName().toLowerCase() + ".csv";
-                    if (dataDir != null) {
-                        fileName = dataDir + "/" + fileName;
-                    }
-
-                    File parentDir = new File(dataDir);
-                    if (!parentDir.exists()) {
-                        parentDir.mkdirs();
-                    }
-                    if (!parentDir.isDirectory()) {
-                        throw new RuntimeException(parentDir + " is not a directory");
-                    }
-
-                    CSVWriter outputFile = new CSVWriter(new FileWriter(fileName));
-                    String[] dataTypes = new String[columnNames.size()];
-                    String[] line = new String[columnNames.size()];
-                    for (int i = 0; i < columnNames.size(); i++) {
-                        line[i] = columnNames.get(i);
-                    }
-                    outputFile.writeNext(line);
-
-                    for (Map row : rs) {
-                        line = new String[columnNames.size()];
-
-                        for (int i = 0; i < columnNames.size(); i++) {
-                            Object value = row.get(columnNames.get(i).toUpperCase());
-                            if (dataTypes[i] == null && value != null) {
-                                if (value instanceof Number) {
-                                    dataTypes[i] = "NUMERIC";
-                                } else if (value instanceof Boolean) {
-                                    dataTypes[i] = "BOOLEAN";
-                                } else if (value instanceof Date) {
-                                    dataTypes[i] = "DATE";
-                                } else {
-                                    dataTypes[i] = "STRING";
-                                }
-                            }
-                            if (value == null) {
-                                line[i] = "NULL";
-                            } else {
-                                if (value instanceof Date) {
-                                    line[i] = new ISODateFormat().format(((Date) value));
-                                } else {
-                                    line[i] = value.toString();
-                                }
-                            }
-                        }
-                        outputFile.writeNext(line);
-                    }
-                    outputFile.flush();
-                    outputFile.close();
-
-                    LoadDataChange change = new LoadDataChange();
-                    change.setFile(fileName);
-                    change.setEncoding("UTF-8");
-                    change.setSchemaName(schema);
-                    change.setTableName(table.getName());
-
-                    for (int i = 0; i < columnNames.size(); i++) {
-                        String colName = columnNames.get(i);
-                        LoadDataColumnConfig columnConfig = new LoadDataColumnConfig();
-                        columnConfig.setHeader(colName);
-                        columnConfig.setName(colName);
-                        columnConfig.setType(dataTypes[i]);
-
-                        change.addColumn(columnConfig);
-                    }
-
-                    changes.add(change);
-                } else { // if dataDir is null, build and use insert tags
-                    for (Map row : rs) {
-                        InsertDataChange change = new InsertDataChange();
-                        change.setSchemaName(schema);
-                        change.setTableName(table.getName());
-
-                        // loop over all columns for this row
-                        for (int i = 0; i < columnNames.size(); i++) {
-                            ColumnConfig column = new ColumnConfig();
-                            column.setName(columnNames.get(i));
-
-                            Object value = row.get(columnNames.get(i).toUpperCase());
-                            if (value == null) {
-                                column.setValue(null);
-                            } else if (value instanceof Number) {
-                                column.setValueNumeric((Number) value);
-                            } else if (value instanceof Boolean) {
-                                column.setValueBoolean((Boolean) value);
-                            } else if (value instanceof Date) {
-                                column.setValueDate((Date) value);
-                            } else { // string
-                                column.setValue(value.toString().replace("\\", "\\\\"));
-                            }
-
-                            change.addColumn(column);
-
-                        }
-
-                        // for each row, add a new change
-                        // (there will be one group per table)
-                        changes.add(change);
-                    }
-
+                // Create a new changeSet with the list of changes
+                ChangeSet changeSet = generateChangeSet();
+                for (Change change : changes) {
+                    changeSet.addChange(change);
                 }
-                if (changes.size() > 0) {
-                    ChangeSet changeSet = generateChangeSet();
-                    for (Change change : changes) {
-                        changeSet.addChange(change);
-                    }
-                    changeSets.add(changeSet);
-                }
+
+                // Add this changeSet to the list
+                changeSets.add(changeSet);
             }
-
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new DatabaseException(e);
         }
     }
 }
