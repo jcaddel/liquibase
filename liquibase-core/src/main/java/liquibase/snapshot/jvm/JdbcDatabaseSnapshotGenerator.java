@@ -339,7 +339,11 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
     }
 
     protected boolean isReadColumns(Set<MetadataType> metadataTypes) {
-        return isReadMetadata(MetadataType.COLUMNS, metadataTypes);
+        Set<MetadataType> set = new HashSet<MetadataType>();
+        set.add(MetadataType.COLUMNS);
+        set.add(MetadataType.DATA);
+        MetadataType[] types = set.toArray(new MetadataType[set.size()]);
+        return isReadMetadata(types, metadataTypes);
     }
 
     protected boolean isReadUniqueConstraints(Set<MetadataType> metadataTypes) {
