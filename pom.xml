@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.kuali</groupId>
@@ -31,6 +32,10 @@
     <url>scm:git:git@github.com:jcaddel/liquibase.git</url>
     <developerConnection>scm:git:git@github.com:jcaddel/liquibase.git</developerConnection>
   </scm>
+  <properties>
+    <oracle.version>10.2.0.3.0</oracle.version>
+    <mysql.version>5.1.13</mysql.version>
+  </properties>
   <developers>
     <developer>
       <id>nvoxland</id>
@@ -129,6 +134,18 @@
         <groupId>org.apache.derby</groupId>
         <artifactId>derby</artifactId>
         <version>10.2.2.0</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>${mysql.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.oracle</groupId>
+        <artifactId>ojdbc14</artifactId>
+        <version>${oracle.version}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
