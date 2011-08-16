@@ -11,6 +11,7 @@ import liquibase.exception.Warnings;
 import liquibase.precondition.Precondition;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotContext;
 import liquibase.util.StringUtils;
 
 public class SequenceExistsPrecondition implements Precondition {
@@ -48,7 +49,8 @@ public class SequenceExistsPrecondition implements Precondition {
             throws PreconditionFailedException, PreconditionErrorException {
         DatabaseSnapshot snapshot;
         try {
-            snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, getSchemaName(), null);
+            snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(
+                    new SnapshotContext(database, getSchemaName()));
         } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }

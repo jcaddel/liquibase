@@ -19,6 +19,7 @@ import liquibase.database.structure.View;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotContext;
 import liquibase.util.StringUtils;
 
 public class Diff {
@@ -70,17 +71,24 @@ public class Diff {
     }
 
     public DiffResult compare() throws DatabaseException {
+        DatabaseSnapshotGeneratorFactory factory = DatabaseSnapshotGeneratorFactory.getInstance();
         if (referenceSnapshot == null) {
-            referenceSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase, null,
-                    statusListeners, metadataTypes);
+            SnapshotContext context = new SnapshotContext();
+            context.setDatabase(referenceDatabase);
+            context.setListeners(statusListeners);
+            context.setMetadataTypes(metadataTypes);
+            referenceSnapshot = factory.createSnapshot(context);
         }
 
         if (targetSnapshot == null) {
             if (targetDatabase == null) {
                 targetSnapshot = new DatabaseSnapshot(referenceDatabase, null);
             } else {
-                targetSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(targetDatabase, null,
-                        statusListeners, metadataTypes);
+                SnapshotContext context = new SnapshotContext();
+                context.setDatabase(targetDatabase);
+                context.setListeners(statusListeners);
+                context.setMetadataTypes(metadataTypes);
+                targetSnapshot = factory.createSnapshot(context);
             }
         }
 

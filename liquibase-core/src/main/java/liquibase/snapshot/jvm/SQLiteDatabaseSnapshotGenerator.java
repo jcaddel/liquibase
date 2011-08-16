@@ -27,6 +27,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.SnapshotContext;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.SelectSequencesStatement;
 import liquibase.util.StringUtils;
@@ -50,8 +51,8 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
     }
 
     @Override
-    protected void readTables(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
-            throws SQLException, DatabaseException {
+    protected void readTables(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData,
+            SnapshotContext context) throws SQLException, DatabaseException {
 
         Database database = snapshot.getDatabase();
 

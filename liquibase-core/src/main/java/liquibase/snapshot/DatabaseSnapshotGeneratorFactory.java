@@ -3,13 +3,10 @@ package liquibase.snapshot;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import liquibase.database.Database;
-import liquibase.database.structure.MetadataType;
-import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.ServiceLocator;
 
@@ -72,18 +69,9 @@ public class DatabaseSnapshotGeneratorFactory {
     /**
      * Get generator for database with highest priority.
      */
-    public DatabaseSnapshot createSnapshot(Database database, String schema, Set<DiffStatusListener> listeners)
-            throws DatabaseException {
-        return createSnapshot(database, schema, listeners, null);
-    }
-
-    /**
-     * Get generator for database with highest priority.
-     */
-    public DatabaseSnapshot createSnapshot(Database database, String schema, Set<DiffStatusListener> listeners,
-            Set<MetadataType> metadataTypes) throws DatabaseException {
-        DatabaseSnapshotGenerator generator = getGenerator(database);
-        return generator.createSnapshot(database, schema, listeners, metadataTypes);
+    public DatabaseSnapshot createSnapshot(SnapshotContext context) throws DatabaseException {
+        DatabaseSnapshotGenerator generator = getGenerator(context.getDatabase());
+        return generator.createSnapshot(context);
     }
 
     /**

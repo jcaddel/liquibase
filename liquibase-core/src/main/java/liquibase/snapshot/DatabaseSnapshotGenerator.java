@@ -1,14 +1,11 @@
 package liquibase.snapshot;
 
 import java.util.List;
-import java.util.Set;
 
 import liquibase.database.Database;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.ForeignKey;
-import liquibase.database.structure.MetadataType;
 import liquibase.database.structure.Table;
-import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
 
 public interface DatabaseSnapshotGenerator {
@@ -26,11 +23,7 @@ public interface DatabaseSnapshotGenerator {
 
     int getPriority(Database database);
 
-    DatabaseSnapshot createSnapshot(Database database, String schema, Set<DiffStatusListener> listeners)
-            throws DatabaseException;
-
-    DatabaseSnapshot createSnapshot(Database database, String schema, Set<DiffStatusListener> listeners,
-            Set<MetadataType> metadataTypes) throws DatabaseException;
+    DatabaseSnapshot createSnapshot(SnapshotContext context) throws DatabaseException;
 
     Table getDatabaseChangeLogTable(Database database) throws DatabaseException;
 

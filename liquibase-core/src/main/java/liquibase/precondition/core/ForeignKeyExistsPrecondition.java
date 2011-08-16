@@ -9,7 +9,9 @@ import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.precondition.Precondition;
+import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotContext;
 import liquibase.util.StringUtils;
 
 public class ForeignKeyExistsPrecondition implements Precondition {
@@ -51,14 +53,22 @@ public class ForeignKeyExistsPrecondition implements Precondition {
         return new ValidationErrors();
     }
 
+    protected DatabaseSnapshot getSnapshot(Database database, String schemaName) throws DatabaseException {
+        SnapshotContext context = new SnapshotContext();
+        context.setDatabase(database);
+        context.setSchema(schemaName);
+        DatabaseSnapshotGeneratorFactory factory = DatabaseSnapshotGeneratorFactory.getInstance();
+        return factory.createSnapshot(context);
+    }
+
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
             throws PreconditionFailedException, PreconditionErrorException {
         try {
             boolean checkPassed;
             if (getForeignKeyTableName() == null) {
-                checkPassed = DatabaseSnapshotGeneratorFactory.getInstance()
-                        .createSnapshot(database, getSchemaName(), null).getForeignKey(getForeignKeyName()) != null;
+                DatabaseSnapshot snapshot = getSnapshot(database, schemaName);
+                checkPassed = snapshot.getForeignKey(getForeignKeyName()) != null;
             } else { // much faster if we can limit to correct table
                 checkPassed = DatabaseSnapshotGeneratorFactory
                         .getInstance()

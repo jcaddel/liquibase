@@ -49,6 +49,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotContext;
 import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -646,8 +647,12 @@ public abstract class AbstractDatabase implements Database {
     @Override
     public void dropDatabaseObjects(String schema) throws DatabaseException {
         try {
-            DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(this, schema,
-                    new HashSet<DiffStatusListener>());
+            DatabaseSnapshotGeneratorFactory factory = DatabaseSnapshotGeneratorFactory.getInstance();
+            SnapshotContext context = new SnapshotContext();
+            context.setDatabase(this);
+            context.setSchema(schema);
+            context.setListeners(new HashSet<DiffStatusListener>());
+            DatabaseSnapshot snapshot = factory.createSnapshot(context);
 
             List<Change> dropChanges = new ArrayList<Change>();
 

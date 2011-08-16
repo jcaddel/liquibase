@@ -19,6 +19,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotContext;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CopyRowsStatement;
 import liquibase.statement.core.CreateIndexStatement;
@@ -106,10 +107,13 @@ public class SQLiteDatabase extends AbstractDatabase {
 
     public static List<SqlStatement> getAlterTableStatements(AlterTableVisitor alterTableVisitor, Database database,
             String schemaName, String tableName) throws UnsupportedChangeException, DatabaseException {
+        DatabaseSnapshotGeneratorFactory factory = DatabaseSnapshotGeneratorFactory.getInstance();
+        SnapshotContext context = new SnapshotContext();
+        context.setDatabase(database);
 
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
-        DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
+        DatabaseSnapshot snapshot = factory.createSnapshot(context);
         Table table = snapshot.getTable(tableName);
 
         List<ColumnConfig> createColumns = new Vector<ColumnConfig>();

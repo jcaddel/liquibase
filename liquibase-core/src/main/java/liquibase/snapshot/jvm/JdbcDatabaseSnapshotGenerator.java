@@ -37,6 +37,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGenerator;
+import liquibase.snapshot.SnapshotContext;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.SelectSequencesStatement;
 import liquibase.util.StringUtils;
@@ -271,8 +272,11 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
     }
 
     @Override
-    public DatabaseSnapshot createSnapshot(Database database, String requestedSchema,
-            Set<DiffStatusListener> listeners, Set<MetadataType> metadataTypes) throws DatabaseException {
+    public DatabaseSnapshot createSnapshot(SnapshotContext context) throws DatabaseException {
+        String requestedSchema = context.getSchema();
+        Database database = context.getDatabase();
+        Set<MetadataType> metadataTypes = context.getMetadataTypes();
+        Set<DiffStatusListener> listeners = context.getListeners();
         if (requestedSchema == null) {
             requestedSchema = database.getDefaultSchemaName();
         }
@@ -289,14 +293,14 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 readSequences(snapshot, requestedSchema, databaseMetaData);
             }
 
-            // Views might be used in readColumns()
+            // Views may be used in readColumns()
             if (isReadViews(metadataTypes)) {
                 readViews(snapshot, requestedSchema, databaseMetaData);
             }
 
             // Always need tables unless they are only asking for views or sequences
             if (isReadTables(metadataTypes)) {
-                readTables(snapshot, requestedSchema, databaseMetaData);
+                readTables(snapshot, requestedSchema, databaseMetaData, context);
             }
 
             if (isReadForeignKeys(metadataTypes)) {
@@ -390,12 +394,6 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         return false;
     }
 
-    @Override
-    public DatabaseSnapshot createSnapshot(Database database, String requestedSchema, Set<DiffStatusListener> listeners)
-            throws DatabaseException {
-        return createSnapshot(database, requestedSchema, listeners, null);
-    }
-
     protected DatabaseMetaData getMetaData(Database database) throws SQLException {
         DatabaseMetaData databaseMetaData = null;
         if (database.getConnection() != null) {
@@ -404,8 +402,8 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         return databaseMetaData;
     }
 
-    protected void readTables(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
-            throws SQLException, DatabaseException {
+    protected void readTables(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData,
+            SnapshotContext context) throws SQLException, DatabaseException {
         Database database = snapshot.getDatabase();
         updateListeners("Reading tables for " + database.toString() + " ...");
 
@@ -611,7 +609,10 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
     @Override
     public boolean hasIndex(String schemaName, String tableName, String indexName, Database database, String columnNames)
             throws DatabaseException {
-        DatabaseSnapshot databaseSnapshot = createSnapshot(database, schemaName, null);
+        SnapshotContext context = new SnapshotContext();
+        context.setDatabase(database);
+        context.setSchema(schemaName);
+        DatabaseSnapshot databaseSnapshot = createSnapshot(context);
         if (databaseSnapshot.getIndex(indexName) != null) {
             return true;
         }

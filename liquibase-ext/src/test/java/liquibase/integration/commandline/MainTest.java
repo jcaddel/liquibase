@@ -35,13 +35,13 @@ public class MainTest {
         executeMain(args);
     }
 
-    // @Test
+    @Test
     public void cycleRice() throws Exception {
         cycleApp("rice", "mysql");
         cycleApp("rice", "oracle");
     }
 
-    @Test
+    // @Test
     public void cycleStudent() throws Exception {
         cycleApp("student", "oracle");
     }
