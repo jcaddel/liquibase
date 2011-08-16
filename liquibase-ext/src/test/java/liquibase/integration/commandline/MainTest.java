@@ -175,6 +175,7 @@ public class MainTest {
         sb.append(getDirFragment(gav.getArtifactId()));
         sb.append(getDirFragment(gav.getVersion()));
         sb.append(getDirFragment(gav.getClassifier()));
+        sb.append(getDirFragment("xml"));
         return sb.toString();
     }
 
