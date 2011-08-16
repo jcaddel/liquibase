@@ -71,6 +71,7 @@ import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVWriter;
 
 public class DiffResult {
+    public static final String ENCODING = "UTF-8";
     private static final String FS = System.getProperty("file.separator");
     public static final String EXCLUDE_SCHEMA_SYSTEM_PROPERTY = "liquibase.schema.exclude";
     private static final boolean EXCLUDE_SCHEMA = getExcludeSchema();
@@ -1059,14 +1060,6 @@ public class DiffResult {
         return fileName;
     }
 
-    protected void printColumnNames(List<String> columnNames, CSVWriter out) {
-        String[] line = new String[columnNames.size()];
-        for (int i = 0; i < columnNames.size(); i++) {
-            line[i] = columnNames.get(i);
-        }
-        out.writeNext(line);
-    }
-
     protected void updateDataTypes(int index, String[] dataTypes, Object value) {
         String existingDataType = dataTypes[index];
         if (existingDataType != null) {
@@ -1115,26 +1108,30 @@ public class DiffResult {
     protected String[] printCSV(Table table, List<String> columnNames, List<Map> rs, String filename)
             throws IOException {
 
-        CSVWriter outputFile = new CSVWriter(new FileWriter(filename));
-        printColumnNames(columnNames, outputFile);
+        // Get a CSV writer
+        CSVWriter writer = new CSVWriter(new FileWriter(filename));
+
+        // Print the columns
+        String[] columns = columnNames.toArray(new String[columnNames.size()]);
+        writer.writeNext(columns);
+
+        // Print the data
         String[] dataTypes = new String[columnNames.size()];
         for (Map<String, Object> row : rs) {
             String[] line = getStringArray(columnNames, row, dataTypes);
-            outputFile.writeNext(line);
+            writer.writeNext(line);
         }
-        outputFile.flush();
-        outputFile.close();
+        writer.flush();
+        writer.close();
         return dataTypes;
     }
 
-    protected void doCSV(Table table, List<String> columnNames, List<Map> rs, List<Change> changes, String schema)
-            throws IOException {
-        String fileName = getFilename(table);
-        String[] dataTypes = printCSV(table, columnNames, rs, fileName);
+    protected LoadDataChange getLoadDataChange(Table table, String schema, String[] dataTypes,
+            List<String> columnNames, List<Map> rs, String filename) {
 
         LoadDataChange change = new LoadDataChange();
-        change.setFile(fileName);
-        change.setEncoding("UTF-8");
+        change.setFile(filename);
+        change.setEncoding(ENCODING);
         change.setSchemaName(schema);
         change.setTableName(table.getName());
 
@@ -1147,8 +1144,7 @@ public class DiffResult {
 
             change.addColumn(columnConfig);
         }
-
-        changes.add(change);
+        return change;
     }
 
     protected InsertDataChange getInsertDataChange(Table table, String schema, List<String> columnNames, Map row) {
@@ -1184,7 +1180,10 @@ public class DiffResult {
 
         // if dataDir is not null, print out a csv file and use loadData tag
         if (dataDir != null) {
-            doCSV(table, columnNames, rs, changes, schema);
+            String filename = getFilename(table);
+            String[] dataTypes = printCSV(table, columnNames, rs, filename);
+            LoadDataChange change = getLoadDataChange(table, schema, dataTypes, columnNames, rs, filename);
+            changes.add(change);
         } else { // if dataDir is null, build and use insert tags
             for (Map row : rs) {
                 Change change = getInsertDataChange(table, schema, columnNames, row);
@@ -1217,7 +1216,7 @@ public class DiffResult {
                     continue;
                 }
 
-                // Create a new changeSet with the list of changes
+                // Create a new changeSet with the changes
                 ChangeSet changeSet = generateChangeSet();
                 for (Change change : changes) {
                     changeSet.addChange(change);
