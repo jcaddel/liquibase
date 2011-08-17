@@ -135,6 +135,7 @@ public class CommandLineUtils {
         diffResult.setChangeSetAuthor(context.getAuthor());
         diffResult.setChangeSetContext(context.getChangeSetContext());
         diffResult.setDataDir(context.getDataDir());
+        diffResult.setWorkingDir(context.getWorkingDir());
 
         if (StringUtils.trimToNull(changeLogFile) != null) {
             diffResult.printChangeLog(changeLogFile, database);

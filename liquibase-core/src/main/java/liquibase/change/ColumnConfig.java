@@ -1,16 +1,16 @@
 package liquibase.change;
 
-import liquibase.database.structure.Column;
-import liquibase.statement.DatabaseFunction;
-import liquibase.util.ISODateFormat;
-
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Locale;
 
+import liquibase.database.structure.Column;
+import liquibase.statement.DatabaseFunction;
+import liquibase.util.ISODateFormat;
+
 /**
- * This class is the representation of the column tag in the XMl file It has a reference to the Constraints object for
+ * This class is the representation of the column tag in the XML file It has a reference to the Constraints object for
  * getting information about the columns constraints.
  */
 public class ColumnConfig {

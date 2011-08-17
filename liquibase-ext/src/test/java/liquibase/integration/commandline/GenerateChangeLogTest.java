@@ -15,7 +15,7 @@ public class GenerateChangeLogTest {
         GAV gav = mtu.getRiceGAV();
         gav.setClassifier(type);
         File changeLog = mtu.getChangeLogFile(gav, "views.xml");
-        String[] other = { "--diffTypes=views" };
+        String[] other = { "--diffTypes=views", "--changeSetAuthor=jcaddel" };
         Args args = new Args();
         args.setGav(gav);
         args.setJdbc(jdbc);
@@ -65,9 +65,11 @@ public class GenerateChangeLogTest {
 
         String basedir = mtu.getBaseDir(mtu.getWorkingDir(), gav, "xml") + MainTestUtils.FS + "data";
         File dataDir = mtu.mkdirs(basedir);
-        String[] other1 = { "--dataDir=" + dataDir.getCanonicalPath(), "--diffTypes=" + mtu.toCSV(MainTestUtils.DATA) };
-        String[] other2 = { "--dataDir=" + dataDir.getCanonicalPath(), "--diffTypes=" + mtu.toCSV(MainTestUtils.DATA),
-                "--includes=krim_perm_attr_data_t" };
+        String workingDir = mtu.getWorkingDir();
+        String[] other1 = { "--workingDir=" + workingDir, "--dataDir=" + dataDir.getCanonicalPath(),
+                "--diffTypes=" + mtu.toCSV(MainTestUtils.DATA) };
+        String[] other2 = { "--workingDir=" + workingDir, "--dataDir=" + dataDir.getCanonicalPath(),
+                "--diffTypes=" + mtu.toCSV(MainTestUtils.DATA), "--includes=krim_perm_attr_data_t" };
         args.setOther(other1);
         args.setOther(other2);
         args.setChangeLog(mtu.getChangeLogFile(gav, "data.xml"));

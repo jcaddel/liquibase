@@ -15,8 +15,9 @@ public class UpdateSQLTest {
         GAV gav = mtu.getRiceGAV();
         gav.setClassifier(type);
         File changeLog = mtu.getChangeLogFile(gav, "data.xml");
+        String workingDir = mtu.getWorkingDir();
         File outputFile = mtu.getSqlFile(gav, "data.sql");
-        String[] other = { "--outputFile=" + outputFile.getCanonicalPath() };
+        String[] other = { "--outputFile=" + outputFile.getCanonicalPath(), "--workingDir=" + workingDir };
         Args args = new Args();
         args.setGav(gav);
         args.setJdbc(jdbc);

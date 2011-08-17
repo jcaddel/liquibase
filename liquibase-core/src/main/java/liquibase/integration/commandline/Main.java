@@ -56,26 +56,16 @@ public class Main {
      * Setting this system property to "false" will prevent Liquibase from calling System.exit() when it has completed
      * executing
      */
-    public static final String SYSTEM_EXIT_KEY = "liquibase.system.exit";
-    private static final boolean SYSTEM_EXIT = getSystemExit();
+    public static final String SYS_EXIT_KEY = "liquibase.system.exit";
+
+    // Call System.exit when done, unless they've set the system property to "false"
+    private static final boolean SYS_EXIT = !"false".equalsIgnoreCase(System.getProperty(SYS_EXIT_KEY));
 
     private static void exit(int status) {
-        if (!SYSTEM_EXIT) {
+        if (!SYS_EXIT) {
             return;
         }
         System.exit(status);
-    }
-
-    protected static boolean getSystemExit() {
-        String value = System.getProperty(SYSTEM_EXIT_KEY);
-        if (value == null) {
-            return true;
-        }
-        if ("false".equalsIgnoreCase(value)) {
-            return Boolean.FALSE;
-        } else {
-            return Boolean.TRUE;
-        }
     }
 
     protected ClassLoader classLoader;
@@ -98,6 +88,7 @@ public class Main {
     protected String changeSetAuthor;
     protected String changeSetContext;
     protected String dataDir;
+    protected String workingDir;
     protected String includes;
     protected String excludes;
 
@@ -662,6 +653,7 @@ public class Main {
                 context.setAuthor(trimToNull(changeSetAuthor));
                 context.setChangeSetContext(trimToNull(changeSetContext));
                 context.setDataDir(trimToNull(dataDir));
+                context.setWorkingDir(trimToNull(workingDir));
                 context.setIncludes(trimToNull(includes));
                 context.setExcludes(trimToNull(excludes));
                 CommandLineUtils.doGenerateChangeLog(context);

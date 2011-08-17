@@ -10,6 +10,7 @@ public class GenerateChangeLogContext {
     String author;
     String changeSetContext;
     String dataDir;
+    String workingDir;
     String includes;
     String excludes;
 
@@ -83,6 +84,14 @@ public class GenerateChangeLogContext {
 
     public void setExcludes(String excludes) {
         this.excludes = excludes;
+    }
+
+    public String getWorkingDir() {
+        return workingDir;
+    }
+
+    public void setWorkingDir(String workingDir) {
+        this.workingDir = workingDir;
     }
 
 }

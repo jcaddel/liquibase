@@ -8,6 +8,7 @@ public class Args {
     String[] other;
     String command;
     File changeLog;
+    String author = "unit-test";
 
     public GAV getGav() {
         return gav;
@@ -47,5 +48,13 @@ public class Args {
 
     public void setChangeLog(File changeLog) {
         this.changeLog = changeLog;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
     }
 }

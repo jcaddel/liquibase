@@ -10,7 +10,7 @@ import liquibase.diff.DiffResult;
 
 public class MainTestUtils {
     static {
-        System.setProperty(Main.SYSTEM_EXIT_KEY, "false");
+        System.setProperty(Main.SYS_EXIT_KEY, "false");
         System.setProperty(DiffResult.EXCLUDE_SCHEMA_KEY, "true");
     }
     public static final String FS = System.getProperty("file.separator");
@@ -91,6 +91,9 @@ public class MainTestUtils {
         String[] other = args.getOther();
         String command = args.getCommand();
         List<String> list = new ArrayList<String>();
+        if (args.getAuthor() != null) {
+            list.add("--changeSetAuthor=" + args.getAuthor());
+        }
         if (changeLog != null) {
             list.add("--changeLogFile=" + changeLog.getAbsolutePath());
         }
@@ -151,6 +154,18 @@ public class MainTestUtils {
         return file;
     }
 
+    protected String getChangeLogUrl(File changeLogFile) throws IOException {
+        File workingDir = new File(getWorkingDir());
+        String workingDirPath = workingDir.getCanonicalPath();
+        int index = workingDirPath.length();
+        // skip past the file separator
+        index += 1;
+        String changeLogPath = changeLogFile.getCanonicalPath();
+        String s = changeLogPath.substring(index);
+        s = s.replace("\\", "/");
+        return "classpath:" + s;
+    }
+
     protected File getChangeLogFile(GAV gav, String filename) throws IOException {
         return getWorkingFile(gav, filename, "xml");
     }
@@ -182,7 +197,7 @@ public class MainTestUtils {
     }
 
     protected String getWorkingDir() {
-        return "." + FS + "target";
+        return "." + FS + "src" + FS + "test" + FS + "resources";
     }
 
 }

@@ -113,6 +113,7 @@ public class DiffResult {
 
     private boolean diffData = false;
     private String dataDir = null;
+    private String workingDir = null;
     private String changeSetContext;
     private String changeSetAuthor;
 
@@ -315,7 +316,7 @@ public class DiffResult {
         boolean differencesInData = false;
         if (shouldDiffData()) {
             List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
-            addInsertDataChanges(changeSets, dataDir);
+            addInsertDataChanges(changeSets, dataDir, workingDir);
             differencesInData = !changeSets.isEmpty();
         }
 
@@ -511,7 +512,7 @@ public class DiffResult {
         addUnexpectedUniqueConstraintChanges(changeSets);
 
         if (diffData) {
-            addInsertDataChanges(changeSets, dataDir);
+            addInsertDataChanges(changeSets, dataDir, workingDir);
         }
 
         addMissingForeignKeyChanges(changeSets);
@@ -1039,10 +1040,9 @@ public class DiffResult {
         return columnNames;
     }
 
-    protected String getFilename(Table table) {
-        String fileName = table.getName().toLowerCase() + ".csv";
+    protected File getDataFile(String dataDir, String filename) {
         if (dataDir != null) {
-            fileName = dataDir + FS + fileName;
+            filename = dataDir + FS + filename;
         }
 
         File parentDir = new File(dataDir);
@@ -1052,7 +1052,11 @@ public class DiffResult {
         if (!parentDir.isDirectory()) {
             throw new RuntimeException(parentDir + " is not a directory");
         }
-        return fileName;
+        return new File(filename);
+    }
+
+    protected String getFilenameFromTableName(Table table) {
+        return table.getName().toLowerCase() + ".csv";
     }
 
     protected void updateDataTypes(int index, String[] dataTypes, Object value) {
@@ -1169,15 +1173,35 @@ public class DiffResult {
 
     }
 
+    protected String getUrl(File dataFile, String workingDir) throws IOException {
+        if (workingDir == null) {
+            return dataFile.getCanonicalPath();
+        }
+        File base = new File(workingDir);
+        String workingDirPath = base.getCanonicalPath();
+        String dataDirPath = dataFile.getCanonicalPath();
+        int pos = dataDirPath.indexOf(workingDirPath);
+        if (pos != 0) {
+            throw new IOException(dataDirPath + " must be a subdirectory of " + workingDirPath);
+        }
+        int index = workingDirPath.length();
+        // Skip past the file separator
+        String s = dataDirPath.substring(index + 1);
+        s = s.replace("\\", "/");
+        return "classpath:" + s;
+    }
+
     protected List<Change> getChanges(Table table, List<Map> rs, String schema) throws IOException {
         List<Change> changes = new ArrayList<Change>();
         List<String> columnNames = getColumnNames(table);
 
         // if dataDir is not null, print out a csv file and use loadData tag
         if (dataDir != null) {
-            String filename = getFilename(table);
-            String[] dataTypes = printCSV(table, columnNames, rs, filename);
-            LoadDataChange change = getLoadDataChange(table, schema, dataTypes, columnNames, rs, filename);
+            String filename = getFilenameFromTableName(table);
+            File dataFile = getDataFile(dataDir, filename);
+            String url = getUrl(dataFile, workingDir);
+            String[] dataTypes = printCSV(table, columnNames, rs, dataFile.getCanonicalPath());
+            LoadDataChange change = getLoadDataChange(table, schema, dataTypes, columnNames, rs, url);
             changes.add(change);
         } else { // if dataDir is null, build and use insert tags
             for (Map row : rs) {
@@ -1190,7 +1214,8 @@ public class DiffResult {
         return changes;
     }
 
-    private void addInsertDataChanges(List<ChangeSet> changeSets, String dataDir) throws DatabaseException, IOException {
+    private void addInsertDataChanges(List<ChangeSet> changeSets, String dataDir, String workingDir)
+            throws DatabaseException, IOException {
         Database database = referenceSnapshot.getDatabase();
         try {
             String schema = referenceSnapshot.getSchema();
@@ -1223,5 +1248,13 @@ public class DiffResult {
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
+    }
+
+    public String getWorkingDir() {
+        return workingDir;
+    }
+
+    public void setWorkingDir(String workingDir) {
+        this.workingDir = workingDir;
     }
 }
