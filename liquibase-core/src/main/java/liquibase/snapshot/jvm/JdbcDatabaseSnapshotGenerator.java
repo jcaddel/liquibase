@@ -40,6 +40,7 @@ import liquibase.snapshot.DatabaseSnapshotGenerator;
 import liquibase.snapshot.SnapshotContext;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.SelectSequencesStatement;
+import liquibase.util.StringFilter;
 import liquibase.util.StringUtils;
 
 public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotGenerator {
@@ -168,7 +169,6 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             if (!rs.next()) {
                 return null;
             }
-
             return readColumn(rs, database);
         } catch (Exception e) {
             throw new DatabaseException(e);
@@ -216,6 +216,16 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         return view;
     }
 
+    protected boolean isSkip(Database database, String catalogName, String schemaName, String tableName) {
+        if (database.isSystemTable(catalogName, schemaName, tableName)) {
+            return true;
+        }
+        if (database.isSystemView(catalogName, schemaName, tableName)) {
+            return true;
+        }
+        return false;
+    }
+
     private Column readColumn(ResultSet rs, Database database) throws SQLException, DatabaseException {
         Column column = new Column();
 
@@ -225,8 +235,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         String catalogName = convertFromDatabaseName(rs.getString("TABLE_CAT"));
         String remarks = rs.getString("REMARKS");
 
-        if (database.isSystemTable(catalogName, schemaName, tableName)
-                || database.isSystemView(catalogName, schemaName, tableName)) {
+        if (isSkip(database, catalogName, schemaName, tableName)) {
             return null;
         }
 
@@ -406,12 +415,19 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             SnapshotContext context) throws SQLException, DatabaseException {
         Database database = snapshot.getDatabase();
         updateListeners("Reading tables for " + database.toString() + " ...");
+        StringFilter filter = new StringFilter(context.getIncludes(), context.getExcludes());
 
         ResultSet rs = databaseMetaData.getTables(database.convertRequestedSchemaToCatalog(schema),
                 database.convertRequestedSchemaToSchema(schema), null, new String[] { "TABLE", "ALIAS" });
         try {
             while (rs.next()) {
                 Table table = readTable(rs, database);
+
+                // This might be a table we don't care about
+                if (!filter.isInclude(table.getName())) {
+                    continue;
+                }
+
                 table.setSchema(schema); // not always set for some reason
                 if (database.isLiquibaseTable(table.getName())) {
                     if (table.getName().equalsIgnoreCase(database.getDatabaseChangeLogTableName())) {

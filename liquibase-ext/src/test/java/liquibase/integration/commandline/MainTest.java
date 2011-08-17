@@ -38,7 +38,7 @@ public class MainTest {
     @Test
     public void cycleRice() throws Exception {
         cycleApp("rice", "mysql");
-        cycleApp("rice", "oracle");
+        // cycleApp("rice", "oracle");
     }
 
     // @Test
@@ -153,17 +153,22 @@ public class MainTest {
         args.setCommand("generateChangeLog");
 
         args.setOther(toOther(SCHEMA));
+        args.setOther(new String[] { "--diffTypes=" + toCSV(SCHEMA), "--includes=krim_perm_attr_data_t" });
         args.setChangeLog(getChangeLogFile(gav, "schema.xml"));
         executeMain(args);
 
         args.setOther(toOther(CONSTRAINTS));
+        args.setOther(new String[] { "--diffTypes=" + toCSV(CONSTRAINTS), "--includes=krim_perm_attr_data_t" });
         args.setChangeLog(getChangeLogFile(gav, "constraints.xml"));
         executeMain(args);
 
         String basedir = getBaseDir(getWorkingDir(), gav) + FS + "data";
         File dataDir = mkdirs(basedir);
-        String[] other = { "--dataDir=" + dataDir.getCanonicalPath(), "--diffTypes=" + toCSV(DATA) };
-        args.setOther(other);
+        String[] other1 = { "--dataDir=" + dataDir.getCanonicalPath(), "--diffTypes=" + toCSV(DATA) };
+        String[] other2 = { "--dataDir=" + dataDir.getCanonicalPath(), "--diffTypes=" + toCSV(DATA),
+                "--includes=krim_perm_attr_data_t" };
+        args.setOther(other1);
+        args.setOther(other2);
         args.setChangeLog(getChangeLogFile(gav, "data.xml"));
         executeMain(args);
     }
