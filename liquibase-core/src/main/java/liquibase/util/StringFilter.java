@@ -30,13 +30,19 @@ public class StringFilter {
     public StringFilter(Set<String> includePatterns, Set<String> excludePatterns) {
         super();
 <<<<<<< HEAD
+<<<<<<< HEAD
         setIncludePatterns(includePatterns);
         setExcludePatterns(excludePatterns);
 =======
+=======
+>>>>>>> f1ea11c3d3dd7bc8912730b68a8d29582cf3bbfd
         this.includePatterns = includePatterns;
         this.excludePatterns = excludePatterns;
         // Compile our Strings into Patterns
         compilePatterns();
+<<<<<<< HEAD
+>>>>>>> f1ea11c3d3dd7bc8912730b68a8d29582cf3bbfd
+=======
 >>>>>>> f1ea11c3d3dd7bc8912730b68a8d29582cf3bbfd
     }
 
@@ -51,7 +57,10 @@ public class StringFilter {
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> f1ea11c3d3dd7bc8912730b68a8d29582cf3bbfd
     /**
      * Compile the strings into Pattern objects
      */
@@ -60,6 +69,9 @@ public class StringFilter {
         excludes = getPatterns(excludePatterns);
     }
 
+<<<<<<< HEAD
+>>>>>>> f1ea11c3d3dd7bc8912730b68a8d29582cf3bbfd
+=======
 >>>>>>> f1ea11c3d3dd7bc8912730b68a8d29582cf3bbfd
     public Set<String> getIncludePatterns() {
         return includePatterns;
