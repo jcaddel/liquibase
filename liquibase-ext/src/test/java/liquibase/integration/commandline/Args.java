@@ -1,13 +1,11 @@
 package liquibase.integration.commandline;
 
-import java.io.File;
-
 public class Args {
     GAV gav;
     JDBC jdbc;
     String[] other;
     String command;
-    File changeLog;
+    String changeLog;
     String author = "unit-test";
 
     public GAV getGav() {
@@ -26,14 +24,6 @@ public class Args {
         this.jdbc = jdbc;
     }
 
-    public String getCommand() {
-        return command;
-    }
-
-    public void setCommand(String command) {
-        this.command = command;
-    }
-
     public String[] getOther() {
         return other;
     }
@@ -42,11 +32,19 @@ public class Args {
         this.other = other;
     }
 
-    public File getChangeLog() {
+    public String getCommand() {
+        return command;
+    }
+
+    public void setCommand(String command) {
+        this.command = command;
+    }
+
+    public String getChangeLog() {
         return changeLog;
     }
 
-    public void setChangeLog(File changeLog) {
+    public void setChangeLog(String changeLog) {
         this.changeLog = changeLog;
     }
 
@@ -57,4 +55,5 @@ public class Args {
     public void setAuthor(String author) {
         this.author = author;
     }
+
 }

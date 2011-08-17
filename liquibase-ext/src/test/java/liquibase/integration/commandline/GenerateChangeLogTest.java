@@ -20,7 +20,7 @@ public class GenerateChangeLogTest {
         args.setGav(gav);
         args.setJdbc(jdbc);
         args.setOther(other);
-        args.setChangeLog(changeLog);
+        args.setChangeLog(changeLog.getCanonicalPath());
         args.setCommand("generateChangeLog");
         mtu.executeMain(args);
     }
@@ -54,13 +54,13 @@ public class GenerateChangeLogTest {
         args.setOther(mtu.toOther(MainTestUtils.SCHEMA));
         args.setOther(new String[] { "--diffTypes=" + mtu.toCSV(MainTestUtils.SCHEMA),
                 "--includes=krim_perm_attr_data_t" });
-        args.setChangeLog(mtu.getChangeLogFile(gav, "schema.xml"));
+        args.setChangeLog(mtu.getChangeLogFile(gav, "schema.xml").getCanonicalPath());
         mtu.executeMain(args);
 
         args.setOther(mtu.toOther(MainTestUtils.CONSTRAINTS));
         args.setOther(new String[] { "--diffTypes=" + mtu.toCSV(MainTestUtils.CONSTRAINTS),
                 "--includes=krim_perm_attr_data_t" });
-        args.setChangeLog(mtu.getChangeLogFile(gav, "constraints.xml"));
+        args.setChangeLog(mtu.getChangeLogFile(gav, "constraints.xml").getCanonicalPath());
         mtu.executeMain(args);
 
         String basedir = mtu.getBaseDir(mtu.getWorkingDir(), gav, "xml") + MainTestUtils.FS + "data";
@@ -72,7 +72,7 @@ public class GenerateChangeLogTest {
                 "--diffTypes=" + mtu.toCSV(MainTestUtils.DATA), "--includes=krim_perm_attr_data_t" };
         args.setOther(other1);
         args.setOther(other2);
-        args.setChangeLog(mtu.getChangeLogFile(gav, "data.xml"));
+        args.setChangeLog(mtu.getChangeLogFile(gav, "data.xml").getCanonicalPath());
         mtu.executeMain(args);
     }
 

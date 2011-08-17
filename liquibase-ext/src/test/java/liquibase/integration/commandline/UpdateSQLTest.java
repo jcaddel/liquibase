@@ -14,15 +14,15 @@ public class UpdateSQLTest {
         JDBC jdbc = mtu.getJDBC("rice", type);
         GAV gav = mtu.getRiceGAV();
         gav.setClassifier(type);
-        File changeLog = mtu.getChangeLogFile(gav, "data.xml");
-        String workingDir = mtu.getWorkingDir();
+        File changeLogFile = mtu.getChangeLogFile(gav, "data.xml");
+        String changeLogUrl = mtu.getChangeLogUrl(changeLogFile);
         File outputFile = mtu.getSqlFile(gav, "data.sql");
-        String[] other = { "--outputFile=" + outputFile.getCanonicalPath(), "--workingDir=" + workingDir };
+        String[] other = { "--outputFile=" + outputFile.getCanonicalPath() };
         Args args = new Args();
         args.setGav(gav);
         args.setJdbc(jdbc);
         args.setOther(other);
-        args.setChangeLog(changeLog);
+        args.setChangeLog(changeLogUrl);
         args.setCommand("updateSQL");
         mtu.executeMain(args);
     }

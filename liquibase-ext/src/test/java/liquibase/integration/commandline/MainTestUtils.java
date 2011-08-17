@@ -87,7 +87,7 @@ public class MainTestUtils {
 
     protected String[] toArray(Args args) {
         JDBC jdbc = args.getJdbc();
-        File changeLog = args.getChangeLog();
+        String changeLog = args.getChangeLog();
         String[] other = args.getOther();
         String command = args.getCommand();
         List<String> list = new ArrayList<String>();
@@ -95,7 +95,7 @@ public class MainTestUtils {
             list.add("--changeSetAuthor=" + args.getAuthor());
         }
         if (changeLog != null) {
-            list.add("--changeLogFile=" + changeLog.getAbsolutePath());
+            list.add("--changeLogFile=" + changeLog);
         }
         if (jdbc != null) {
             list.add("--url=" + jdbc.getUrl());
@@ -163,7 +163,7 @@ public class MainTestUtils {
         String changeLogPath = changeLogFile.getCanonicalPath();
         String s = changeLogPath.substring(index);
         s = s.replace("\\", "/");
-        return "classpath:" + s;
+        return s;
     }
 
     protected File getChangeLogFile(GAV gav, String filename) throws IOException {
