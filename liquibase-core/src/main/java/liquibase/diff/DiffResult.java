@@ -73,13 +73,8 @@ import liquibase.util.csv.CSVWriter;
 public class DiffResult {
     public static final String ENCODING = "UTF-8";
     private static final String FS = System.getProperty("file.separator");
-    public static final String EXCLUDE_SCHEMA_SYSTEM_PROPERTY = "liquibase.schema.exclude";
-    private static final boolean EXCLUDE_SCHEMA = getExcludeSchema();
-
-    private static final boolean getExcludeSchema() {
-        String property = System.getProperty(EXCLUDE_SCHEMA_SYSTEM_PROPERTY);
-        return "true".equalsIgnoreCase(property);
-    }
+    public static final String EXCLUDE_SCHEMA_KEY = "liquibase.schema.exclude";
+    private static final boolean EXCLUDE_SCHEMA = "true".equalsIgnoreCase(System.getProperty(EXCLUDE_SCHEMA_KEY));
 
     private String idRoot = String.valueOf(new Date().getTime());
     private int changeNumber = 1;

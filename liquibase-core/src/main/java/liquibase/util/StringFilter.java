@@ -35,12 +35,12 @@ public class StringFilter {
 
     public void setIncludePatterns(Set<String> includePatterns) {
         this.includePatterns = includePatterns;
-        this.includes = getPatterns(includePatterns);
+        this.includes = compileToRegexPattern(includePatterns);
     }
 
     public void setExcludePatterns(Set<String> excludePatterns) {
         this.excludePatterns = excludePatterns;
-        this.excludes = getPatterns(excludePatterns);
+        this.excludes = compileToRegexPattern(excludePatterns);
     }
 
     public Set<String> getIncludePatterns() {
@@ -54,7 +54,7 @@ public class StringFilter {
     /**
      * Convert a List<String> into List<Pattern>
      */
-    protected Set<Pattern> getPatterns(Set<String> patterns) {
+    protected Set<Pattern> compileToRegexPattern(Set<String> patterns) {
         // If Set<String> is empty return an empty Set<Pattern>
         if (isEmpty(patterns)) {
             return new HashSet<Pattern>();
