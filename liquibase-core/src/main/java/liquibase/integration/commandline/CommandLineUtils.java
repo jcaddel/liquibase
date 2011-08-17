@@ -23,7 +23,7 @@ import liquibase.util.StringUtils;
 /**
  * Common Utilitiy methods used in the CommandLine application and the Maven plugin. These methods were orignally moved
  * from {@link Main} so they could be shared.
- * 
+ *
  * @author Peter Murray
  */
 public class CommandLineUtils {
@@ -121,24 +121,28 @@ public class CommandLineUtils {
         }
     }
 
-    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String defaultSchemaName,
-            String diffTypes, String author, String context, String dataDir) throws DatabaseException, IOException,
+    public static void doGenerateChangeLog(GenerateChangeLogContext context) throws DatabaseException, IOException,
             ParserConfigurationException {
-        Diff diff = new Diff(originalDatabase, defaultSchemaName);
-        diff.setDiffTypes(diffTypes);
+        Database database = context.getDatabase();
+        String changeLogFile = context.getChangeLogFile();
+        Diff diff = new Diff(database, context.getSchema());
+        diff.setDiffTypes(context.getDiffTypes());
+        diff.setIncludes(context.getIncludes());
+        diff.setExcludes(context.getExcludes());
 
         diff.addStatusListener(new OutDiffStatusListener());
         DiffResult diffResult = diff.compare();
-        diffResult.setChangeSetAuthor(author);
-        diffResult.setChangeSetContext(context);
-        diffResult.setDataDir(dataDir);
+        diffResult.setChangeSetAuthor(context.getAuthor());
+        diffResult.setChangeSetContext(context.getChangeSetContext());
+        diffResult.setDataDir(context.getDataDir());
 
         if (StringUtils.trimToNull(changeLogFile) != null) {
-            diffResult.printChangeLog(changeLogFile, originalDatabase);
+            diffResult.printChangeLog(changeLogFile, database);
         } else {
             PrintStream outputStream = System.out;
-            diffResult.printChangeLog(outputStream, originalDatabase);
+            diffResult.printChangeLog(outputStream, database);
         }
+
     }
 
     private static class OutDiffStatusListener implements DiffStatusListener {

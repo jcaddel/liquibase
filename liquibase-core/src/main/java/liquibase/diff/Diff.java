@@ -42,6 +42,8 @@ public class Diff {
     private boolean diffSequences = true;
     private boolean diffData = false;
     private Set<MetadataType> metadataTypes;
+    private String includes;
+    private String excludes;
 
     public Diff(Database referenceDatabase, Database targetDatabase) {
         this.referenceDatabase = referenceDatabase;
@@ -70,13 +72,27 @@ public class Diff {
         statusListeners.remove(listener);
     }
 
+    protected Set<String> getSetFromCSV(String s) {
+        if (s == null || s.trim().length() == 0) {
+            return new HashSet<String>();
+        } else {
+            return new HashSet<String>(Arrays.asList(s.split(",")));
+        }
+
+    }
+
     public DiffResult compare() throws DatabaseException {
         DatabaseSnapshotGeneratorFactory factory = DatabaseSnapshotGeneratorFactory.getInstance();
+        Set<String> includesSet = getSetFromCSV(includes);
+        Set<String> excludesSet = getSetFromCSV(excludes);
+
         if (referenceSnapshot == null) {
             SnapshotContext context = new SnapshotContext();
             context.setDatabase(referenceDatabase);
             context.setListeners(statusListeners);
             context.setMetadataTypes(metadataTypes);
+            context.setIncludes(includesSet);
+            context.setExcludes(excludesSet);
             referenceSnapshot = factory.createSnapshot(context);
         }
 
@@ -88,6 +104,8 @@ public class Diff {
                 context.setDatabase(targetDatabase);
                 context.setListeners(statusListeners);
                 context.setMetadataTypes(metadataTypes);
+                context.setIncludes(includesSet);
+                context.setExcludes(excludesSet);
                 targetSnapshot = factory.createSnapshot(context);
             }
         }
@@ -460,6 +478,22 @@ public class Diff {
 
     public void setMetadataTypes(Set<MetadataType> metadataTypes) {
         this.metadataTypes = metadataTypes;
+    }
+
+    public String getIncludes() {
+        return includes;
+    }
+
+    public void setIncludes(String includes) {
+        this.includes = includes;
+    }
+
+    public String getExcludes() {
+        return excludes;
+    }
+
+    public void setExcludes(String excludes) {
+        this.excludes = excludes;
     }
 
 }

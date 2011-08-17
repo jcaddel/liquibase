@@ -1,5 +1,7 @@
 package liquibase.integration.commandline;
 
+import static liquibase.util.StringUtils.trimToNull;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -45,7 +47,6 @@ import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
 
 /**
  * Class for executing Liquibase via the command line.
@@ -97,6 +98,8 @@ public class Main {
     protected String changeSetAuthor;
     protected String changeSetContext;
     protected String dataDir;
+    protected String includes;
+    protected String excludes;
 
     protected String referenceDriver;
     protected String referenceUrl;
@@ -650,9 +653,17 @@ public class Main {
                         createReferenceDatabaseFromCommandParams(commandParams), database);
                 return;
             } else if ("generateChangeLog".equalsIgnoreCase(command)) {
-                CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultSchemaName,
-                        StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor),
-                        StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataDir));
+                GenerateChangeLogContext context = new GenerateChangeLogContext();
+                context.setChangeLogFile(changeLogFile);
+                context.setDatabase(database);
+                context.setSchema(defaultSchemaName);
+                context.setDiffTypes(trimToNull(diffTypes));
+                context.setAuthor(trimToNull(changeSetAuthor));
+                context.setChangeSetContext(trimToNull(changeSetContext));
+                context.setDataDir(trimToNull(dataDir));
+                context.setIncludes(trimToNull(includes));
+                context.setExcludes(trimToNull(excludes));
+                CommandLineUtils.doGenerateChangeLog(context);
                 return;
             }
 
