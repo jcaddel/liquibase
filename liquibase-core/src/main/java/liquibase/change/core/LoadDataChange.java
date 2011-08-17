@@ -148,28 +148,38 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
     public SqlStatement[] generateStatements(Database database) {
         CSVReader reader = null;
         try {
+            // Get a handle to the csv file
             reader = getCSVReader();
 
+            // Pull out the headers
             String[] headers = reader.readNext();
             if (headers == null) {
                 throw new UnexpectedLiquibaseException("Data file " + getFile() + " was empty");
             }
 
+            // Setup some storage and loop control variables
             List<SqlStatement> statements = new ArrayList<SqlStatement>();
             String[] line = null;
             int lineNumber = 0;
 
+            // Iterate through the csv file
             while ((line = reader.readNext()) != null) {
+                // bump our line number
                 lineNumber++;
 
+                // if it is a blank line, skip it
                 if (isSkipLine(line)) {
                     continue;
                 }
 
+                // Generate an SQL insert statement from the data
                 SqlStatement sqlStatement = getSqlStatement(headers, line, lineNumber);
+
+                // Add this statement to our List
                 statements.add(sqlStatement);
             }
 
+            // Convert the List to an Array and return
             return statements.toArray(new SqlStatement[statements.size()]);
         } catch (IOException e) {
             throw new RuntimeException(e);
