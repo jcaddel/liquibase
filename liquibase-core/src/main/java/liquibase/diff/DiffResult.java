@@ -1188,7 +1188,7 @@ public class DiffResult {
         // Skip past the file separator
         String s = dataDirPath.substring(index + 1);
         s = s.replace("\\", "/");
-        return "classpath:" + s;
+        return s;
     }
 
     protected List<Change> getChanges(Table table, List<Map> rs, String schema) throws IOException {
