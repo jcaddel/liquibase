@@ -19,6 +19,11 @@ public class MainTestUtils {
     public static final String[] CONSTRAINTS = { "foreignKeys" };
     public static final String[] DATA = { "data" };
 
+    protected void executeMain(Args args) throws Exception {
+        String[] argsArray = toArray(args);
+        Main.main(argsArray);
+    }
+
     protected GAV getGAV(String app) throws Exception {
         if (app.equalsIgnoreCase("rice")) {
             return getRiceGAV();
@@ -105,14 +110,14 @@ public class MainTestUtils {
         return new String[] { "--diffTypes=" + toCSV(types) };
     }
 
-    protected String getBaseDir(String workingDirectory, GAV gav) {
+    protected String getBaseDir(String workingDirectory, GAV gav, String fragment) {
         StringBuilder sb = new StringBuilder();
         sb.append(workingDirectory);
         sb.append(getDirFragment(gav.getGroupId(), true));
         sb.append(getDirFragment(gav.getArtifactId()));
         sb.append(getDirFragment(gav.getVersion()));
         sb.append(getDirFragment(gav.getClassifier()));
-        sb.append(getDirFragment("xml"));
+        sb.append(getDirFragment(fragment));
         return sb.toString();
     }
 
@@ -147,10 +152,18 @@ public class MainTestUtils {
     }
 
     protected File getChangeLogFile(GAV gav, String filename) throws IOException {
-        String basedir = getBaseDir(getWorkingDir(), gav);
+        return getWorkingFile(gav, filename, "xml");
+    }
+
+    protected File getWorkingFile(GAV gav, String filename, String fragment) throws IOException {
+        String basedir = getBaseDir(getWorkingDir(), gav, fragment);
         File dir = mkdirs(basedir);
-        File changeLog = new File(dir.getCanonicalFile() + FS + filename);
-        return changeLog;
+        File file = new File(dir.getCanonicalFile() + FS + filename);
+        return file;
+    }
+
+    protected File getSqlFile(GAV gav, String filename) throws IOException {
+        return getWorkingFile(gav, filename, "sql");
     }
 
     protected String getDirFragment(String s) {

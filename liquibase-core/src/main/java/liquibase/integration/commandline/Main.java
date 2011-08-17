@@ -113,6 +113,7 @@ public class Main {
 
     protected String logLevel;
     protected String logFile;
+    protected String outputFile;
 
     protected Map<String, Object> changeLogParameters = new HashMap<String, Object>();
 
@@ -873,7 +874,14 @@ public class Main {
     }
 
     private Writer getOutputWriter() {
-        return new OutputStreamWriter(System.out);
+        if (outputFile == null) {
+            return new OutputStreamWriter(System.out);
+        }
+        try {
+            return new OutputStreamWriter(new FileOutputStream(outputFile));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public boolean isWindows() {

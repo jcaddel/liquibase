@@ -22,7 +22,7 @@ public class GenerateChangeLogTest {
         args.setOther(other);
         args.setChangeLog(changeLog);
         args.setCommand("generateChangeLog");
-        executeMain(args);
+        mtu.executeMain(args);
     }
 
     @Test
@@ -34,11 +34,6 @@ public class GenerateChangeLogTest {
     // @Test
     public void cycleStudent() throws Exception {
         cycleApp("student", "oracle");
-    }
-
-    protected void executeMain(Args args) throws Exception {
-        String[] argsArray = mtu.toArray(args);
-        Main.main(argsArray);
     }
 
     protected void cycleApp(String app) throws Exception {
@@ -60,15 +55,15 @@ public class GenerateChangeLogTest {
         args.setOther(new String[] { "--diffTypes=" + mtu.toCSV(MainTestUtils.SCHEMA),
                 "--includes=krim_perm_attr_data_t" });
         args.setChangeLog(mtu.getChangeLogFile(gav, "schema.xml"));
-        executeMain(args);
+        mtu.executeMain(args);
 
         args.setOther(mtu.toOther(MainTestUtils.CONSTRAINTS));
         args.setOther(new String[] { "--diffTypes=" + mtu.toCSV(MainTestUtils.CONSTRAINTS),
                 "--includes=krim_perm_attr_data_t" });
         args.setChangeLog(mtu.getChangeLogFile(gav, "constraints.xml"));
-        executeMain(args);
+        mtu.executeMain(args);
 
-        String basedir = mtu.getBaseDir(mtu.getWorkingDir(), gav) + MainTestUtils.FS + "data";
+        String basedir = mtu.getBaseDir(mtu.getWorkingDir(), gav, "xml") + MainTestUtils.FS + "data";
         File dataDir = mtu.mkdirs(basedir);
         String[] other1 = { "--dataDir=" + dataDir.getCanonicalPath(), "--diffTypes=" + mtu.toCSV(MainTestUtils.DATA) };
         String[] other2 = { "--dataDir=" + dataDir.getCanonicalPath(), "--diffTypes=" + mtu.toCSV(MainTestUtils.DATA),
@@ -76,7 +71,7 @@ public class GenerateChangeLogTest {
         args.setOther(other1);
         args.setOther(other2);
         args.setChangeLog(mtu.getChangeLogFile(gav, "data.xml"));
-        executeMain(args);
+        mtu.executeMain(args);
     }
 
 }
