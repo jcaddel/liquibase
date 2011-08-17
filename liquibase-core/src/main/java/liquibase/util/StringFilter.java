@@ -29,26 +29,8 @@ public class StringFilter {
 
     public StringFilter(Set<String> includePatterns, Set<String> excludePatterns) {
         super();
-<<<<<<< HEAD
         setIncludePatterns(includePatterns);
         setExcludePatterns(excludePatterns);
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-        setIncludePatterns(includePatterns);
-        setExcludePatterns(excludePatterns);
-=======
-=======
->>>>>>> f1ea11c3d3dd7bc8912730b68a8d29582cf3bbfd
-        this.includePatterns = includePatterns;
-        this.excludePatterns = excludePatterns;
-        // Compile our Strings into Patterns
-        compilePatterns();
-<<<<<<< HEAD
->>>>>>> f1ea11c3d3dd7bc8912730b68a8d29582cf3bbfd
-=======
->>>>>>> f1ea11c3d3dd7bc8912730b68a8d29582cf3bbfd
->>>>>>> edd91180c91bbb32925a1136e41e1006871023e6
     }
 
     public void setIncludePatterns(Set<String> includePatterns) {
@@ -61,26 +43,6 @@ public class StringFilter {
         this.excludes = getPatterns(excludePatterns);
     }
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> f1ea11c3d3dd7bc8912730b68a8d29582cf3bbfd
-    /**
-     * Compile the strings into Pattern objects
-     */
-    protected void compilePatterns() {
-        includes = getPatterns(includePatterns);
-        excludes = getPatterns(excludePatterns);
-    }
-
-<<<<<<< HEAD
->>>>>>> f1ea11c3d3dd7bc8912730b68a8d29582cf3bbfd
-=======
->>>>>>> f1ea11c3d3dd7bc8912730b68a8d29582cf3bbfd
->>>>>>> edd91180c91bbb32925a1136e41e1006871023e6
     public Set<String> getIncludePatterns() {
         return includePatterns;
     }
