@@ -14,16 +14,24 @@ public class UpdateSQLTest {
         JDBC jdbc = mtu.getJDBC("rice", type);
         GAV gav = mtu.getRiceGAV();
         gav.setClassifier(type);
-        File changeLogFile = mtu.getChangeLogFile(gav, "data.xml");
-        String changeLogUrl = mtu.getChangeLogUrl(changeLogFile);
-        File outputFile = mtu.getSqlFile(gav, "data.sql");
-        String[] other = { "--outputFile=" + outputFile.getCanonicalPath() };
         Args args = new Args();
         args.setGav(gav);
         args.setJdbc(jdbc);
+        args.setCommand("updateSQL");
+
+        generate(gav, args, "data");
+        generate(gav, args, "schema");
+        generate(gav, args, "constraints");
+
+    }
+
+    protected void generate(GAV gav, Args args, String type) throws Exception {
+        File changeLogFile = mtu.getChangeLogFile(gav, type + ".xml");
+        String changeLogUrl = mtu.getChangeLogUrl(changeLogFile);
+        File outputFile = mtu.getSqlFile(gav, type + ".sql");
+        String[] other = { "--outputFile=" + outputFile.getCanonicalPath() };
         args.setOther(other);
         args.setChangeLog(changeLogUrl);
-        args.setCommand("updateSQL");
         mtu.executeMain(args);
     }
 
