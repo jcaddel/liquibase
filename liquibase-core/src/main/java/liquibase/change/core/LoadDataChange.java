@@ -97,49 +97,59 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
         return (List<ColumnConfig>) (List) columns;
     }
 
+    protected Object convertValue(Object value, ColumnConfig columnConfig) {
+        if (value.toString().equalsIgnoreCase("NULL")) {
+            return "NULL";
+        }
+        if (columnConfig.getType() == null) {
+            return value;
+        }
+        ColumnConfig valueConfig = new ColumnConfig();
+        if (columnConfig.getType().equalsIgnoreCase("BOOLEAN")) {
+            valueConfig.setValueBoolean(Boolean.parseBoolean(value.toString().toLowerCase()));
+        } else if (columnConfig.getType().equalsIgnoreCase("NUMERIC")) {
+            valueConfig.setValueNumeric(value.toString());
+        } else if (columnConfig.getType().toLowerCase().contains("date")
+                || columnConfig.getType().toLowerCase().contains("time")) {
+            valueConfig.setValueDate(value.toString());
+        } else if (columnConfig.getType().equalsIgnoreCase("STRING")) {
+            valueConfig.setValue(value.toString());
+        } else if (columnConfig.getType().equalsIgnoreCase("COMPUTED")) {
+            valueConfig.setValue(value.toString());
+        } else {
+            throw new UnexpectedLiquibaseException("loadData type of " + columnConfig.getType()
+                    + " is not supported.  Please use BOOLEAN, NUMERIC, DATE, STRING, or COMPUTED");
+        }
+        return valueConfig.getValueObject();
+    }
+
+    protected String getColumnName(ColumnConfig columnConfig, String header) {
+        String columnName = null;
+        if (columnConfig != null) {
+            columnName = columnConfig.getName();
+        }
+        if (columnName == null) {
+            columnName = header;
+        }
+        return columnName;
+    }
+
     protected SqlStatement getSqlStatement(String[] headers, String[] line, int lineNumber) {
+
+        // Make sure the columns match up
+        if (headers.length != line.length) {
+            throw new UnexpectedLiquibaseException("CSV Line " + lineNumber + " has  " + line.length
+                    + " columns, the header has " + headers.length);
+        }
+
+        // Create an insert statement from the data
         InsertStatement insertStatement = this.createStatement(getSchemaName(), getTableName());
         for (int i = 0; i < headers.length; i++) {
-            String columnName = null;
-            if (i >= line.length) {
-                throw new UnexpectedLiquibaseException("CSV Line " + lineNumber + " has only " + (i - 1)
-                        + " columns, the header has " + headers.length);
-            }
-
             Object value = line[i];
-
             ColumnConfig columnConfig = getColumnConfig(i, headers[i]);
-            if (columnConfig != null) {
-                columnName = columnConfig.getName();
-
-                if (value.toString().equalsIgnoreCase("NULL")) {
-                    value = "NULL";
-                } else if (columnConfig.getType() != null) {
-                    ColumnConfig valueConfig = new ColumnConfig();
-                    if (columnConfig.getType().equalsIgnoreCase("BOOLEAN")) {
-                        valueConfig.setValueBoolean(Boolean.parseBoolean(value.toString().toLowerCase()));
-                    } else if (columnConfig.getType().equalsIgnoreCase("NUMERIC")) {
-                        valueConfig.setValueNumeric(value.toString());
-                    } else if (columnConfig.getType().toLowerCase().contains("date")
-                            || columnConfig.getType().toLowerCase().contains("time")) {
-                        valueConfig.setValueDate(value.toString());
-                    } else if (columnConfig.getType().equalsIgnoreCase("STRING")) {
-                        valueConfig.setValue(value.toString());
-                    } else if (columnConfig.getType().equalsIgnoreCase("COMPUTED")) {
-                        valueConfig.setValue(value.toString());
-                    } else {
-                        throw new UnexpectedLiquibaseException("loadData type of " + columnConfig.getType()
-                                + " is not supported.  Please use BOOLEAN, NUMERIC, DATE, STRING, or COMPUTED");
-                    }
-                    value = valueConfig.getValueObject();
-                }
-            }
-
-            if (columnName == null) {
-                columnName = headers[i];
-            }
-
-            insertStatement.addColumnValue(columnName, value);
+            String columnName = getColumnName(columnConfig, headers[i]);
+            Object newValue = convertValue(value, columnConfig);
+            insertStatement.addColumnValue(columnName, newValue);
         }
         return insertStatement;
     }
