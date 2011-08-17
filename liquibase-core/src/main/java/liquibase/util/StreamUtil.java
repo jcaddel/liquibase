@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 
+import liquibase.util.csv.CSVReader;
+
 /**
  * Utilities for working with streams.
  */
@@ -17,10 +19,32 @@ public class StreamUtil {
         return lineSeparator;
     }
 
+    public static void closeQuietly(CSVReader reader) {
+        if (reader == null) {
+            return;
+        }
+        try {
+            reader.close();
+        } catch (IOException e) {
+            ;
+        }
+    }
+
+    public static void closeQuietly(Reader reader) {
+        if (reader == null) {
+            return;
+        }
+        try {
+            reader.close();
+        } catch (IOException e) {
+            ;
+        }
+    }
+
     /**
      * Reads a stream until the end of file into a String and uses the machines default encoding to convert to
      * characters the bytes from the Stream.
-     * 
+     *
      * @param ins
      *            The InputStream to read.
      * @return The contents of the input stream as a String
@@ -36,7 +60,7 @@ public class StreamUtil {
     /**
      * Reads a stream until the end of file into a String and uses the machines default encoding to convert to
      * characters the bytes from the Stream.
-     * 
+     *
      * @param ins
      *            The InputStream to read.
      * @param charsetName
@@ -54,7 +78,7 @@ public class StreamUtil {
 
     /**
      * Reads all the characters into a String.
-     * 
+     *
      * @param reader
      *            The Reader to read.
      * @return The contents of the input stream as a String

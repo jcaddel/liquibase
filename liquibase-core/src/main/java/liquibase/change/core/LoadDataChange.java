@@ -16,6 +16,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
+import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;
 
@@ -96,6 +97,53 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
         return (List<ColumnConfig>) (List) columns;
     }
 
+    protected SqlStatement getSqlStatement(String[] headers, String[] line, int lineNumber) {
+        InsertStatement insertStatement = this.createStatement(getSchemaName(), getTableName());
+        for (int i = 0; i < headers.length; i++) {
+            String columnName = null;
+            if (i >= line.length) {
+                throw new UnexpectedLiquibaseException("CSV Line " + lineNumber + " has only " + (i - 1)
+                        + " columns, the header has " + headers.length);
+            }
+
+            Object value = line[i];
+
+            ColumnConfig columnConfig = getColumnConfig(i, headers[i]);
+            if (columnConfig != null) {
+                columnName = columnConfig.getName();
+
+                if (value.toString().equalsIgnoreCase("NULL")) {
+                    value = "NULL";
+                } else if (columnConfig.getType() != null) {
+                    ColumnConfig valueConfig = new ColumnConfig();
+                    if (columnConfig.getType().equalsIgnoreCase("BOOLEAN")) {
+                        valueConfig.setValueBoolean(Boolean.parseBoolean(value.toString().toLowerCase()));
+                    } else if (columnConfig.getType().equalsIgnoreCase("NUMERIC")) {
+                        valueConfig.setValueNumeric(value.toString());
+                    } else if (columnConfig.getType().toLowerCase().contains("date")
+                            || columnConfig.getType().toLowerCase().contains("time")) {
+                        valueConfig.setValueDate(value.toString());
+                    } else if (columnConfig.getType().equalsIgnoreCase("STRING")) {
+                        valueConfig.setValue(value.toString());
+                    } else if (columnConfig.getType().equalsIgnoreCase("COMPUTED")) {
+                        valueConfig.setValue(value.toString());
+                    } else {
+                        throw new UnexpectedLiquibaseException("loadData type of " + columnConfig.getType()
+                                + " is not supported.  Please use BOOLEAN, NUMERIC, DATE, STRING, or COMPUTED");
+                    }
+                    value = valueConfig.getValueObject();
+                }
+            }
+
+            if (columnName == null) {
+                columnName = headers[i];
+            }
+
+            insertStatement.addColumnValue(columnName, value);
+        }
+        return insertStatement;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         CSVReader reader = null;
@@ -114,67 +162,33 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
             while ((line = reader.readNext()) != null) {
                 lineNumber++;
 
-                if (line.length == 0 || (line.length == 1 && StringUtils.trimToNull(line[0]) == null)) {
-                    continue; // nothing on this line
+                if (isSkipLine(line)) {
+                    continue;
                 }
-                InsertStatement insertStatement = this.createStatement(getSchemaName(), getTableName());
-                for (int i = 0; i < headers.length; i++) {
-                    String columnName = null;
-                    if (i >= line.length) {
-                        throw new UnexpectedLiquibaseException("CSV Line " + lineNumber + " has only " + (i - 1)
-                                + " columns, the header has " + headers.length);
-                    }
 
-                    Object value = line[i];
-
-                    ColumnConfig columnConfig = getColumnConfig(i, headers[i]);
-                    if (columnConfig != null) {
-                        columnName = columnConfig.getName();
-
-                        if (value.toString().equalsIgnoreCase("NULL")) {
-                            value = "NULL";
-                        } else if (columnConfig.getType() != null) {
-                            ColumnConfig valueConfig = new ColumnConfig();
-                            if (columnConfig.getType().equalsIgnoreCase("BOOLEAN")) {
-                                valueConfig.setValueBoolean(Boolean.parseBoolean(value.toString().toLowerCase()));
-                            } else if (columnConfig.getType().equalsIgnoreCase("NUMERIC")) {
-                                valueConfig.setValueNumeric(value.toString());
-                            } else if (columnConfig.getType().toLowerCase().contains("date")
-                                    || columnConfig.getType().toLowerCase().contains("time")) {
-                                valueConfig.setValueDate(value.toString());
-                            } else if (columnConfig.getType().equalsIgnoreCase("STRING")) {
-                                valueConfig.setValue(value.toString());
-                            } else if (columnConfig.getType().equalsIgnoreCase("COMPUTED")) {
-                                valueConfig.setValue(value.toString());
-                            } else {
-                                throw new UnexpectedLiquibaseException("loadData type of " + columnConfig.getType()
-                                        + " is not supported.  Please use BOOLEAN, NUMERIC, DATE, STRING, or COMPUTED");
-                            }
-                            value = valueConfig.getValueObject();
-                        }
-                    }
-
-                    if (columnName == null) {
-                        columnName = headers[i];
-                    }
-
-                    insertStatement.addColumnValue(columnName, value);
-                }
-                statements.add(insertStatement);
+                SqlStatement sqlStatement = getSqlStatement(headers, line, lineNumber);
+                statements.add(sqlStatement);
             }
 
             return statements.toArray(new SqlStatement[statements.size()]);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            if (null != reader) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    ;
-                }
-            }
+            StreamUtil.closeQuietly(reader);
         }
+    }
+
+    /**
+     * Return true if it is an empty line
+     */
+    protected boolean isSkipLine(String[] line) {
+        if (line.length == 0) {
+            return true;
+        }
+        if (line.length == 1 && StringUtils.trimToNull(line[0]) == null) {
+            return true;
+        }
+        return false;
     }
 
     protected CSVReader getCSVReader() throws IOException {
