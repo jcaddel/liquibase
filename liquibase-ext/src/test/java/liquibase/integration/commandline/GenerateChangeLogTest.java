@@ -8,6 +8,12 @@ public class GenerateChangeLogTest {
 
     MainTestUtils mtu = new MainTestUtils();
 
+    @Test
+    public void cycleRice() throws Exception {
+        cycleApp("rice", "mysql");
+        cycleApp("rice", "oracle");
+    }
+
     // @Test
     public void exportRiceMySQLViews() throws Exception {
         String type = "mysql";
@@ -23,12 +29,6 @@ public class GenerateChangeLogTest {
         args.setChangeLog(changeLog.getCanonicalPath());
         args.setCommand("generateChangeLog");
         mtu.executeMain(args);
-    }
-
-    @Test
-    public void cycleRice() throws Exception {
-        cycleApp("rice", "mysql");
-        // cycleApp("rice", "oracle");
     }
 
     // @Test
@@ -52,14 +52,10 @@ public class GenerateChangeLogTest {
         args.setCommand("generateChangeLog");
 
         args.setOther(mtu.toOther(MainTestUtils.SCHEMA));
-        args.setOther(new String[] { "--diffTypes=" + mtu.toCSV(MainTestUtils.SCHEMA),
-                "--includes=krim_perm_attr_data_t" });
         args.setChangeLog(mtu.getChangeLogFile(gav, "schema.xml").getCanonicalPath());
         mtu.executeMain(args);
 
         args.setOther(mtu.toOther(MainTestUtils.CONSTRAINTS));
-        args.setOther(new String[] { "--diffTypes=" + mtu.toCSV(MainTestUtils.CONSTRAINTS),
-                "--includes=krim_perm_attr_data_t" });
         args.setChangeLog(mtu.getChangeLogFile(gav, "constraints.xml").getCanonicalPath());
         mtu.executeMain(args);
 
@@ -68,11 +64,25 @@ public class GenerateChangeLogTest {
         String workingDir = mtu.getWorkingDir();
         String[] other1 = { "--workingDir=" + workingDir, "--dataDir=" + dataDir.getCanonicalPath(),
                 "--diffTypes=" + mtu.toCSV(MainTestUtils.DATA) };
-        String[] other2 = { "--workingDir=" + workingDir, "--dataDir=" + dataDir.getCanonicalPath(),
-                "--diffTypes=" + mtu.toCSV(MainTestUtils.DATA), "--includes=krim_perm_attr_data_t" };
         args.setOther(other1);
-        args.setOther(other2);
         args.setChangeLog(mtu.getChangeLogFile(gav, "data.xml").getCanonicalPath());
+        mtu.executeMain(args);
+
+        JDBC liquibase = mtu.getJDBC("liquibase", db);
+        args.setJdbc(liquibase);
+        args.setCommand("updateSQL");
+        generateSql(gav, args, "schema");
+        generateSql(gav, args, "data");
+        generateSql(gav, args, "constraints");
+    }
+
+    protected void generateSql(GAV gav, Args args, String type) throws Exception {
+        File changeLogFile = mtu.getChangeLogFile(gav, type + ".xml");
+        String changeLogUrl = mtu.getChangeLogUrl(changeLogFile);
+        File outputFile = mtu.getSqlFile(gav, type + ".sql");
+        String[] other = { "--outputFile=" + outputFile.getCanonicalPath() };
+        args.setOther(other);
+        args.setChangeLog(changeLogUrl);
         mtu.executeMain(args);
     }
 

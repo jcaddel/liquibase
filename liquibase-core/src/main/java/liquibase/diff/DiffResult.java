@@ -11,8 +11,10 @@ import java.io.PrintStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -316,7 +318,7 @@ public class DiffResult {
         boolean differencesInData = false;
         if (shouldDiffData()) {
             List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
-            addInsertDataChanges(changeSets, dataDir, workingDir);
+            addInsertDataChanges(changeSets);
             differencesInData = !changeSets.isEmpty();
         }
 
@@ -512,7 +514,7 @@ public class DiffResult {
         addUnexpectedUniqueConstraintChanges(changeSets);
 
         if (diffData) {
-            addInsertDataChanges(changeSets, dataDir, workingDir);
+            addInsertDataChanges(changeSets);
         }
 
         addMissingForeignKeyChanges(changeSets);
@@ -1104,8 +1106,9 @@ public class DiffResult {
         return line;
     }
 
-    protected String[] printCSV(Table table, List<String> columnNames, List<Map> rs, String filename)
-            throws IOException {
+    protected String[] printCSV(LoadDataContext context, String filename) throws IOException {
+
+        List<String> columnNames = context.getColumnNames();
 
         // Get a CSV writer
         CSVWriter writer = new CSVWriter(new FileWriter(filename));
@@ -1116,7 +1119,7 @@ public class DiffResult {
 
         // Print the data
         String[] dataTypes = new String[columnNames.size()];
-        for (Map<String, Object> row : rs) {
+        for (Map<String, Object> row : context.getData()) {
             String[] line = getStringArray(columnNames, row, dataTypes);
             writer.writeNext(line);
         }
@@ -1125,15 +1128,15 @@ public class DiffResult {
         return dataTypes;
     }
 
-    protected LoadDataChange getLoadDataChange(Table table, String schema, String[] dataTypes,
-            List<String> columnNames, List<Map> rs, String filename) {
+    protected LoadDataChange getLoadDataChange(LoadDataContext context, String[] dataTypes, String filename) {
 
         LoadDataChange change = new LoadDataChange();
         change.setFile(filename);
         change.setEncoding(ENCODING);
-        change.setSchemaName(schema);
-        change.setTableName(table.getName());
+        change.setSchemaName(context.getSchema());
+        change.setTableName(context.getTable().getName());
 
+        List<String> columnNames = context.getColumnNames();
         for (int i = 0; i < columnNames.size(); i++) {
             String colName = columnNames.get(i);
             LoadDataColumnConfig columnConfig = new LoadDataColumnConfig();
@@ -1173,7 +1176,24 @@ public class DiffResult {
 
     }
 
-    protected String getUrl(File dataFile, String workingDir) throws IOException {
+    /**
+     * This method returns a relative url suitable for passing to a resource loader
+     *
+     * Given a dataFile of:
+     *
+     * <pre>
+     * /tmp/workspace/target/src/main/resources/org/kuali/data.csv
+     * </pre>
+     *
+     * and a workingDir of:
+     *
+     * <pre>
+     * /tmp/workspace/target/src/main/resources
+     * </pre>
+     *
+     * This method returns: <code>org/kuali/data.csv</code>
+     */
+    protected String getRelativeUrl(File dataFile, String workingDir) throws IOException {
         if (workingDir == null) {
             return dataFile.getCanonicalPath();
         }
@@ -1185,36 +1205,75 @@ public class DiffResult {
             throw new IOException(dataDirPath + " must be a subdirectory of " + workingDirPath);
         }
         int index = workingDirPath.length();
-        // Skip past the file separator
-        String s = dataDirPath.substring(index + 1);
+
+        // Skip past the working directory (and the file separator)
+        String s = dataDirPath.substring(index + FS.length());
+
+        // Replace any backslashes with a forward slash
         s = s.replace("\\", "/");
         return s;
     }
 
-    protected List<Change> getChanges(Table table, List<Map> rs, String schema) throws IOException {
+    protected boolean isUseLoadDataTag() {
+        return dataDir != null;
+    }
+
+    protected List<Change> doLoadDataTag(LoadDataContext context) throws IOException {
+        String filename = getFilenameFromTableName(context.getTable());
+        File dataFile = getDataFile(dataDir, filename);
+        String url = getRelativeUrl(dataFile, workingDir);
+        String[] dataTypes = printCSV(context, dataFile.getCanonicalPath());
+        LoadDataChange change = getLoadDataChange(context, dataTypes, url);
         List<Change> changes = new ArrayList<Change>();
+        changes.add(change);
+        return changes;
+    }
+
+    protected List<Map<String, Object>> copy(@SuppressWarnings("rawtypes") List<Map> rs) {
+        List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
+        for (Map<?, ?> row : rs) {
+            data.add(copy(row));
+        }
+        return data;
+    }
+
+    protected Map<String, Object> copy(Map<?, ?> rs) {
+        Map<String, Object> data = new HashMap<String, Object>();
+        Set<?> keys = rs.keySet();
+        for (Object key : keys) {
+            Object value = rs.get(key);
+            data.put((String) key, value);
+        }
+        return data;
+    }
+
+    protected List<Change> getChanges(Table table, List<Map> rs, String schema) throws IOException {
         List<String> columnNames = getColumnNames(table);
 
-        // if dataDir is not null, print out a csv file and use loadData tag
-        if (dataDir != null) {
-            String filename = getFilenameFromTableName(table);
-            File dataFile = getDataFile(dataDir, filename);
-            String url = getUrl(dataFile, workingDir);
-            String[] dataTypes = printCSV(table, columnNames, rs, dataFile.getCanonicalPath());
-            LoadDataChange change = getLoadDataChange(table, schema, dataTypes, columnNames, rs, url);
+        // Print a .csv file that is referenced by a loadData tag
+        if (isUseLoadDataTag()) {
+            LoadDataContext context = new LoadDataContext();
+            context.setTable(table);
+            context.setColumnNames(columnNames);
+            context.setData(copy(rs));
+            context.setSchema(schema);
+            return doLoadDataTag(context);
+        }
+
+        // Create inline insert data changes, there is one insert change per row in the table
+        // Wrapped inside of a changeSet tag for the table
+        List<Change> changes = new ArrayList<Change>();
+        for (Map row : rs) {
+            Change change = getInsertDataChange(table, schema, columnNames, row);
             changes.add(change);
-        } else { // if dataDir is null, build and use insert tags
-            for (Map row : rs) {
-                Change change = getInsertDataChange(table, schema, columnNames, row);
-                // for each row, add a new change
-                // (there will be one group per table)
-                changes.add(change);
-            }
         }
         return changes;
     }
 
-    private void addInsertDataChanges(List<ChangeSet> changeSets, String dataDir, String workingDir)
+    /**
+     * Create ChangeSet objects representing the need to insert data
+     */
+    private void addInsertDataChanges(List<ChangeSet> changeSets)
             throws DatabaseException, IOException {
         Database database = referenceSnapshot.getDatabase();
         try {
@@ -1231,12 +1290,12 @@ public class DiffResult {
                 // Convert the data to one or more change objects
                 List<Change> changes = getChanges(table, rs, schema);
 
-                // Double check that changes exist
+                // Double check that there is data to insert
                 if (changes.size() == 0) {
                     continue;
                 }
 
-                // Create a new changeSet with the changes
+                // Create a new changeSet for this table
                 ChangeSet changeSet = generateChangeSet();
                 for (Change change : changes) {
                     changeSet.addChange(change);

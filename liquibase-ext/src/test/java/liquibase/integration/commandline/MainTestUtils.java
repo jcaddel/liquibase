@@ -66,6 +66,9 @@ public class MainTestUtils {
         } else if (app.equalsIgnoreCase("student")) {
             username = "KSEMBEDDED";
             password = "KSEMBEDDED";
+        } else if (app.equalsIgnoreCase("liquibase")) {
+            username = "LIQUIBASE";
+            password = "LIQUIBASE";
         } else {
             throw new Exception("Unsupported app " + app);
         }

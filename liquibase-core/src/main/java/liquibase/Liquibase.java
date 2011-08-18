@@ -40,6 +40,7 @@ import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.lockservice.LockService;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
+import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.core.UpdateStatement;
@@ -122,15 +123,12 @@ public class Liquibase {
         changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
 
         try {
-            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance()
-                    .getParser(changeLogFile, resourceAccessor)
-                    .parse(changeLogFile, changeLogParameters, resourceAccessor);
-
+            ChangeLogParserFactory factory = ChangeLogParserFactory.getInstance();
+            ChangeLogParser parser = factory.getParser(changeLogFile, resourceAccessor);
+            DatabaseChangeLog changeLog = parser.parse(changeLogFile, changeLogParameters, resourceAccessor);
             checkDatabaseChangeLogTable(true, changeLog, contexts);
-
             changeLog.validate(database, contexts);
             ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, changeLog);
-
             changeLogIterator.run(new UpdateVisitor(database), database);
         } finally {
             try {
@@ -750,7 +748,7 @@ public class Liquibase {
      * Add safe database properties as changelog parameters.<br/>
      * Safe properties are the ones that doesn't have side effects in liquibase state and also don't change in during
      * the liquibase execution
-     * 
+     *
      * @param database
      *            Database which propeties are put in the changelog
      * @throws DatabaseException
