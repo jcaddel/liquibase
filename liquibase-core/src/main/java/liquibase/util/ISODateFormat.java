@@ -12,9 +12,9 @@ public class ISODateFormat {
     private SimpleDateFormat dateTimeFormatWithSpace = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_SPACE);
     private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss";
-    private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE = "yyyy-MM-dd HH:mm:ss";
-    private static final String DATE_TIME_FORMAT_STRING_WITH_DECIMAL = "yyyy-MM-dd'T'HH:mm:ss.S";
+    private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ssZZZZZ";
+    private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE = "yyyy-MM-dd HH:mm:ssZZZZZ";
+    private static final String DATE_TIME_FORMAT_STRING_WITH_DECIMAL = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ";
 
     public String format(java.sql.Date date) {
         return dateFormat.format(date);
