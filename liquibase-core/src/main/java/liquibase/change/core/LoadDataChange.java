@@ -136,14 +136,14 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
 
     protected SqlStatement getSqlStatement(String[] headers, String[] line, int lineNumber) {
 
-        // Make sure the columns match up
+        // Make sure we have a token for each column
         if (headers.length != line.length) {
             throw new UnexpectedLiquibaseException("CSV Line " + lineNumber + " has  " + line.length
                     + " columns, the header has " + headers.length);
         }
 
         // Create an insert statement from the data
-        InsertStatement insertStatement = this.createStatement(getSchemaName(), getTableName());
+        InsertStatement insertStatement = createStatement(getSchemaName(), getTableName());
         for (int i = 0; i < headers.length; i++) {
             Object value = line[i];
             ColumnConfig columnConfig = getColumnConfig(i, headers[i]);

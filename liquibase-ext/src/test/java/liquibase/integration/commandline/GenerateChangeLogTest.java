@@ -62,9 +62,9 @@ public class GenerateChangeLogTest {
         String basedir = mtu.getBaseDir(mtu.getWorkingDir(), gav, "xml") + MainTestUtils.FS + "data";
         File dataDir = mtu.mkdirs(basedir);
         String workingDir = mtu.getWorkingDir();
-        String[] other1 = { "--workingDir=" + workingDir, "--dataDir=" + dataDir.getCanonicalPath(),
+        String[] other = { "--workingDir=" + workingDir, "--dataDir=" + dataDir.getCanonicalPath(),
                 "--diffTypes=" + mtu.toCSV(MainTestUtils.DATA) };
-        args.setOther(other1);
+        args.setOther(other);
         args.setChangeLog(mtu.getChangeLogFile(gav, "data.xml").getCanonicalPath());
         mtu.executeMain(args);
 
