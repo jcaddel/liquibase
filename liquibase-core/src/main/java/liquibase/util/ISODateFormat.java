@@ -5,6 +5,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * Convert ISO formatted date strings into date objects and vice versa. Strings produced by this class contain UTC
+ * offset information. The strings can be read in by a JVM on a server with a different timezone without any loss of
+ * data.
+ */
 public class ISODateFormat {
 
     private SimpleDateFormat dateTimeFormat = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
