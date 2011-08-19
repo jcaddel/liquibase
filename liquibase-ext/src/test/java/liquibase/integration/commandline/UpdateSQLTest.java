@@ -19,9 +19,9 @@ public class UpdateSQLTest {
         args.setJdbc(jdbc);
         args.setCommand("updateSQL");
 
-        generate(gav, args, "schema");
+        //generate(gav, args, "schema");
         generate(gav, args, "data");
-        generate(gav, args, "constraints");
+        //generate(gav, args, "constraints");
 
     }
 

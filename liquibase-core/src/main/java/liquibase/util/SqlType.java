@@ -1,6 +1,9 @@
 package liquibase.util;
 
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public enum SqlType {
     ARRAY(Types.ARRAY),
@@ -43,5 +46,37 @@ public enum SqlType {
 
     public int getValue() {
         return this.value;
+    }
+
+    public static final List<SqlType> NUMERIC_TYPES = new ArrayList<SqlType>(Arrays.asList(getNumericTypes()));
+    public static final List<SqlType> STRING_TYPES = new ArrayList<SqlType>(Arrays.asList(getStringTypes()));
+    public static final List<SqlType> DATE_TYPES = new ArrayList<SqlType>(Arrays.asList(getDateTypes()));
+
+    private static final SqlType[] getNumericTypes() {
+        return new SqlType[] { BIGINT, BIT, DECIMAL, DOUBLE, FLOAT, INTEGER, NUMERIC, REAL, SMALLINT, TINYINT };
+    }
+
+    private static final SqlType[] getDateTypes() {
+        return new SqlType[] { DATE, TIME, TIMESTAMP };
+    }
+
+    private static final SqlType[] getStringTypes() {
+        return new SqlType[] { CHAR, CLOB, LONGVARCHAR, VARCHAR };
+    }
+
+    public static final boolean isBoolean(String type) {
+        return valueOf(type).equals(BOOLEAN);
+    }
+
+    public static final boolean isNumeric(String type) {
+        return NUMERIC_TYPES.contains(valueOf(type));
+    }
+
+    public static final boolean isString(String type) {
+        return STRING_TYPES.contains(valueOf(type));
+    }
+
+    public static final boolean isDate(String type) {
+        return DATE_TYPES.contains(valueOf(type));
     }
 }

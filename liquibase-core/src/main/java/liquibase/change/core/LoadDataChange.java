@@ -8,6 +8,7 @@ import java.util.List;
 
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeProperty;
 import liquibase.change.ChangeWithColumns;
 import liquibase.change.CheckSum;
 import liquibase.change.ColumnConfig;
@@ -16,6 +17,8 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
+import liquibase.util.NullValue;
+import liquibase.util.SqlType;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;
@@ -28,6 +31,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
     private String encoding = null;
     private String separator = liquibase.util.csv.opencsv.CSVReader.DEFAULT_SEPARATOR + "";
     private String quotchar = liquibase.util.csv.opencsv.CSVReader.DEFAULT_QUOTE_CHARACTER + "";
+    @ChangeProperty(includeInSerialization = false)
+    private NullValue nullValue = new NullValue();
 
     private List<LoadDataColumnConfig> columns = new ArrayList<LoadDataColumnConfig>();
 
@@ -98,21 +103,22 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
     }
 
     protected Object convertValue(Object value, ColumnConfig columnConfig) {
-        if (value.toString().equalsIgnoreCase("NULL")) {
-            return "NULL";
+        if (nullValue.isNull(value.toString())) {
+            return nullValue.getValue();
         }
         if (columnConfig.getType() == null) {
             return value;
         }
         ColumnConfig valueConfig = new ColumnConfig();
-        if (columnConfig.getType().equalsIgnoreCase("BOOLEAN")) {
+
+        String type = columnConfig.getType();
+        if (SqlType.isBoolean(type)) {
             valueConfig.setValueBoolean(Boolean.parseBoolean(value.toString().toLowerCase()));
-        } else if (columnConfig.getType().equalsIgnoreCase("NUMERIC")) {
+        } else if (SqlType.isNumeric(type)) {
             valueConfig.setValueNumeric(value.toString());
-        } else if (columnConfig.getType().toLowerCase().contains("date")
-                || columnConfig.getType().toLowerCase().contains("time")) {
+        } else if (SqlType.isDate(type)) {
             valueConfig.setValueDate(value.toString());
-        } else if (columnConfig.getType().equalsIgnoreCase("STRING")) {
+        } else if (SqlType.isString(type)) {
             valueConfig.setValue(value.toString());
         } else if (columnConfig.getType().equalsIgnoreCase("COMPUTED")) {
             valueConfig.setValue(value.toString());
@@ -286,5 +292,13 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
                 }
             }
         }
+    }
+
+    public NullValue getNullValue() {
+        return nullValue;
+    }
+
+    public void setNullValue(NullValue nullValue) {
+        this.nullValue = nullValue;
     }
 }
