@@ -1,20 +1,18 @@
 package liquibase.statement.core;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import liquibase.changelog.conversion.DataType;
 import liquibase.statement.AbstractSqlStatement;
 
 public class InsertStatement extends AbstractSqlStatement {
     private String schemaName;
     private String tableName;
     private SortedMap<String, Object> columnValues = new TreeMap<String, Object>();
-    private SortedMap<String, DataType> columnTypes = new TreeMap<String, DataType>();
-    private Set<String> primaryKeys = new HashSet<String>();
+    private List<InsertStatementColumn> columns = new ArrayList<InsertStatementColumn>();
 
     public InsertStatement(String schemaName, String tableName) {
         this.schemaName = schemaName;
@@ -43,19 +41,23 @@ public class InsertStatement extends AbstractSqlStatement {
         return columnValues;
     }
 
-    public SortedMap<String, DataType> getColumnTypes() {
-        return columnTypes;
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
-    public void setColumnTypes(SortedMap<String, DataType> columnTypes) {
-        this.columnTypes = columnTypes;
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
-    public Set<String> getPrimaryKeys() {
-        return primaryKeys;
+    public void setColumnValues(SortedMap<String, Object> columnValues) {
+        this.columnValues = columnValues;
     }
 
-    public void setPrimaryKeys(Set<String> primaryKeys) {
-        this.primaryKeys = primaryKeys;
+    public List<InsertStatementColumn> getColumns() {
+        return columns;
+    }
+
+    public void setColumns(List<InsertStatementColumn> columns) {
+        this.columns = columns;
     }
 }

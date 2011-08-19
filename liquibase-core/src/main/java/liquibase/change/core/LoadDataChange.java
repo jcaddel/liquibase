@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
@@ -12,11 +14,13 @@ import liquibase.change.ChangeProperty;
 import liquibase.change.ChangeWithColumns;
 import liquibase.change.CheckSum;
 import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
+import liquibase.statement.core.InsertStatementColumn;
 import liquibase.util.NullValue;
 import liquibase.util.SqlType;
 import liquibase.util.StreamUtil;
@@ -150,15 +154,44 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
 
         // Create an insert statement from the data
         InsertStatement insertStatement = createStatement(getSchemaName(), getTableName());
+        List<InsertStatementColumn> insertStatementColumns = new ArrayList<InsertStatementColumn>();
         for (int i = 0; i < headers.length; i++) {
             Object value = line[i];
             ColumnConfig columnConfig = getColumnConfig(i, headers[i]);
-
             String columnName = getColumnName(columnConfig, headers[i]);
             Object newValue = convertValue(value, columnConfig);
+            InsertStatementColumn insertStatementColumn = getInsertStatementColumn(columnConfig, columnName, newValue);
+            insertStatementColumns.add(insertStatementColumn);
             insertStatement.addColumnValue(columnName, newValue);
         }
+        insertStatement.setColumns(insertStatementColumns);
         return insertStatement;
+    }
+
+    protected InsertStatementColumn getInsertStatementColumn(ColumnConfig columnConfig, String columnName, Object value) {
+        InsertStatementColumn column = new InsertStatementColumn();
+        column.setName(columnName);
+        column.setValue(value);
+        column.setType(SqlType.valueOf(columnConfig.getType()));
+        ConstraintsConfig cc = columnConfig.getConstraints();
+        if (cc != null) {
+            column.setPrimaryKey(cc.isPrimaryKey());
+        }
+        return column;
+    }
+
+    protected Set<String> getPrimaryKeys(List<LoadDataColumnConfig> columnConfigs) {
+        Set<String> primaryKeys = new HashSet<String>();
+        for (LoadDataColumnConfig columnConfig : columnConfigs) {
+            ConstraintsConfig cc = columnConfig.getConstraints();
+            if (cc == null) {
+                continue;
+            }
+            if (cc.isPrimaryKey()) {
+                primaryKeys.add(columnConfig.getName());
+            }
+        }
+        return primaryKeys;
     }
 
     @Override

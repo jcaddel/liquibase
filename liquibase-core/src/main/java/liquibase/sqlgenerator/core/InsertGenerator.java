@@ -27,30 +27,47 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
         return validationErrors;
     }
 
-    @Override
-    public Sql[] generateSql(InsertStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer sql = new StringBuffer("INSERT INTO "
-                + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " (");
+    protected String getInsertIntoFragment(InsertStatement statement, Database database) {
+        String tableName = database.escapeTableName(statement.getSchemaName(), statement.getTableName());
+        StringBuffer sb = new StringBuffer();
+        sb.append("INSERT INTO ");
+        sb.append(tableName);
+        sb.append(" (");
+        sb.append(getColumnNamesFragment(statement, database));
+        return sb.toString();
+    }
+
+    protected String getColumnNamesFragment(InsertStatement statement, Database database) {
+        StringBuffer sb = new StringBuffer();
         for (String column : statement.getColumnValues().keySet()) {
-            sql.append(database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), column)).append(
-                    ", ");
+            String columnName = database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), column);
+            sb.append(columnName);
+            sb.append(", ");
         }
-        sql.deleteCharAt(sql.lastIndexOf(" "));
-        sql.deleteCharAt(sql.lastIndexOf(","));
+        sb.deleteCharAt(sb.lastIndexOf(" "));
+        sb.deleteCharAt(sb.lastIndexOf(","));
+        return sb.toString();
+    }
 
-        sql.append(") VALUES (");
-
+    protected String getValuesFragment(InsertStatement statement, Database database) {
+        StringBuilder sb = new StringBuilder();
         for (String column : statement.getColumnValues().keySet()) {
             String sqlValue = getSqlValue(statement.getColumnValues().get(column), database);
-            sql.append(sqlValue);
-            sql.append(", ");
+            sb.append(sqlValue);
+            sb.append(", ");
         }
+        sb.deleteCharAt(sb.lastIndexOf(" "));
+        sb.deleteCharAt(sb.lastIndexOf(","));
+        return sb.toString();
+    }
 
-        sql.deleteCharAt(sql.lastIndexOf(" "));
-        sql.deleteCharAt(sql.lastIndexOf(","));
-
+    @Override
+    public Sql[] generateSql(InsertStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        StringBuffer sql = new StringBuffer();
+        sql.append(getInsertIntoFragment(statement, database));
+        sql.append(") VALUES (");
+        sql.append(getValuesFragment(statement, database));
         sql.append(")");
-
         return new Sql[] { new UnparsedSql(sql.toString()) };
     }
 
@@ -58,8 +75,8 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
         TypeConverter converter = TypeConverterFactory.getInstance().findTypeConverter(database);
         if (newValue == null || newValue.toString().equalsIgnoreCase("NULL")) {
             return "NULL";
-        } else if (newValue instanceof String && database.shouldQuoteValue(((String) newValue))) {
-            return "'" + database.escapeStringForDatabase((String) newValue) + "'";
+        } else if (newValue instanceof String) {
+            return getStringSqlValue((String) newValue, database);
         } else if (newValue instanceof Date) {
             return database.getDateLiteral(((Date) newValue));
         } else if (newValue instanceof Boolean) {
@@ -71,5 +88,12 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
         } else {
             return newValue.toString();
         }
+    }
+
+    protected String getStringSqlValue(String value, Database database) {
+        if (!database.shouldQuoteValue(value)) {
+            return value;
+        }
+        return "'" + database.escapeStringForDatabase(value) + "'";
     }
 }

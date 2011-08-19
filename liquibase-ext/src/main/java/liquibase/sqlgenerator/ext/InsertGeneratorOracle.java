@@ -1,9 +1,8 @@
 package liquibase.sqlgenerator.ext;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
@@ -12,10 +11,12 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.core.InsertGenerator;
 import liquibase.statement.core.InsertStatement;
+import liquibase.statement.core.InsertStatementColumn;
+import liquibase.util.SqlType;
 
 public class InsertGeneratorOracle extends InsertGenerator {
     private static final int MAX_CLOB_LENGTH = 4000;
-    private static final int PRIORITY = -1;
+    private static final int PRIORITY = 6;
 
     @Override
     public int getPriority() {
@@ -27,38 +28,49 @@ public class InsertGeneratorOracle extends InsertGenerator {
         return database instanceof OracleDatabase;
     }
 
-    protected boolean isGiantClob(Object object) {
-        if (!(object instanceof String)) {
+    protected boolean isGiantClob(InsertStatementColumn column) {
+        if (!isClob(column)) {
             return false;
         }
-        String text = (String) object;
+        if (!(column.getValue() instanceof String)) {
+            return false;
+        }
+        String text = (String) column.getValue();
         return text.length() > MAX_CLOB_LENGTH;
     }
 
-    protected boolean containsGiantClob(Database database, InsertStatement statement) {
-        String schemaName = statement.getSchemaName();
-        String tableName = statement.getTableName();
+    protected boolean isClob(InsertStatementColumn column) {
+        return column.getType().equals(SqlType.CLOB);
+    }
 
+    protected boolean containsGiantClob(InsertStatement statement) {
+        List<InsertStatementColumn> columns = statement.getColumns();
+        for (InsertStatementColumn column : columns) {
+            if (isGiantClob(column)) {
+                return true;
+            }
+        }
         return false;
     }
 
-    protected String getInsertInto(Database database, InsertStatement statement) {
-        String escapedTableName = database.escapeTableName(statement.getSchemaName(), statement.getTableName());
-        StringBuilder sb = new StringBuilder();
-        sb.append("INSERT INTO ");
-        sb.append(escapedTableName);
-        sb.append(" (");
-        return sb.toString();
+    protected String getSqlValue(InsertStatementColumn column, Database database) {
+        if (isGiantClob(column)) {
+            return "EMPTY_CLOB()";
+        } else {
+            return super.getSqlValue(column.getValue(), database);
+        }
     }
 
-    protected String getColumns(Database database, InsertStatement statement) {
-        String schemaName = statement.getSchemaName();
-        String tableName = statement.getTableName();
-        Set<String> columnNames = statement.getColumnValues().keySet();
+    @Override
+    protected String getValuesFragment(InsertStatement statement, Database database) {
+        if (!containsGiantClob(statement)) {
+            return super.getValuesFragment(statement, database);
+        }
         StringBuilder sb = new StringBuilder();
-        for (String columnName : columnNames) {
-            String escapedColumnName = database.escapeColumnName(schemaName, tableName, columnName);
-            sb.append(escapedColumnName + ", ");
+        for (InsertStatementColumn column : statement.getColumns()) {
+            String sqlValue = getSqlValue(column, database);
+            sb.append(sqlValue);
+            sb.append(", ");
         }
         sb.deleteCharAt(sb.lastIndexOf(" "));
         sb.deleteCharAt(sb.lastIndexOf(","));
@@ -67,103 +79,78 @@ public class InsertGeneratorOracle extends InsertGenerator {
 
     @Override
     public Sql[] generateSql(InsertStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        // Determine if this insert statement requires special handling
-        boolean containsGiantClob = containsGiantClob(database, statement);
+        // Determine if this insert statement has any oversized clobs that are going to require special handling
+        List<InsertStatementColumn> giantClobs = getGiantClobs(statement);
 
         // If not, no special handling required
-        if (!containsGiantClob) {
+        if (giantClobs.size() == 0) {
             return super.generateSql(statement, database, sqlGeneratorChain);
         }
 
-        // Create custom SQL for values bigger than Oracle's 4K limit for SQL statements
-        StringBuffer sb = new StringBuffer();
-        sb.append(getInsertInto(database, statement));
-        sb.append(getColumns(database, statement));
-        sb.append(") VALUES (");
+        Sql[] normalSql = super.generateSql(statement, database, sqlGeneratorChain);
 
-        for (String column : statement.getColumnValues().keySet()) {
-            // Pull out the raw value
-            Object rawValue = statement.getColumnValues().get(column);
-            // Convert it to an SQL friendly value
-            String sqlValue = getSqlValue(rawValue, database);
-            // Add it to the SQL
-            sb.append(sqlValue);
-            // Append the delimiter
-            sb.append(", ");
-        }
-
-        // Remove the trailing whitespace and comma
-        sb.deleteCharAt(sb.lastIndexOf(" "));
-        sb.deleteCharAt(sb.lastIndexOf(","));
-
-        // Close off the sql
-        sb.append(")");
-
-        List<NameValue> giantClobFields = getGiantClobFields(statement.getColumnValues());
-        List<Sql> list = new ArrayList<Sql>();
-        Sql sql = new UnparsedSql(sb.toString());
-        list.add(sql);
-        list.addAll(getSql(giantClobFields, database, statement));
+        List<Sql> list = new ArrayList<Sql>(Arrays.asList(normalSql));
+        list.addAll(getSql(giantClobs, database, statement));
         return list.toArray(new Sql[list.size()]);
     }
 
-    protected List<Sql> getSql(List<NameValue> giantTextFields, Database database, InsertStatement statement) {
+    protected List<Sql> getSql(List<InsertStatementColumn> clobs, Database database, InsertStatement statement) {
         List<Sql> sql = new ArrayList<Sql>();
-        for (NameValue giantTextField : giantTextFields) {
-            sql.addAll(getSql(giantTextField, database, statement));
+        for (InsertStatementColumn clob : clobs) {
+            sql.addAll(getSql(clob, database, statement));
         }
         return sql;
 
     }
 
-    protected List<Sql> getSql(NameValue giantField, Database database, InsertStatement statement) {
+    protected List<Sql> getSql(InsertStatementColumn clob, Database database, InsertStatement statement) {
+        String text = (String) clob.getValue();
         List<Sql> sql = new ArrayList<Sql>();
-        int chunkCount = getChunkCount(giantField.getValue());
-        int length = giantField.getValue().length();
+        int chunkCount = getChunkCount(text);
+        int length = text.length();
         StringBuilder sb = new StringBuilder();
         sb.append("-- Length: " + length + "\n");
         sb.append("-- Chunks: " + chunkCount + "\n");
         for (int i = 0; i < chunkCount; i++) {
-            sb.append(getOraclePlSqlFragment(i, giantField, database, statement));
+            sb.append(getOraclePlSqlFragment(i, clob, database, statement));
             sql.add(new UnparsedSql(sb.toString()));
             sb = new StringBuilder();
         }
         return sql;
     }
 
-    protected List<NameValue> getGiantClobFields(Map<String, Object> columnValues) {
-        List<NameValue> list = new ArrayList<NameValue>();
-        for (Map.Entry<String, Object> entry : columnValues.entrySet()) {
-            // Pull out the raw value
-            Object rawValue = entry.getValue();
-            if (!isGiantClob(rawValue)) {
-                continue;
+    protected List<InsertStatementColumn> getGiantClobs(InsertStatement statement) {
+        List<InsertStatementColumn> list = new ArrayList<InsertStatementColumn>();
+        for (InsertStatementColumn column : statement.getColumns()) {
+            if (isGiantClob(column)) {
+                list.add(column);
             }
-            String text = (String) rawValue;
-            list.add(new NameValue(entry.getKey(), text));
         }
         return list;
     }
 
-    protected String getData(String s, int chunkIndex) {
-        int length = s.length();
+    protected String getChunk(String text, int chunkIndex) {
+        int length = text.length();
         int beginIndex = chunkIndex * MAX_CLOB_LENGTH;
         int endIndex = Math.min(beginIndex + MAX_CLOB_LENGTH, length);
-        return s.substring(beginIndex, endIndex);
+        return text.substring(beginIndex, endIndex);
     }
 
-    protected String getOraclePlSqlFragment(int chunkIndex, NameValue pair, Database database, InsertStatement statement) {
+    protected String getOraclePlSqlFragment(int chunkIndex, InsertStatementColumn clob, Database database,
+            InsertStatement statement) {
         String schemaName = statement.getSchemaName();
         String tableName = statement.getTableName();
         String escapedTableName = database.escapeTableName(schemaName, tableName);
-        String data = getData(pair.getValue(), chunkIndex);
+        String text = (String) clob.getValue();
+        String textChunk = getChunk(text, chunkIndex);
+        String sqlValue = getStringSqlValue(textChunk, database);
         StringBuilder sb = new StringBuilder();
         sb.append("DECLARE    data CLOB; buffer VARCHAR2(32000);\n");
         sb.append("BEGIN\n");
-        sb.append("    SELECT " + pair.getName() + " INTO data FROM " + escapedTableName + "\n");
+        sb.append("    SELECT " + clob.getName() + " INTO data FROM " + escapedTableName + "\n");
         sb.append("    WHERE \n");
         sb.append(" MSG_QUE_ID = 2340    FOR UPDATE;\n");
-        sb.append("    buffer := '" + data + "';\n");
+        sb.append("    buffer := " + sqlValue + ";\n");
         sb.append("    DBMS_LOB.writeappend(data,LENGTH(buffer),buffer);\n");
         sb.append("END;");
         return sb.toString();
@@ -173,14 +160,5 @@ public class InsertGeneratorOracle extends InsertGenerator {
         int length = value.length();
         double count = Math.ceil((length * 1D) / MAX_CLOB_LENGTH);
         return new Double(count).intValue();
-    }
-
-    @Override
-    protected String getSqlValue(Object newValue, Database database) {
-        if (isGiantClob(newValue)) {
-            return "EMPTY_CLOB()";
-        } else {
-            return super.getSqlValue(newValue, database);
-        }
     }
 }

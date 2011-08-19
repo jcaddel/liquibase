@@ -6,9 +6,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Convert ISO formatted date strings into date objects and vice versa. Strings produced by this class contain UTC
- * offset information. The strings can be read in by a JVM on a server with a different timezone without any loss of
- * data.
+ * Convert ISO formatted date strings into date objects and vice versa. Strings produced by this class that have a time
+ * element in them, contain UTC offset information. The strings can be consumed by a JVM on a server with a different
+ * timezone without any loss of data.
  */
 public class ISODateFormat {
 
@@ -17,7 +17,7 @@ public class ISODateFormat {
     private SimpleDateFormat dateTimeFormatWithSpace = new SimpleDateFormat(DATE_TIME_FORMAT_WITH_SPACE);
     private SimpleDateFormat timeFormat = new SimpleDateFormat(TIME_FORMAT);
     private SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-    public static final String DATE_FORMAT = "yyyy-MM-ddZZZZZ";
+    public static final String DATE_FORMAT = "yyyy-MM-dd";
     public static final String TIME_FORMAT = "HH:mm:ssZZZZZ";
     public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZZZZ";
     public static final String DATE_TIME_FORMAT_WITH_SPACE = "yyyy-MM-dd HH:mm:ssZZZZZ";

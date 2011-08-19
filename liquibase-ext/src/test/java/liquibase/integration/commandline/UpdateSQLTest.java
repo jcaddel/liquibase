@@ -9,7 +9,7 @@ public class UpdateSQLTest {
     MainTestUtils mtu = new MainTestUtils();
 
     @Test
-    public void generateForMySQL() throws Exception {
+    public void generateSQL() throws Exception {
         String type = "oracle";
         JDBC jdbc = mtu.getJDBC("liquibase", type);
         GAV gav = mtu.getRiceGAV();
@@ -19,9 +19,9 @@ public class UpdateSQLTest {
         args.setJdbc(jdbc);
         args.setCommand("updateSQL");
 
-        //generate(gav, args, "schema");
+        // generate(gav, args, "schema");
         generate(gav, args, "data");
-        //generate(gav, args, "constraints");
+        // generate(gav, args, "constraints");
 
     }
 
