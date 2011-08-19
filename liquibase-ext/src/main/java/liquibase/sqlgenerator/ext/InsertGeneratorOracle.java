@@ -1,15 +1,12 @@
 package liquibase.sqlgenerator.ext;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
-import liquibase.database.typeconversion.TypeConverter;
-import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -178,24 +175,12 @@ public class InsertGeneratorOracle extends InsertGenerator {
         return new Double(count).intValue();
     }
 
+    @Override
     protected String getSqlValue(Object newValue, Database database) {
-        TypeConverter converter = TypeConverterFactory.getInstance().findTypeConverter(database);
-        if (newValue == null || newValue.toString().equalsIgnoreCase("NULL")) {
-            return "NULL";
-        } else if (isGiantClob(newValue)) {
+        if (isGiantClob(newValue)) {
             return "EMPTY_CLOB()";
-        } else if (newValue instanceof String && database.shouldQuoteValue(((String) newValue))) {
-            return "'" + database.escapeStringForDatabase((String) newValue) + "'";
-        } else if (newValue instanceof Date) {
-            return database.getDateLiteral(((Date) newValue));
-        } else if (newValue instanceof Boolean) {
-            if (((Boolean) newValue)) {
-                return converter.getBooleanType().getTrueBooleanValue();
-            } else {
-                return converter.getBooleanType().getFalseBooleanValue();
-            }
         } else {
-            return newValue.toString();
+            return super.getSqlValue(newValue, database);
         }
     }
 }

@@ -1,6 +1,8 @@
 package liquibase.statement.core;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -12,6 +14,7 @@ public class InsertStatement extends AbstractSqlStatement {
     private String tableName;
     private SortedMap<String, Object> columnValues = new TreeMap<String, Object>();
     private SortedMap<String, DataType> columnTypes = new TreeMap<String, DataType>();
+    private Set<String> primaryKeys = new HashSet<String>();
 
     public InsertStatement(String schemaName, String tableName) {
         this.schemaName = schemaName;
@@ -46,5 +49,13 @@ public class InsertStatement extends AbstractSqlStatement {
 
     public void setColumnTypes(SortedMap<String, DataType> columnTypes) {
         this.columnTypes = columnTypes;
+    }
+
+    public Set<String> getPrimaryKeys() {
+        return primaryKeys;
+    }
+
+    public void setPrimaryKeys(Set<String> primaryKeys) {
+        this.primaryKeys = primaryKeys;
     }
 }

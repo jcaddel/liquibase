@@ -153,6 +153,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
         for (int i = 0; i < headers.length; i++) {
             Object value = line[i];
             ColumnConfig columnConfig = getColumnConfig(i, headers[i]);
+
             String columnName = getColumnName(columnConfig, headers[i]);
             Object newValue = convertValue(value, columnConfig);
             insertStatement.addColumnValue(columnName, newValue);
