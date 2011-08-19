@@ -4,12 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 import liquibase.database.structure.Table;
-import liquibase.util.SqlType;
 
 public class LoadDataContext {
     Table table;
-    List<String> columnNames;
-    List<SqlType> columnTypes;
     List<Map<String, Object>> data;
 
     String schema;
@@ -20,14 +17,6 @@ public class LoadDataContext {
 
     public void setTable(Table table) {
         this.table = table;
-    }
-
-    public List<String> getColumnNames() {
-        return columnNames;
-    }
-
-    public void setColumnNames(List<String> columnNames) {
-        this.columnNames = columnNames;
     }
 
     public String getSchema() {
@@ -46,11 +35,4 @@ public class LoadDataContext {
         this.data = data;
     }
 
-    public List<SqlType> getColumnTypes() {
-        return columnTypes;
-    }
-
-    public void setColumnTypes(List<SqlType> columnTypes) {
-        this.columnTypes = columnTypes;
-    }
 }

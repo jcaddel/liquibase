@@ -1127,7 +1127,7 @@ public class DiffResult {
 
     protected void printCSV(LoadDataContext context, String filename) throws IOException {
 
-        List<String> columnNames = context.getColumnNames();
+        List<String> columnNames = getColumnNames(context.getTable());
 
         // Get a CSV writer
         CSVWriter writer = new CSVWriter(new FileWriter(filename));
@@ -1152,13 +1152,20 @@ public class DiffResult {
         change.setEncoding(ENCODING);
         change.setSchemaName(context.getSchema());
         change.setTableName(context.getTable().getName());
+        List<SqlType> columnTypes = getColumnTypes(context.getTable());
 
-        List<String> columnNames = context.getColumnNames();
-        List<SqlType> columnTypes = context.getColumnTypes();
-        for (int i = 0; i < columnNames.size(); i++) {
-            String columnName = columnNames.get(i);
+        Table table = context.getTable();
+        List<Column> columns = table.getColumns();
+        for (int i = 0; i < columns.size(); i++) {
+            Column column = columns.get(i);
+            String columnName = column.getName();
             SqlType columnType = columnTypes.get(i);
             LoadDataColumnConfig columnConfig = new LoadDataColumnConfig();
+            if (column.isPrimaryKey()) {
+                ConstraintsConfig cc = new ConstraintsConfig();
+                cc.setPrimaryKey(true);
+                columnConfig.setConstraints(cc);
+            }
             columnConfig.setHeader(columnName);
             columnConfig.setName(columnName);
             columnConfig.setType(columnType.name());
@@ -1266,20 +1273,17 @@ public class DiffResult {
     }
 
     protected List<Change> getChanges(Table table, List<Map> rs, String schema) throws IOException {
-        List<String> columnNames = getColumnNames(table);
-        List<SqlType> columnTypes = getColumnTypes(table);
 
         // Print a .csv file that is referenced by a loadData tag
         if (isUseLoadDataTag()) {
             LoadDataContext context = new LoadDataContext();
             context.setTable(table);
-            context.setColumnNames(columnNames);
             context.setData(copy(rs));
             context.setSchema(schema);
-            context.setColumnTypes(columnTypes);
             return doLoadDataTag(context);
         }
 
+        List<String> columnNames = getColumnNames(table);
         // Create inline insert data changes, there is one insert change per row in the table
         // Wrapped inside of a changeSet tag for the table
         List<Change> changes = new ArrayList<Change>();

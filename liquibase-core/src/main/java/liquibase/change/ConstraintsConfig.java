@@ -1,7 +1,7 @@
 package liquibase.change;
 
 /**
- * This class is resposible for holding the information about all the constraints imposed on the column.
+ * This class is responsible for holding the information about all the constraints imposed on the column.
  */
 public class ConstraintsConfig {
 
