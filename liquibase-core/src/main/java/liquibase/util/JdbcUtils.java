@@ -87,7 +87,12 @@ public abstract class JdbcUtils {
         Object obj = rs.getObject(index);
         if (obj == null) {
             return null;
+        } else {
+            return convertValue(obj, rs, index);
         }
+    }
+
+    public static Object convertValue(Object obj, ResultSet rs, int index) throws SQLException {
         if (obj instanceof Blob) {
             return rs.getBytes(index);
         } else if (obj instanceof Clob) {
@@ -100,8 +105,9 @@ public abstract class JdbcUtils {
             } else {
                 return rs.getDate(index);
             }
+        } else {
+            return obj;
         }
-        return obj;
     }
 
     public static boolean isDate(Object obj) {
@@ -157,7 +163,7 @@ public abstract class JdbcUtils {
      *            the result Collection (can be <code>null</code>)
      * @return the single result object
      */
-    public static Object requiredSingleResult(Collection results) throws DatabaseException {
+    public static Object requiredSingleResult(Collection<?> results) throws DatabaseException {
         int size = (results != null ? results.size() : 0);
         if (size == 0) {
             throw new DatabaseException("Empty result set, expected one row");
