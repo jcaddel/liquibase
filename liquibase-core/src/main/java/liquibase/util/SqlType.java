@@ -32,7 +32,8 @@ public enum SqlType {
     TIMESTAMP(Types.TIMESTAMP),
     TINYINT(Types.TINYINT),
     VARBINARY(Types.VARBINARY),
-    VARCHAR(Types.VARCHAR);
+    VARCHAR(Types.VARCHAR),
+    UNKNOWN(-1);
 
     private final int value;
 

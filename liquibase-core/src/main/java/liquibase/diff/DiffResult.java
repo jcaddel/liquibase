@@ -69,6 +69,7 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.ISODateFormat;
+import liquibase.util.SqlType;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVWriter;
 
@@ -1042,6 +1043,25 @@ public class DiffResult {
         return columnNames;
     }
 
+    protected List<SqlType> getColumnTypes(Table table) {
+        List<SqlType> columnTypes = new ArrayList<SqlType>();
+        for (Column column : table.getColumns()) {
+            SqlType sqlType = getSqlType(column.getDataType());
+            columnTypes.add(sqlType);
+        }
+        return columnTypes;
+    }
+
+    protected SqlType getSqlType(int dataType) {
+        SqlType[] sqlTypes = SqlType.values();
+        for (SqlType sqlType : sqlTypes) {
+            if (dataType == sqlType.getValue()) {
+                return sqlType;
+            }
+        }
+        return SqlType.UNKNOWN;
+    }
+
     protected File getDataFile(String dataDir, String filename) {
         if (dataDir != null) {
             filename = dataDir + FS + filename;
@@ -1096,17 +1116,16 @@ public class DiffResult {
         }
     }
 
-    protected String[] getStringArray(List<String> columnNames, Map<String, Object> row, String[] dataTypes) {
+    protected String[] getStringArray(List<String> columnNames, Map<String, Object> row) {
         String[] line = new String[columnNames.size()];
         for (int i = 0; i < columnNames.size(); i++) {
             Object value = row.get(columnNames.get(i).toUpperCase());
-            updateDataTypes(i, dataTypes, value);
             line[i] = getPrintValue(value);
         }
         return line;
     }
 
-    protected String[] printCSV(LoadDataContext context, String filename) throws IOException {
+    protected void printCSV(LoadDataContext context, String filename) throws IOException {
 
         List<String> columnNames = context.getColumnNames();
 
@@ -1118,17 +1137,15 @@ public class DiffResult {
         writer.writeNext(columns);
 
         // Print the data
-        String[] dataTypes = new String[columnNames.size()];
         for (Map<String, Object> row : context.getData()) {
-            String[] line = getStringArray(columnNames, row, dataTypes);
+            String[] line = getStringArray(columnNames, row);
             writer.writeNext(line);
         }
         writer.flush();
         writer.close();
-        return dataTypes;
     }
 
-    protected LoadDataChange getLoadDataChange(LoadDataContext context, String[] dataTypes, String filename) {
+    protected LoadDataChange getLoadDataChange(LoadDataContext context, String filename) {
 
         LoadDataChange change = new LoadDataChange();
         change.setFile(filename);
@@ -1137,13 +1154,14 @@ public class DiffResult {
         change.setTableName(context.getTable().getName());
 
         List<String> columnNames = context.getColumnNames();
+        List<SqlType> columnTypes = context.getColumnTypes();
         for (int i = 0; i < columnNames.size(); i++) {
-            String colName = columnNames.get(i);
+            String columnName = columnNames.get(i);
+            SqlType columnType = columnTypes.get(i);
             LoadDataColumnConfig columnConfig = new LoadDataColumnConfig();
-            columnConfig.setHeader(colName);
-            columnConfig.setName(colName);
-            columnConfig.setType(dataTypes[i]);
-
+            columnConfig.setHeader(columnName);
+            columnConfig.setName(columnName);
+            columnConfig.setType(columnType.name());
             change.addColumn(columnConfig);
         }
         return change;
@@ -1222,8 +1240,8 @@ public class DiffResult {
         String filename = getFilenameFromTableName(context.getTable());
         File dataFile = getDataFile(dataDir, filename);
         String url = getRelativeUrl(dataFile, workingDir);
-        String[] dataTypes = printCSV(context, dataFile.getCanonicalPath());
-        LoadDataChange change = getLoadDataChange(context, dataTypes, url);
+        printCSV(context, dataFile.getCanonicalPath());
+        LoadDataChange change = getLoadDataChange(context, url);
         List<Change> changes = new ArrayList<Change>();
         changes.add(change);
         return changes;
@@ -1249,6 +1267,7 @@ public class DiffResult {
 
     protected List<Change> getChanges(Table table, List<Map> rs, String schema) throws IOException {
         List<String> columnNames = getColumnNames(table);
+        List<SqlType> columnTypes = getColumnTypes(table);
 
         // Print a .csv file that is referenced by a loadData tag
         if (isUseLoadDataTag()) {
@@ -1257,6 +1276,7 @@ public class DiffResult {
             context.setColumnNames(columnNames);
             context.setData(copy(rs));
             context.setSchema(schema);
+            context.setColumnTypes(columnTypes);
             return doLoadDataTag(context);
         }
 
@@ -1273,8 +1293,7 @@ public class DiffResult {
     /**
      * Create ChangeSet objects representing the need to insert data
      */
-    private void addInsertDataChanges(List<ChangeSet> changeSets)
-            throws DatabaseException, IOException {
+    private void addInsertDataChanges(List<ChangeSet> changeSets) throws DatabaseException, IOException {
         Database database = referenceSnapshot.getDatabase();
         try {
             String schema = referenceSnapshot.getSchema();

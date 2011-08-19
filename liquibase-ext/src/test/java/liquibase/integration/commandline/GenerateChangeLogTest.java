@@ -71,9 +71,9 @@ public class GenerateChangeLogTest {
         JDBC liquibase = mtu.getJDBC("liquibase", db);
         args.setJdbc(liquibase);
         args.setCommand("updateSQL");
-        generateSql(gav, args, "schema");
-        generateSql(gav, args, "data");
-        generateSql(gav, args, "constraints");
+        // generateSql(gav, args, "schema");
+        // generateSql(gav, args, "data");
+        // generateSql(gav, args, "constraints");
     }
 
     protected void generateSql(GAV gav, Args args, String type) throws Exception {

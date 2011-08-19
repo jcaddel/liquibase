@@ -17,7 +17,7 @@ import liquibase.sqlgenerator.core.InsertGenerator;
 import liquibase.statement.core.InsertStatement;
 
 public class InsertGeneratorOracle extends InsertGenerator {
-    private static final int MAX_TEXT_LENGTH = 4000;
+    private static final int MAX_CLOB_LENGTH = 4000;
     private static final int PRIORITY = -1;
 
     @Override
@@ -30,21 +30,18 @@ public class InsertGeneratorOracle extends InsertGenerator {
         return database instanceof OracleDatabase;
     }
 
-    protected boolean isGiantText(Object object) {
+    protected boolean isGiantClob(Object object) {
         if (!(object instanceof String)) {
             return false;
         }
         String text = (String) object;
-        return text.length() > MAX_TEXT_LENGTH;
+        return text.length() > MAX_CLOB_LENGTH;
     }
 
-    protected boolean containsGiantText(Map<String, Object> columnValues) {
-        for (String col : columnValues.keySet()) {
-            Object value = columnValues.get(col);
-            if (isGiantText(value)) {
-                return true;
-            }
-        }
+    protected boolean containsGiantClob(Database database, InsertStatement statement) {
+        String schemaName = statement.getSchemaName();
+        String tableName = statement.getTableName();
+
         return false;
     }
 
@@ -74,10 +71,10 @@ public class InsertGeneratorOracle extends InsertGenerator {
     @Override
     public Sql[] generateSql(InsertStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         // Determine if this insert statement requires special handling
-        boolean containsGiantText = containsGiantText(statement.getColumnValues());
+        boolean containsGiantClob = containsGiantClob(database, statement);
 
         // If not, no special handling required
-        if (!containsGiantText) {
+        if (!containsGiantClob) {
             return super.generateSql(statement, database, sqlGeneratorChain);
         }
 
@@ -105,11 +102,11 @@ public class InsertGeneratorOracle extends InsertGenerator {
         // Close off the sql
         sb.append(")");
 
-        List<NameValue> giantTextFields = getGiantTextFields(statement.getColumnValues());
+        List<NameValue> giantClobFields = getGiantClobFields(statement.getColumnValues());
         List<Sql> list = new ArrayList<Sql>();
         Sql sql = new UnparsedSql(sb.toString());
         list.add(sql);
-        list.addAll(getSql(giantTextFields, database, statement));
+        list.addAll(getSql(giantClobFields, database, statement));
         return list.toArray(new Sql[list.size()]);
     }
 
@@ -137,12 +134,12 @@ public class InsertGeneratorOracle extends InsertGenerator {
         return sql;
     }
 
-    protected List<NameValue> getGiantTextFields(Map<String, Object> columnValues) {
+    protected List<NameValue> getGiantClobFields(Map<String, Object> columnValues) {
         List<NameValue> list = new ArrayList<NameValue>();
         for (Map.Entry<String, Object> entry : columnValues.entrySet()) {
             // Pull out the raw value
             Object rawValue = entry.getValue();
-            if (!isGiantText(rawValue)) {
+            if (!isGiantClob(rawValue)) {
                 continue;
             }
             String text = (String) rawValue;
@@ -153,8 +150,8 @@ public class InsertGeneratorOracle extends InsertGenerator {
 
     protected String getData(String s, int chunkIndex) {
         int length = s.length();
-        int beginIndex = chunkIndex * MAX_TEXT_LENGTH;
-        int endIndex = Math.min(beginIndex + MAX_TEXT_LENGTH, length);
+        int beginIndex = chunkIndex * MAX_CLOB_LENGTH;
+        int endIndex = Math.min(beginIndex + MAX_CLOB_LENGTH, length);
         return s.substring(beginIndex, endIndex);
     }
 
@@ -177,7 +174,7 @@ public class InsertGeneratorOracle extends InsertGenerator {
 
     protected int getChunkCount(String value) {
         int length = value.length();
-        double count = Math.ceil((length * 1D) / MAX_TEXT_LENGTH);
+        double count = Math.ceil((length * 1D) / MAX_CLOB_LENGTH);
         return new Double(count).intValue();
     }
 
@@ -185,7 +182,7 @@ public class InsertGeneratorOracle extends InsertGenerator {
         TypeConverter converter = TypeConverterFactory.getInstance().findTypeConverter(database);
         if (newValue == null || newValue.toString().equalsIgnoreCase("NULL")) {
             return "NULL";
-        } else if (isGiantText(newValue)) {
+        } else if (isGiantClob(newValue)) {
             return "EMPTY_CLOB()";
         } else if (newValue instanceof String && database.shouldQuoteValue(((String) newValue))) {
             return "'" + database.escapeStringForDatabase((String) newValue) + "'";
