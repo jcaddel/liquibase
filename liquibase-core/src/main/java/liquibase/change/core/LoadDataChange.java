@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
@@ -154,14 +156,14 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
 
         // Create an insert statement from the data
         InsertStatement insertStatement = createStatement(getSchemaName(), getTableName());
-        List<InsertStatementColumn> insertStatementColumns = new ArrayList<InsertStatementColumn>();
+        SortedMap<String, InsertStatementColumn> insertStatementColumns = new TreeMap<String, InsertStatementColumn>();
         for (int i = 0; i < headers.length; i++) {
             Object value = line[i];
             ColumnConfig columnConfig = getColumnConfig(i, headers[i]);
             String columnName = getColumnName(columnConfig, headers[i]);
             Object newValue = convertValue(value, columnConfig);
             InsertStatementColumn insertStatementColumn = getInsertStatementColumn(columnConfig, columnName, newValue);
-            insertStatementColumns.add(insertStatementColumn);
+            insertStatementColumns.put(columnName, insertStatementColumn);
             insertStatement.addColumnValue(columnName, newValue);
         }
         insertStatement.setColumns(insertStatementColumns);
