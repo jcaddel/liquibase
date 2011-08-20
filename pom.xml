@@ -62,8 +62,8 @@
   <modules>
     <module>liquibase-core</module>
     <module>liquibase-ext</module>
-    <!-- 
     <module>liquibase-maven-plugin</module>
+    <!-- 
     <module>samples</module>
     <module>liquibase-integration-tests</module>
      -->
