@@ -33,14 +33,14 @@ public class StringFilter {
         setExcludePatterns(excludePatterns);
     }
 
-    public void setIncludePatterns(Set<String> includePatterns) {
+    public synchronized void setIncludePatterns(Set<String> includePatterns) {
         this.includePatterns = includePatterns;
-        this.includes = compileToRegexPattern(includePatterns);
+        this.includes = compileToRegexPatterns(includePatterns);
     }
 
-    public void setExcludePatterns(Set<String> excludePatterns) {
+    public synchronized void setExcludePatterns(Set<String> excludePatterns) {
         this.excludePatterns = excludePatterns;
-        this.excludes = compileToRegexPattern(excludePatterns);
+        this.excludes = compileToRegexPatterns(excludePatterns);
     }
 
     public Set<String> getIncludePatterns() {
@@ -54,8 +54,8 @@ public class StringFilter {
     /**
      * Convert a List<String> into List<Pattern>
      */
-    protected Set<Pattern> compileToRegexPattern(Set<String> patterns) {
-        // If Set<String> is empty return an empty Set<Pattern>
+    protected Set<Pattern> compileToRegexPatterns(Set<String> patterns) {
+        // If patterns is empty return an empty Set<Pattern>
         if (isEmpty(patterns)) {
             return new HashSet<Pattern>();
         }
@@ -93,7 +93,7 @@ public class StringFilter {
      * Return true if it matches an inclusion pattern.<br>
      * Return false otherwise.<br>
      */
-    public boolean isInclude(String s) {
+    public synchronized boolean isInclude(String s) {
         if (isExclude(s)) {
             return false;
         } else {
@@ -104,7 +104,7 @@ public class StringFilter {
     /**
      * Return true if the string matches one or more of the exclude patterns
      */
-    public boolean isExclude(String s) {
+    public synchronized boolean isExclude(String s) {
         return isMatch(s, excludes);
     }
 
@@ -115,11 +115,11 @@ public class StringFilter {
         return c == null || c.size() == 0;
     }
 
-    public Set<Pattern> getIncludes() {
+    public synchronized Set<Pattern> getIncludes() {
         return includes;
     }
 
-    public Set<Pattern> getExcludes() {
+    public synchronized Set<Pattern> getExcludes() {
         return excludes;
     }
 }
