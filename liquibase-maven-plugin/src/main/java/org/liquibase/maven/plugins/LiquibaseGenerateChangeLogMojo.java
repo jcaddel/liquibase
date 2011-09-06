@@ -7,6 +7,7 @@ import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
+import liquibase.integration.commandline.GenerateChangeLogContext;
 import liquibase.util.file.FilenameUtils;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -61,6 +62,14 @@ public class LiquibaseGenerateChangeLogMojo extends AbstractLiquibaseMojo2 {
      */
     protected String dataDir;
 
+    /**
+     * Optional. If workingDir is provided, the path to the CSV file will be relative path calculated by the difference
+     * between dataDir and workingDir
+     *
+     * @parameter expression="${liquibase.workingDir}"
+     */
+    protected String workingDir;
+
     @Override
     protected void performTask() throws MojoExecutionException {
         ClassLoader cl = getClass().getClassLoader();
@@ -68,9 +77,17 @@ public class LiquibaseGenerateChangeLogMojo extends AbstractLiquibaseMojo2 {
             createDirectories();
             Database database = CommandLineUtils.createDatabaseObject(cl, url, username, password, driver,
                     defaultSchemaName, databaseClass, driverProperties);
+            GenerateChangeLogContext context = new GenerateChangeLogContext();
+            context.setAuthor(author);
+            context.setChangeLogFile(changeLogFile);
+            context.setDatabase(database);
+            context.setSchema(defaultSchemaName);
+            context.setDiffTypes(types);
+            context.setDataDir(dataDir);
+            context.setWorkingDir(workingDir);
+            context.setChangeSetContext(this.context);
 
-            CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultSchemaName, types, author, context,
-                    dataDir);
+            CommandLineUtils.doGenerateChangeLog(context);
         } catch (Exception e) {
             throw new MojoExecutionException("Liquibase error: " + e.getMessage(), e);
         }

@@ -2,11 +2,18 @@ package liquibase.snapshot.ext;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.TimeZone;
 
 import liquibase.database.Database;
 import liquibase.database.structure.View;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.SnapshotContext;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.RawSqlStatement;
+import liquibase.util.TimeZoneUtil;
 
 /**
  * Provides MySQL specific logic for capturing a snapshot of a database via JDBC
@@ -15,10 +22,22 @@ import liquibase.snapshot.DatabaseSnapshot;
  */
 public class MySQLSnapshotGenerator extends liquibase.snapshot.jvm.MySQLDatabaseSnapshotGenerator {
     public static final int PRIORITY = 6;
+    TimeZoneUtil tzu = new TimeZoneUtil();
 
     @Override
     public int getPriority(Database database) {
         return PRIORITY;
+    }
+
+    @Override
+    protected TimeZone getDatabaseTimeZone(SnapshotContext context) throws DatabaseException {
+        ExecutorService service = ExecutorService.getInstance();
+        Executor executor = service.getExecutor(context.getDatabase());
+        String sql = "SELECT timestampdiff(hour,utc_timestamp,current_timestamp)";
+        SqlStatement ss = new RawSqlStatement(sql);
+        Long offset = executor.queryForLong(ss);
+        TimeZone timeZone = tzu.getEtcGMTTimeZone(offset.intValue());
+        return timeZone;
     }
 
     /**

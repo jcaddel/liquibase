@@ -15,4 +15,5 @@ public class MySQLDatabase extends liquibase.database.core.MySQLDatabase {
     public int getPriority() {
         return PRIORITY;
     }
+
 }

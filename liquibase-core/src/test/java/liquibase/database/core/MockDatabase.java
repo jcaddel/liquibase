@@ -37,7 +37,6 @@ public class MockDatabase implements Database {
 
     @Override
     public DelimiterStyle getDelimiterStyle() {
-        // TODO Auto-generated method stub
         return DelimiterStyle.DEFAULT;
     }
 
@@ -574,6 +573,12 @@ public class MockDatabase implements Database {
 
     @Override
     public boolean isReservedWord(String string) {
+        return false;
+    }
+
+    @Override
+    public boolean isTimestampsHaveTimeZones() {
+        // TODO Auto-generated method stub
         return false;
     }
 

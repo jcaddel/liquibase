@@ -1,5 +1,10 @@
 package liquibase.util;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,10 +19,52 @@ import org.junit.Test;
 
 public class ISODateFormatTest {
 
+    static String url = "jdbc:oracle:thin:@deploy.rice.kuali.org:1521:KS";
+    // String url = "jdbc:oracle:thin:@localhost:1521:XE";
+    static String username = "system";
+    static String password = "gw570229";
+    static String driver = "oracle.jdbc.driver.OracleDriver";
+
+    public static void main(String[] args) {
+        try {
+
+            Class.forName(driver);
+            Connection c = DriverManager.getConnection(url, username, password);
+            // String sql = "select sessiontimezone from dual";
+            String sql = "SELECT systimestamp FROM DUAL";
+            // String sql = "SELECT TO_CHAR(SysTimeStamp, 'YYYY-MM-DD HH24:MI:SS TZR TZD') from dual";
+            Object object = getOne(sql);
+            Statement stmt = c.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            rs.next();
+            Timestamp value = rs.getTimestamp(1);
+            int offset = value.getTimezoneOffset();
+
+            System.out.println(value + " " + (offset / 60));
+            rs.close();
+            stmt.close();
+            c.close();
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+    }
+
+    protected static Object getOne(String sql) throws SQLException {
+        Connection c = DriverManager.getConnection(url, username, password);
+        Statement stmt = c.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        rs.next();
+        Object object = rs.getObject(1);
+        rs.close();
+        stmt.close();
+        c.close();
+        return object;
+    }
+
     @Test
     public void testFormatAndParse() throws Exception {
         ISODateFormat idf = new ISODateFormat();
-        Date now = new Timestamp(new java.util.Date().getTime());
+        Timestamp now = new Timestamp(new java.util.Date().getTime());
         String s = idf.format(now);
         Date parsed = idf.parse(s);
         Assert.assertEquals(now, parsed);

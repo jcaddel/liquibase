@@ -76,8 +76,8 @@ public class InsertGeneratorOracle extends InsertGenerator {
             sb.append(sqlValue);
             sb.append(", ");
         }
-        sb.deleteCharAt(sb.lastIndexOf(" "));
         sb.deleteCharAt(sb.lastIndexOf(","));
+        sb.deleteCharAt(sb.lastIndexOf(" "));
         return sb.toString();
     }
 
