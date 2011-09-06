@@ -61,13 +61,6 @@ public class Main {
     // Call System.exit when done, unless they've set the system property to "false"
     private static final boolean SYS_EXIT = !"false".equalsIgnoreCase(System.getProperty(SYS_EXIT_KEY));
 
-    private static void exit(int status) {
-        if (!SYS_EXIT) {
-            return;
-        }
-        System.exit(status);
-    }
-
     protected ClassLoader classLoader;
 
     protected String driver;
@@ -879,4 +872,12 @@ public class Main {
     public boolean isWindows() {
         return System.getProperty("os.name").startsWith("Windows ");
     }
+
+    private static void exit(int status) {
+        if (!SYS_EXIT) {
+            return;
+        }
+        System.exit(status);
+    }
+
 }
