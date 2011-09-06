@@ -2,17 +2,11 @@ package liquibase.snapshot.ext;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.TimeZone;
 
 import liquibase.database.Database;
 import liquibase.database.structure.View;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.Executor;
-import liquibase.executor.ExecutorService;
 import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.SnapshotContext;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.TimeZoneUtil;
 
 /**
@@ -29,6 +23,7 @@ public class MySQLSnapshotGenerator extends liquibase.snapshot.jvm.MySQLDatabase
         return PRIORITY;
     }
 
+    /*
     @Override
     protected TimeZone getDatabaseTimeZone(SnapshotContext context) throws DatabaseException {
         ExecutorService service = ExecutorService.getInstance();
@@ -38,7 +33,7 @@ public class MySQLSnapshotGenerator extends liquibase.snapshot.jvm.MySQLDatabase
         Long offset = executor.queryForLong(ss);
         TimeZone timeZone = tzu.getEtcGMTTimeZone(offset.intValue());
         return timeZone;
-    }
+    }*/
 
     /**
      * When a view is created in MySQL, the original SQL statement is parsed, and has some formatting applied to it
