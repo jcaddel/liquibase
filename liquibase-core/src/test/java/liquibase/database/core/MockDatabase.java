@@ -576,10 +576,4 @@ public class MockDatabase implements Database {
         return false;
     }
 
-    @Override
-    public boolean isTimestampsHaveTimeZones() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
 }
