@@ -122,7 +122,7 @@ public class Main {
             // Parse properties files as appropriate
             handlePropertiesFiles(main);
 
-            // Make sure our configuration is correct
+            // Make sure we can understand our configuration
             List<String> setupMessages = main.checkSetup();
             if (setupMessages.size() > 0) {
                 main.printHelp(setupMessages, System.out);
@@ -158,7 +158,7 @@ public class Main {
         if (this.timezone == null || "".equals(this.timezone.trim())) {
             return;
         }
-        TimeZone timeZone = timeZoneUtil.getTimeZone(timezone);
+        TimeZone timeZone = timeZoneUtil.getTimeZone(timezone.trim());
         if (timeZone == null) {
             throw new IllegalArgumentException("Timezone '" + timezone + "' is unknown.  Available timezones:\n"
                     + timeZoneUtil.getLogValue());
