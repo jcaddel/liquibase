@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -48,7 +47,6 @@ import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
-import liquibase.util.TimeZoneUtil;
 
 /**
  * Class for executing Liquibase via the command line.
@@ -63,7 +61,7 @@ public class Main {
     // Call System.exit when done, unless they've set the system property to "false"
     private static final boolean SYS_EXIT = !"false".equalsIgnoreCase(System.getProperty(SYS_EXIT_KEY));
 
-    protected TimeZoneUtil timeZoneUtil = new TimeZoneUtil();
+    CommandLineUtils cliUtils = new CommandLineUtils();
 
     protected ClassLoader classLoader;
     protected String driver;
@@ -131,7 +129,7 @@ public class Main {
 
             // Run liquibase
             try {
-                main.handleTimeZone();
+                cliUtils.handleTimeZone(this.timezone);
                 main.applyDefaults();
                 main.configureClassLoader();
                 main.doMigration();
@@ -152,18 +150,6 @@ public class Main {
 
         // Exit normally
         exit(0);
-    }
-
-    protected void handleTimeZone() {
-        if (this.timezone == null || "".equals(this.timezone.trim())) {
-            return;
-        }
-        TimeZone timeZone = timeZoneUtil.getTimeZone(timezone.trim());
-        if (timeZone == null) {
-            throw new IllegalArgumentException("Timezone '" + timezone + "' is unknown.  Available timezones:\n"
-                    + timeZoneUtil.getLogValue());
-        }
-        timeZoneUtil.setJVMTimeZone(timeZone);
     }
 
     protected Main getMain(String[] args) throws IOException {

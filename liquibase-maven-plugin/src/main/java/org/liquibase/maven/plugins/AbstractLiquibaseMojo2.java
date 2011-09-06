@@ -10,6 +10,7 @@ import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.logging.LogFactory;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
@@ -25,26 +26,38 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
 /**
  * A base class for providing Liquibase {@link liquibase.Liquibase} functionality.
- * 
+ *
  * @author Peter Murray
- * 
+ *
  *         Test dependency is used because when you run a goal outside the build phases you want to have the same
  *         dependencies that it would had if it was ran inside test phase
  * @requiresDependencyResolution test
  */
 public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
+    CommandLineUtils cliUtils = new CommandLineUtils();
+
+    /**
+     * Optional. If timezone is provided, timestamp data from the database the plugin is connecting to will be
+     * considered to be from the timezone specified. This is essentially a synonym for passing -Duser.timezone as a
+     * command line argument. The difference is that if the JVM cannot understand what is passed using -Duser.timezone
+     * it silently continues using UTC time. Using the timezone option for this plugin will generate an exception if the
+     * indicated timezone is unknown to the JVM. It will also print the known list of timezones available.
+     *
+     * @parameter expression="${liquibase.timezone}"
+     */
+    protected String timezone;
 
     /**
      * The fully qualified name of the JDBC driver to use. This is optional as the correct driver to use can almost
      * always be inferred from the url.
-     * 
+     *
      * @parameter expression="${liquibase.driver}"
      */
     protected String driver;
 
     /**
      * The jdbc URL to connect to when executing Liquibase.
-     * 
+     *
      * @parameter expression="${liquibase.url}"
      * @required
      */
@@ -52,7 +65,7 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
 
     /**
      * The Maven Wagon manager to use when obtaining server authentication details.
-     * 
+     *
      * @component role="org.apache.maven.artifact.manager.WagonManager"
      * @required
      * @readonly
@@ -62,28 +75,28 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     /**
      * The id of a server in settings.xml containing username/password to use. If server is provided, the corresponding
      * username/password from settings.xml overrides any other username/password supplied to the plugin.
-     * 
+     *
      * @parameter expression="${liquibase.server}"
      */
     private String server;
 
     /**
      * The database username to use to connect to the specified database.
-     * 
+     *
      * @parameter expression="${liquibase.username}"
      */
     protected String username;
 
     /**
      * The database password to use to connect to the specified database.
-     * 
+     *
      * @parameter expression="${liquibase.password}"
      */
     protected String password;
 
     /**
      * The default schema name to use the for database connection.
-     * 
+     *
      * @parameter expression="${liquibase.defaultSchemaName}"
      */
     protected String defaultSchemaName;
@@ -91,7 +104,7 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     /**
      * The class to use as the database object. This is optional as a default class to use can almost always be inferred
      * by the JDBC url. If a class name is supplied here it will override the default.
-     * 
+     *
      * @parameter expression="${liquibase.databaseClass}"
      */
     protected String databaseClass;
@@ -99,14 +112,14 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     /**
      * Controls the prompting of users as to whether or not they really want to run the changes on a database that is
      * not local to the machine that the user is current executing the plugin on.
-     * 
+     *
      * @parameter expression="${liquibase.promptOnNonLocalDatabase}" default-value="true"
      */
     protected boolean promptOnNonLocalDatabase;
 
     /**
      * Controls the verbosity of the plugin output
-     * 
+     *
      * @parameter expression="${liquibase.verbose}" default-value="false"
      * @description Controls the verbosity of the plugin when executing
      */
@@ -115,7 +128,7 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     /**
      * Controls the Liquibase logging level. The value can be "all", "finest", "finer", "fine", "info", "warning",
      * "severe" or "off". The value is case insensitive.
-     * 
+     *
      * @parameter expression="${liquibase.logging}" default-value="INFO"
      * @description Controls the verbosity of the plugin when executing
      */
@@ -123,28 +136,28 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
 
     /**
      * Flag for forcing the checksums to be cleared from the DatabaseChangeLog table.
-     * 
+     *
      * @parameter expression="${liquibase.clearCheckSums}" default-value="false"
      */
     protected boolean clearCheckSums;
 
     /**
      * Any properties provided here, will be set as System properties prior to invoking Liquibase
-     * 
+     *
      * @parameter
      */
     protected Properties systemProperties;
 
     /**
      * Pointer to a properties file containing extra properties for the JDBC driver
-     * 
+     *
      * @parameter expression="${liquibase.driverProperties}"
      */
     protected String driverProperties;
 
     /**
      * The Maven project the plugin is running under.
-     * 
+     *
      * @parameter expression="${project}"
      * @required
      * @readonly
@@ -153,14 +166,14 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
 
     /**
      * Any properties specified here get passed through to Liquibase as change log parameters
-     * 
+     *
      * @parameter
      */
     private Properties changeLogParameters;
 
     /**
      * Set this to 'true' to skip execution
-     * 
+     *
      * @parameter expression="${liquibase.skip}"
      */
     protected boolean skip;
@@ -274,6 +287,9 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
             getLog().info("Skipping execution due to Maven configuration");
             return;
         }
+
+        // Update timezone as needed
+        cliUtils.handleTimeZone(getTimezone());
 
         // Might be using credentials from settings.xml
         updateCredentials();
@@ -492,5 +508,13 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
 
     public void setPromptOnNonLocalDatabase(boolean promptOnNonLocalDatabase) {
         this.promptOnNonLocalDatabase = promptOnNonLocalDatabase;
+    }
+
+    public String getTimezone() {
+        return timezone;
+    }
+
+    public void setTimezone(String timezone) {
+        this.timezone = timezone;
     }
 }

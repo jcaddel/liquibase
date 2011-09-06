@@ -7,6 +7,7 @@ import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.util.Properties;
+import java.util.TimeZone;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -19,14 +20,32 @@ import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.util.StringUtils;
+import liquibase.util.TimeZoneUtil;
 
 /**
- * Common Utilitiy methods used in the CommandLine application and the Maven plugin. These methods were orignally moved
+ * Common Utility methods used in the CommandLine application and the Maven plugin. These methods were orignally moved
  * from {@link Main} so they could be shared.
  *
  * @author Peter Murray
  */
 public class CommandLineUtils {
+    TimeZoneUtil timeZoneUtil = new TimeZoneUtil();
+
+    /**
+     * Set the default timezone of the JVM to the timezone specified. If null or "" is passed in, do nothing. If the
+     * timezone cannot be found, throw IllegalArgumentException
+     */
+    public void handleTimeZone(String timezone) {
+        if (timezone == null || "".equals(timezone.trim())) {
+            return;
+        }
+        TimeZone timeZone = timeZoneUtil.getTimeZone(timezone.trim());
+        if (timeZone == null) {
+            throw new IllegalArgumentException("Timezone '" + timezone + "' is unknown.  Available timezones:\n"
+                    + timeZoneUtil.getLogValue());
+        }
+        timeZoneUtil.setJVMTimeZone(timeZone);
+    }
 
     public static Database createDatabaseObject(ClassLoader classLoader, String url, String username, String password,
             String driver, String defaultSchemaName, String databaseClass, String driverPropertiesFile)
