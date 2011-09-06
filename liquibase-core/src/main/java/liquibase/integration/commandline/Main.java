@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -47,6 +48,7 @@ import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
+import liquibase.util.TimeZoneUtil;
 
 /**
  * Class for executing Liquibase via the command line.
@@ -61,8 +63,9 @@ public class Main {
     // Call System.exit when done, unless they've set the system property to "false"
     private static final boolean SYS_EXIT = !"false".equalsIgnoreCase(System.getProperty(SYS_EXIT_KEY));
 
-    protected ClassLoader classLoader;
+    protected TimeZoneUtil timeZoneUtil = new TimeZoneUtil();
 
+    protected ClassLoader classLoader;
     protected String driver;
     protected String username;
     protected String password;
@@ -98,10 +101,15 @@ public class Main {
     protected String logLevel;
     protected String logFile;
     protected String outputFile;
+    protected String timezone;
 
     protected Map<String, Object> changeLogParameters = new HashMap<String, Object>();
 
-    public static void main(String args[]) throws CommandLineParsingException, IOException {
+    public static void main(String[] args) {
+        new Main().execute(args);
+    }
+
+    protected void execute(String args[]) {
         try {
             // Might just be displaying version number or help
             if (!isContinue(args)) {
@@ -123,11 +131,13 @@ public class Main {
 
             // Run liquibase
             try {
+                main.handleTimeZone();
                 main.applyDefaults();
                 main.configureClassLoader();
                 main.doMigration();
             } catch (Throwable e) {
                 handleLiquibaseError(e);
+                // Exit code -1 for Liquibase issues
                 exit(-1);
             }
 
@@ -136,6 +146,7 @@ public class Main {
 
         } catch (Throwable e) {
             handleUnexpectedError(e);
+            // Exit code -3 for unexpected issues
             exit(-3);
         }
 
@@ -143,18 +154,31 @@ public class Main {
         exit(0);
     }
 
-    protected static Main getMain(String[] args) {
+    protected void handleTimeZone() {
+        if (this.timezone == null || "".equals(this.timezone.trim())) {
+            return;
+        }
+        TimeZone timeZone = timeZoneUtil.getTimeZone(timezone);
+        if (timeZone == null) {
+            throw new IllegalArgumentException("Timezone '" + timezone + "' is unknown.  Available timezones:\n"
+                    + timeZoneUtil.getLogValue());
+        }
+        timeZoneUtil.setJVMTimeZone(timeZone);
+    }
+
+    protected Main getMain(String[] args) throws IOException {
         Main main = new Main();
         try {
             main.parseOptions(args);
         } catch (CommandLineParsingException e) {
             main.printHelp(Arrays.asList(e.getMessage()), System.out);
+            // Exit code -2 for issues with command line arguments
             exit(-2);
         }
         return main;
     }
 
-    protected static void postProcessing(Main main) {
+    protected void postProcessing(Main main) {
         if ("update".equals(main.command)) {
             System.out.println("Liquibase Update Successful");
         } else if (main.command.startsWith("rollback") && !main.command.endsWith("SQL")) {
@@ -164,7 +188,7 @@ public class Main {
         }
     }
 
-    private static String generateLogLevelWarningMessage() {
+    private String generateLogLevelWarningMessage() {
         Logger logger = LogFactory.getLogger();
         if (logger == null || logger.getLogLevel() == null || (logger.getLogLevel().equals(LogLevel.DEBUG))) {
             return "";
@@ -851,22 +875,22 @@ public class Main {
         return System.getProperty("os.name").startsWith("Windows ");
     }
 
-    private static void exit(int status) {
+    private void exit(int status) {
         if (!SYS_EXIT) {
             return;
         }
         System.exit(status);
     }
 
-    protected static boolean isShowHelp(String[] args) {
+    protected boolean isShowHelp(String[] args) {
         return args.length == 1 && "--help".equals(args[0]);
     }
 
-    protected static boolean isShowVersion(String[] args) {
+    protected boolean isShowVersion(String[] args) {
         return args.length == 1 && "--version".equals(args[0]);
     }
 
-    protected static boolean isShouldRun() {
+    protected boolean isShouldRun() {
         String shouldRun = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRun == null) {
             return true;
@@ -875,9 +899,9 @@ public class Main {
         }
     }
 
-    protected static void handleUnexpectedError(Throwable e) {
+    protected void handleUnexpectedError(Throwable e) {
         String message = "Unexpected error running Liquibase: " + e.getMessage();
-        System.out.println(message);
+        System.err.println(message);
         try {
             LogFactory.getLogger().severe(message, e);
         } catch (Exception e1) {
@@ -885,7 +909,7 @@ public class Main {
         }
     }
 
-    protected static void handleLiquibaseError(Throwable e) {
+    protected void handleLiquibaseError(Throwable e) {
         String message = e.getMessage();
         if (e.getCause() != null) {
             message = e.getCause().getMessage();
@@ -903,7 +927,7 @@ public class Main {
         }
     }
 
-    protected static boolean isContinue(String[] args) {
+    protected boolean isContinue(String[] args) {
         if (!isShouldRun()) {
             System.out.println("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY
                     + "' system property was set to false");
@@ -920,7 +944,7 @@ public class Main {
         return true;
     }
 
-    protected static void handlePropertiesFiles(Main main) throws CommandLineParsingException, IOException {
+    protected void handlePropertiesFiles(Main main) throws CommandLineParsingException, IOException {
         File propertiesFile = new File(main.defaultsFile);
         File localPropertiesFile = new File(main.defaultsFile.replaceFirst("(\\.[^\\.]+)$", ".local$1"));
 
