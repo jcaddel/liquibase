@@ -1,0 +1,2 @@
+mysql --user=root --password=gw570229 < mysql-reset.sql
+mysql --user=root --password=gw570229 < mysql-session-tz.sql
