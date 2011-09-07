@@ -1,6 +1,7 @@
 package liquibase.util;
 
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -16,6 +17,7 @@ public class ISODateFormat {
     public static final String TIME_FORMAT = "HH:mm:ss";
 
     public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZZZZ";
+    public static final String DATE_TIME_FORMAT_NO_OFFSET = "yyyy-MM-dd'T'HH:mm:ss.SSS";
     public static final String DATE_TIME_FORMAT_WITH_DECIMAL1 = "yyyy-MM-dd'T'HH:mm:ss.SZZZZZ";
     public static final String DATE_TIME_FORMAT_WITH_DECIMAL2 = "yyyy-MM-dd'T'HH:mm:ss.SSZZZZZ";
     public static final String DATE_TIME_FORMAT_WITH_DECIMAL3 = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ";
@@ -28,6 +30,7 @@ public class ISODateFormat {
     SimpleDateFormat timeFormat = new SimpleDateFormat(TIME_FORMAT);
     SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
     SimpleDateFormat dateTimeFormat = new SimpleDateFormat(DATE_TIME_FORMAT_WITH_DECIMAL3);
+    SimpleDateFormat dateTimeFormatNoOffset = new SimpleDateFormat(DATE_TIME_FORMAT_NO_OFFSET);
     String[] iso8601DateTimeFormats = { DATE_TIME_FORMAT,
             DATE_TIME_FORMAT_WITH_DECIMAL1,
             DATE_TIME_FORMAT_WITH_DECIMAL2,
@@ -54,8 +57,12 @@ public class ISODateFormat {
         return timeFormat.format(date);
     }
 
-    public String format(java.sql.Timestamp date) {
+    public String format(Timestamp date) {
         return dateTimeFormat.format(date);
+    }
+
+    public String formatNoOffset(Timestamp date) {
+        return dateTimeFormatNoOffset.format(date);
     }
 
     public String format(Date date) {

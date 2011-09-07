@@ -83,6 +83,7 @@ public abstract class AbstractDatabase implements Database {
     public static final String DEFAULT_SQL_DELIMITER = ";";
     public static final DelimiterStyle DEFAULT_DELIMITER_STYLE = DelimiterStyle.DEFAULT;
 
+    ISODateFormat isoDateFormat = new ISODateFormat();
     private String delimiter = DEFAULT_SQL_DELIMITER;
     private DelimiterStyle delimiterStyle = DEFAULT_DELIMITER_STYLE;
     private DatabaseConnection connection;
@@ -311,19 +312,29 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
+    protected String getProcessedDate(String rawDate) {
+        return rawDate.replaceFirst("^'", "").replaceFirst("'$", "");
+    }
+
     @Override
     public String getDateTimeLiteral(java.sql.Timestamp date) {
-        return getDateLiteral(new ISODateFormat().format(date).replaceFirst("^'", "").replaceFirst("'$", ""));
+        String rawDate = isoDateFormat.formatNoOffset(date);
+        String processedDate = getProcessedDate(rawDate);
+        return getDateLiteral(processedDate);
     }
 
     @Override
     public String getDateLiteral(java.sql.Date date) {
-        return getDateLiteral(new ISODateFormat().format(date).replaceFirst("^'", "").replaceFirst("'$", ""));
+        String rawDate = isoDateFormat.format(date);
+        String processedDate = getProcessedDate(rawDate);
+        return getDateLiteral(processedDate);
     }
 
     @Override
     public String getTimeLiteral(java.sql.Time date) {
-        return getDateLiteral(new ISODateFormat().format(date).replaceFirst("^'", "").replaceFirst("'$", ""));
+        String rawDate = isoDateFormat.format(date);
+        String processedDate = getProcessedDate(rawDate);
+        return getDateLiteral(processedDate);
     }
 
     @Override
