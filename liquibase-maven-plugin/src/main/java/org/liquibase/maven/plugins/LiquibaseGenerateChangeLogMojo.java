@@ -101,10 +101,11 @@ public class LiquibaseGenerateChangeLogMojo extends AbstractLiquibaseMojo2 {
         if (StringUtils.isEmpty(types)) {
             return true;
         }
-        if (types.indexOf(EXPORT_DATA_TYPE) == -1) {
+        if (types.indexOf(EXPORT_DATA_TYPE) >= 0) {
+            return true;
+        } else {
             return false;
         }
-        return true;
     }
 
     protected void createDirectories() throws IOException {

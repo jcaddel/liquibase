@@ -1,7 +1,5 @@
 package org.liquibase.maven.plugins;
 
-import static liquibase.integration.commandline.CommandLineUtils.createDatabaseObject;
-
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -27,21 +25,20 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 /**
  * A base class for providing Liquibase {@link liquibase.Liquibase} functionality.
  *
- * @author Peter Murray
+ * Test dependency is used because when you run a goal outside the build phases you want to have the same dependencies
+ * that it would had if it was ran inside test phase
  *
- *         Test dependency is used because when you run a goal outside the build phases you want to have the same
- *         dependencies that it would had if it was ran inside test phase
- * @requiresDependencyResolution test
+ * @author Peter Murray
  */
 public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     CommandLineUtils cliUtils = new CommandLineUtils();
 
     /**
-     * Optional. If timezone is provided, timestamp data from the database the plugin is connecting to will be
-     * considered to be from the timezone specified. This is essentially a synonym for passing -Duser.timezone as a
-     * command line argument. The difference is that if the JVM cannot understand what is passed using -Duser.timezone
-     * it silently continues using UTC time. Using the timezone option for this plugin will generate an exception if the
-     * indicated timezone is unknown to the JVM. It will also print the known list of timezones available.
+     * Optional. If timezone is provided, timestamp data will be considered to be from the timezone specified. This is
+     * essentially a synonym for passing -Duser.timezone as a command line argument. The difference is that if the JVM
+     * cannot understand what is passed using -Duser.timezone it silently continues using UTC time. Using the timezone
+     * option for this plugin will generate an exception if the indicated timezone is unknown to the JVM. It will also
+     * print the known list of timezones available.
      *
      * @parameter expression="${liquibase.timezone}"
      */
@@ -208,7 +205,8 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
     protected Database getDatabaseObject() throws DatabaseException {
         String pw = ((password == null) ? "" : password);
         ClassLoader cl = this.getClass().getClassLoader();
-        return createDatabaseObject(cl, url, username, pw, driver, defaultSchemaName, databaseClass, driverProperties);
+        return CommandLineUtils.createDatabaseObject(cl, url, username, pw, driver, defaultSchemaName, databaseClass,
+                driverProperties);
     }
 
     /**
@@ -262,7 +260,7 @@ public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
             // Give them a chance to cancel if we are performing an action against a non-local database that performs a
             // modification
             if (!isConfirmExecution(liquibase)) {
-                throw new LiquibaseException("User decided not to run against non-local database");
+                throw new LiquibaseException("User decided not to run against a non-local database");
             }
 
             if (clearCheckSums) {

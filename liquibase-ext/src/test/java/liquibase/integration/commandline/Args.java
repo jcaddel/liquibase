@@ -6,7 +6,7 @@ public class Args {
     String[] other;
     String command;
     String changeLog;
-    String author = "unit-test";
+    String author = "kuali-ci";
 
     public GAV getGav() {
         return gav;
