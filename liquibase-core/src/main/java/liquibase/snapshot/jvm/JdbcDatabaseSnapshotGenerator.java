@@ -40,6 +40,7 @@ import liquibase.snapshot.DatabaseSnapshotGenerator;
 import liquibase.snapshot.SnapshotContext;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.SelectSequencesStatement;
+import liquibase.util.JdbcUtils;
 import liquibase.util.StringFilter;
 import liquibase.util.StringUtils;
 
@@ -182,7 +183,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         }
     }
 
-    private Table readTable(ResultSet rs, Database database) throws SQLException {
+    protected Table readTable(ResultSet rs, Database database) throws SQLException {
         String name = convertFromDatabaseName(rs.getString("TABLE_NAME"));
         String schemaName = convertFromDatabaseName(rs.getString("TABLE_SCHEM"));
         String remarks = rs.getString("REMARKS");
@@ -197,7 +198,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         return table;
     }
 
-    private View readView(ResultSet rs, Database database) throws SQLException, DatabaseException {
+    protected View readView(ResultSet rs, Database database) throws SQLException, DatabaseException {
         String name = convertFromDatabaseName(rs.getString("TABLE_NAME"));
         String schemaName = convertFromDatabaseName(rs.getString("TABLE_SCHEM"));
 
@@ -216,17 +217,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         return view;
     }
 
-    protected boolean isSkip(Database database, String catalogName, String schemaName, String tableName) {
-        if (database.isSystemTable(catalogName, schemaName, tableName)) {
-            return true;
-        }
-        if (database.isSystemView(catalogName, schemaName, tableName)) {
-            return true;
-        }
-        return false;
-    }
-
-    private Column readColumn(ResultSet rs, Database database) throws SQLException, DatabaseException {
+    protected Column readColumn(ResultSet rs, Database database) throws SQLException, DatabaseException {
         Column column = new Column();
 
         String tableName = convertFromDatabaseName(rs.getString("TABLE_NAME"));
@@ -235,7 +226,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         String catalogName = convertFromDatabaseName(rs.getString("TABLE_CAT"));
         String remarks = rs.getString("REMARKS");
 
-        if (isSkip(database, catalogName, schemaName, tableName)) {
+        if (isSystemTableOrView(database, catalogName, schemaName, tableName)) {
             return null;
         }
 
@@ -282,13 +273,14 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
     @Override
     public DatabaseSnapshot createSnapshot(SnapshotContext context) throws DatabaseException {
+        if (context.getSchema() == null) {
+            context.setSchema(context.getDatabase().getDefaultSchemaName());
+        }
+
         String requestedSchema = context.getSchema();
         Database database = context.getDatabase();
         Set<MetadataType> metadataTypes = context.getMetadataTypes();
         Set<DiffStatusListener> listeners = context.getListeners();
-        if (requestedSchema == null) {
-            requestedSchema = database.getDefaultSchemaName();
-        }
 
         try {
 
@@ -309,7 +301,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
             // Always need tables unless they are only asking for views or sequences
             if (isReadTables(metadataTypes)) {
-                readTables(snapshot, requestedSchema, databaseMetaData, context);
+                readTables(snapshot, databaseMetaData, context);
             }
 
             if (isReadForeignKeys(metadataTypes)) {
@@ -415,48 +407,90 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         return databaseMetaData;
     }
 
+    protected void readTables(DatabaseSnapshot snapshot, DatabaseMetaData databaseMetaData, SnapshotContext context)
+            throws SQLException, DatabaseException {
+        readTables(snapshot, context.getSchema(), databaseMetaData, context);
+    }
+
+    protected ResultSet getAllTablesResultSet(String schema, Database database, DatabaseMetaData dbmd)
+            throws SQLException, DatabaseException {
+        String toSchema = database.convertRequestedSchemaToSchema(schema);
+        String toCatalog = database.convertRequestedSchemaToCatalog(schema);
+        String[] types = { "TABLE", "ALIAS" };
+        return dbmd.getTables(toCatalog, toSchema, null, types);
+    }
+
     protected void readTables(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData,
             SnapshotContext context) throws SQLException, DatabaseException {
         Database database = snapshot.getDatabase();
         updateListeners("Reading tables for " + database.toString() + " ...");
         StringFilter filter = new StringFilter(context.getIncludes(), context.getExcludes());
 
-        ResultSet rs = databaseMetaData.getTables(database.convertRequestedSchemaToCatalog(schema),
-                database.convertRequestedSchemaToSchema(schema), null, new String[] { "TABLE", "ALIAS" });
+        ResultSet rs = getAllTablesResultSet(context.getSchema(), database, databaseMetaData);
         try {
             while (rs.next()) {
                 Table table = readTable(rs, database);
-
-                // This might be a table we don't care about
-                if (!filter.isInclude(table.getName())) {
-                    continue;
-                }
-
                 table.setSchema(schema); // not always set for some reason
-                if (database.isLiquibaseTable(table.getName())) {
-                    if (table.getName().equalsIgnoreCase(database.getDatabaseChangeLogTableName())) {
-                        snapshot.setDatabaseChangeLogTable(table);
-                        continue;
-                    }
 
-                    if (table.getName().equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
-                        snapshot.setDatabaseChangeLogLockTable(table);
-                        continue;
-                    }
-                }
-                if (database.isSystemTable(table.getRawCatalogName(), table.getRawSchemaName(), table.getName())
-                        || database.isSystemView(table.getRawCatalogName(), table.getRawSchemaName(), table.getName())) {
+                // May not want this table in the snapshot
+                if (isIgnoreTable(database, table, filter)) {
                     continue;
                 }
 
-                snapshot.getTables().add(table);
+                if (isLiquibaseTable(database, table)) {
+                    // Liquibase tables get attached to the snapshot directly
+                    handleLiquibaseTable(database, snapshot, table);
+                } else {
+                    // We've located a table to add to the snapshot
+                    snapshot.getTables().add(table);
+                }
             }
         } finally {
-            try {
-                rs.close();
-            } catch (SQLException ignore) {
-            }
+            JdbcUtils.closeResultSet(rs);
         }
+    }
+
+    protected boolean isLiquibaseTable(Database database, Table table) {
+        return database.isLiquibaseTable(table.getName());
+    }
+
+    protected void handleLiquibaseTable(Database database, DatabaseSnapshot snapshot, Table table) {
+        if (table.getName().equalsIgnoreCase(database.getDatabaseChangeLogTableName())) {
+            snapshot.setDatabaseChangeLogTable(table);
+        }
+
+        if (table.getName().equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
+            snapshot.setDatabaseChangeLogLockTable(table);
+        }
+    }
+
+    protected boolean isIgnoreTable(Database database, Table table, StringFilter filter) {
+        // Might have been explicitly excluded
+        if (!filter.isInclude(table.getName())) {
+            return true;
+        }
+        // Might be a system table
+        if (isSystemTableOrView(database, table)) {
+            return true;
+        }
+        return false;
+    }
+
+    protected boolean isSystemTableOrView(Database database, String catalogName, String schemaName, String tableName) {
+        if (database.isSystemTable(catalogName, schemaName, tableName)) {
+            return true;
+        }
+        if (database.isSystemView(catalogName, schemaName, tableName)) {
+            return true;
+        }
+        return false;
+    }
+
+    protected boolean isSystemTableOrView(Database database, Table table) {
+        String tableName = table.getName();
+        String rawCatalogName = table.getRawCatalogName();
+        String rawSchemaName = table.getRawSchemaName();
+        return isSystemTableOrView(database, rawCatalogName, rawSchemaName, tableName);
     }
 
     protected void readViews(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
@@ -476,10 +510,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 snapshot.getViews().add(view);
             }
         } finally {
-            try {
-                rs.close();
-            } catch (SQLException ignore) {
-            }
+            JdbcUtils.closeResultSet(rs);
         }
     }
 
@@ -1021,7 +1052,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
     // }
 
     protected void readSequences(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
-            throws DatabaseException {
+            throws SQLException, DatabaseException {
         Database database = snapshot.getDatabase();
         if (database.supportsSequences()) {
             updateListeners("Reading sequences for " + database.toString() + " ...");

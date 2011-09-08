@@ -1,12 +1,17 @@
 package liquibase.snapshot.ext;
 
 import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import liquibase.database.Database;
+import liquibase.database.structure.Table;
 import liquibase.database.structure.View;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.util.StringFilter;
 import liquibase.util.TimeZoneUtil;
 
 /**
@@ -23,17 +28,39 @@ public class MySQLSnapshotGenerator extends liquibase.snapshot.jvm.MySQLDatabase
         return PRIORITY;
     }
 
-    /*
+    protected boolean isSequenceTable(Table table) {
+        String name = table.getName().toLowerCase();
+        return name.endsWith("_s");
+    }
+
+    protected List<Table> getSequenceTables(Database database, ResultSet rs) throws SQLException {
+        List<Table> sequences = new ArrayList<Table>();
+        while (rs.next()) {
+            Table table = readTable(rs, database);
+            if (isSequenceTable(table)) {
+                sequences.add(table);
+            }
+        }
+        return sequences;
+    }
+
     @Override
-    protected TimeZone getDatabaseTimeZone(SnapshotContext context) throws DatabaseException {
-        ExecutorService service = ExecutorService.getInstance();
-        Executor executor = service.getExecutor(context.getDatabase());
-        String sql = "SELECT timestampdiff(hour,utc_timestamp,current_timestamp)";
-        SqlStatement ss = new RawSqlStatement(sql);
-        Long offset = executor.queryForLong(ss);
-        TimeZone timeZone = tzu.getEtcGMTTimeZone(offset.intValue());
-        return timeZone;
-    }*/
+    protected void readSequences(DatabaseSnapshot snapshot, String schema, DatabaseMetaData dbmd) throws SQLException,
+            DatabaseException {
+
+        Database database = snapshot.getDatabase();
+        if (!database.supportsSequences()) {
+            updateListeners("Sequences not supported for " + database.toString() + " ...");
+            return;
+        }
+
+        ResultSet rs = super.getAllTablesResultSet(schema, database, dbmd);
+        List<Table> sequences = getSequenceTables(database, rs);
+        System.out.println("found " + sequences.size() + " sequences");
+        for (Table sequence : sequences) {
+            System.out.println(sequence.getName());
+        }
+    }
 
     /**
      * When a view is created in MySQL, the original SQL statement is parsed, and has some formatting applied to it
@@ -69,6 +96,15 @@ public class MySQLSnapshotGenerator extends liquibase.snapshot.jvm.MySQLDatabase
             s = s.replace(token, replacement);
         }
         return s;
+    }
+
+    /**
+     * Override the super class method so tables that are only being used to produce sequences do not get lumped in with
+     * the other tables. Sequence only tables need to produce <createSequence> tags instead of <creatTable> tags
+     */
+    @Override
+    protected boolean isIgnoreTable(Database database, Table table, StringFilter filter) {
+        return super.isIgnoreTable(database, table, filter) || isSequenceTable(table);
     }
 
 }
