@@ -11,19 +11,12 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.core.InsertGenerator;
 import liquibase.statement.core.InsertStatement;
 import liquibase.statement.core.InsertStatementColumn;
 import liquibase.util.SqlType;
 
-public class InsertGeneratorOracle extends InsertGenerator {
+public class InsertGeneratorOracle extends FlattenInsertGenerator {
     private static final int MAX_CLOB_LENGTH = 4000;
-    private static final int PRIORITY = 6;
-
-    @Override
-    public int getPriority() {
-        return PRIORITY;
-    }
 
     @Override
     public boolean supports(InsertStatement statement, Database database) {
