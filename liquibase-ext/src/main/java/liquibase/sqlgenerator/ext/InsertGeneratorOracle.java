@@ -14,6 +14,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertStatement;
 import liquibase.statement.core.InsertStatementColumn;
 import liquibase.util.SqlType;
+import liquibase.util.StringUtils;
 
 public class InsertGeneratorOracle extends FlattenInsertGenerator {
     private static final int MAX_CLOB_LENGTH = 4000;
@@ -100,25 +101,60 @@ public class InsertGeneratorOracle extends FlattenInsertGenerator {
 
     }
 
-    protected List<Sql> getSql(InsertStatementColumn clob, Database database, InsertStatement statement) {
-        String text = (String) clob.getValue();
+    protected List<Sql> getSql(InsertStatementColumn clobColumn, Database database, InsertStatement statement) {
+        boolean flattened = false;
+        String text = (String) clobColumn.getValue();
+        if (isShouldFlatten(text)) {
+            text = StringUtils.flatten(text);
+            clobColumn.setValue(text);
+            flattened = true;
+        }
         List<Sql> sql = new ArrayList<Sql>();
         int chunkCount = getChunkCount(text);
         int length = text.length();
         StringBuilder sb = new StringBuilder();
         sb.append("-- Length: " + length + "\n");
         sb.append("-- Chunks: " + chunkCount + "\n");
+        if (flattened) {
+            sb.append("-- Flattened: " + flattened + "\n");
+        }
+        sb.append("\n");
+        OracleClobContext context = new OracleClobContext();
+        context.setClobColumn(clobColumn);
+        context.setDatabase(database);
+        context.setStatement(statement);
         for (int i = 0; i < chunkCount; i++) {
-            OracleClobContext context = new OracleClobContext();
+            sb.append("-- Chunk Number: " + (i + 1) + "\n");
             context.setChunkIndex(i);
-            context.setClob(clob);
-            context.setDatabase(database);
-            context.setStatement(statement);
             sb.append(getOraclePlSqlFragment(context));
             sql.add(new UnparsedSql(sb.toString()));
             sb = new StringBuilder();
         }
+
+        if (flattened) {
+            String updateSql = getUpdateFlattenedClobSQL(context);
+            sb = new StringBuilder();
+            sb.append("-- Revert Flattened CLOB data\n");
+            sb.append(updateSql);
+            sql.add(new UnparsedSql(sb.toString()));
+        }
+
         return sql;
+    }
+
+    protected String getUpdateFlattenedClobSQL(OracleClobContext context) {
+        String schemaName = context.getStatement().getSchemaName();
+        String tableName = context.getStatement().getTableName();
+        String escapedTableName = context.getDatabase().escapeTableName(schemaName, tableName);
+        String columnName = context.getClobColumn().getName();
+        String cr = StringUtils.LIQUIBASE_CR;
+        String lf = StringUtils.LIQUIBASE_LF;
+        StringBuilder sb = new StringBuilder();
+        sb.append("UPDATE " + escapedTableName);
+        sb.append(" SET " + columnName + " = ");
+        sb.append("replace(replace(" + columnName + ",'" + cr + "','\\r'),'" + lf + "','\\n')");
+        sb.append(" WHERE " + getWhereClause(context));
+        return sb.toString();
     }
 
     protected List<InsertStatementColumn> getGiantClobs(InsertStatement statement) {
@@ -142,13 +178,13 @@ public class InsertGeneratorOracle extends FlattenInsertGenerator {
         String schemaName = context.getStatement().getSchemaName();
         String tableName = context.getStatement().getTableName();
         String escapedTableName = context.getDatabase().escapeTableName(schemaName, tableName);
-        String text = (String) context.getClob().getValue();
+        String text = (String) context.getClobColumn().getValue();
         String textChunk = getChunk(text, context.getChunkIndex());
         String sqlValue = getStringSqlValue(textChunk, context.getDatabase());
         StringBuilder sb = new StringBuilder();
         sb.append("DECLARE    data CLOB; buffer VARCHAR2(32000);\n");
         sb.append("BEGIN\n");
-        sb.append("    SELECT " + context.getClob().getName() + " INTO data FROM " + escapedTableName + "\n");
+        sb.append("    SELECT " + context.getClobColumn().getName() + " INTO data FROM " + escapedTableName + "\n");
         sb.append("    WHERE " + getWhereClause(context) + "\n");
         sb.append("    FOR UPDATE;\n");
         sb.append("    buffer := " + sqlValue + ";\n");

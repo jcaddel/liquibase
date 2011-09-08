@@ -6,7 +6,7 @@ import liquibase.statement.core.InsertStatementColumn;
 
 public class OracleClobContext {
     int chunkIndex;
-    InsertStatementColumn clob;
+    InsertStatementColumn clobColumn;
     Database database;
     InsertStatement statement;
 
@@ -18,12 +18,12 @@ public class OracleClobContext {
         this.chunkIndex = chunkIndex;
     }
 
-    public InsertStatementColumn getClob() {
-        return clob;
+    public InsertStatementColumn getClobColumn() {
+        return clobColumn;
     }
 
-    public void setClob(InsertStatementColumn clob) {
-        this.clob = clob;
+    public void setClobColumn(InsertStatementColumn clob) {
+        this.clobColumn = clob;
     }
 
     public Database getDatabase() {

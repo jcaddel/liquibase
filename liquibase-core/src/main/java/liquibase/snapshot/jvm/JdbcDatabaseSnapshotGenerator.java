@@ -441,7 +441,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                     // Liquibase tables get attached to the snapshot directly
                     handleLiquibaseTable(database, snapshot, table);
                 } else {
-                    // We've located a table to add to the snapshot
+                    // We've located a table to add to our list
                     snapshot.getTables().add(table);
                 }
             }
