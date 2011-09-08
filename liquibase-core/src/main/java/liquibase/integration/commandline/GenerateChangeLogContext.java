@@ -13,6 +13,7 @@ public class GenerateChangeLogContext {
     String workingDir;
     String includes;
     String excludes;
+    boolean flatten;
 
     public String getChangeLogFile() {
         return changeLogFile;
@@ -92,6 +93,14 @@ public class GenerateChangeLogContext {
 
     public void setWorkingDir(String workingDir) {
         this.workingDir = workingDir;
+    }
+
+    public boolean getFlatten() {
+        return flatten;
+    }
+
+    public void setFlatten(boolean flatten) {
+        this.flatten = flatten;
     }
 
 }

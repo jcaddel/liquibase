@@ -10,6 +10,21 @@ import java.util.regex.Pattern;
  * Various utility methods for working with strings.
  */
 public class StringUtils {
+
+    public static String flatten(String s) {
+        if (s == null) {
+            return null;
+        }
+        return s.replace("\n", "${liquibase.lf}").replace("\r", "${liquibase.cr}");
+    }
+
+    public static String inflate(String s) {
+        if (s == null) {
+            return null;
+        }
+        return s.replace("${liquibase.lf}", "\n").replace("${liquibase.cr}", "\r");
+    }
+
     public static String trimToEmpty(String string) {
         if (string == null) {
             return "";
@@ -32,7 +47,7 @@ public class StringUtils {
     /**
      * Removes any comments from multiple line SQL using {@link #stripComments(String)} and then extracts each
      * individual statement using {@link #splitSQL(String, String)}.
-     * 
+     *
      * @param multiLineSQL
      *            A String containing all the SQL statements
      * @param stripComments
@@ -75,7 +90,7 @@ public class StringUtils {
     /**
      * Searches through a String which contains SQL code and strips out any comments that are between \/**\/ or anything
      * that matches SP--SP<text>\n (to support the ANSI standard commenting of -- at the end of a line).
-     * 
+     *
      * @return The String without the comments in
      */
     public static String stripComments(String multiLineSQL) {

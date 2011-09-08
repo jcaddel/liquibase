@@ -78,6 +78,7 @@ public class DiffResult {
     private static final String FS = System.getProperty("file.separator");
     public static final String EXCLUDE_SCHEMA_KEY = "liquibase.schema.exclude";
     private static final boolean EXCLUDE_SCHEMA = "true".equalsIgnoreCase(System.getProperty(EXCLUDE_SCHEMA_KEY));
+    ISODateFormat isoDateFormat = new ISODateFormat();
 
     private String idRoot = String.valueOf(new Date().getTime());
     private int changeNumber = 1;
@@ -119,6 +120,7 @@ public class DiffResult {
     private String workingDir = null;
     private String changeSetContext;
     private String changeSetAuthor;
+    private boolean flatten;
 
     private ChangeLogSerializerFactory serializerFactory = ChangeLogSerializerFactory.getInstance();
 
@@ -1110,9 +1112,13 @@ public class DiffResult {
             return "NULL";
         }
         if (value instanceof Date) {
-            return new ISODateFormat().format(((Date) value));
+            return isoDateFormat.format(((Date) value));
         } else {
-            return value.toString();
+            if (this.flatten && value instanceof String) {
+                return StringUtils.flatten((String) value);
+            } else {
+                return value.toString();
+            }
         }
     }
 
@@ -1152,6 +1158,7 @@ public class DiffResult {
         change.setEncoding(ENCODING);
         change.setSchemaName(context.getSchema());
         change.setTableName(context.getTable().getName());
+        change.setFlattened(Boolean.toString(flatten));
         List<SqlType> columnTypes = getColumnTypes(context.getTable());
 
         Table table = context.getTable();
@@ -1338,5 +1345,13 @@ public class DiffResult {
 
     public void setWorkingDir(String workingDir) {
         this.workingDir = workingDir;
+    }
+
+    public boolean isFlatten() {
+        return flatten;
+    }
+
+    public void setFlatten(boolean flatten) {
+        this.flatten = flatten;
     }
 }

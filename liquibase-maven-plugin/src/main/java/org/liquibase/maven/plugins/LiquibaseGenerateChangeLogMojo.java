@@ -64,12 +64,21 @@ public class LiquibaseGenerateChangeLogMojo extends AbstractLiquibaseMojo2 {
     protected String dataDir;
 
     /**
-     * Optional. If workingDir is provided, the path to the CSV file will be relative path calculated by the difference
-     * between dataDir and workingDir
+     * Optional. If workingDir is provided, the path to the CSV file will be a relative path calculated by the
+     * difference between dataDir and workingDir
      *
      * @parameter expression="${liquibase.workingDir}"
      */
     protected String workingDir;
+
+    /**
+     * Optional. If flatten=true, text data written to CSV files will be "flattened" so there is exactly one line in the
+     * CSV file for each row in the table. This is done by replacing line feed characters with ${liquibase.lf} and
+     * carriage return characters with ${liquibase.cr}.
+     *
+     * @parameter expression="${liquibase.flatten}"
+     */
+    protected boolean flatten;
 
     @Override
     protected void performTask() throws MojoExecutionException {
@@ -87,6 +96,7 @@ public class LiquibaseGenerateChangeLogMojo extends AbstractLiquibaseMojo2 {
             context.setDataDir(dataDir);
             context.setWorkingDir(workingDir);
             context.setChangeSetContext(this.context);
+            context.setFlatten(flatten);
 
             CommandLineUtils.doGenerateChangeLog(context);
         } catch (Exception e) {

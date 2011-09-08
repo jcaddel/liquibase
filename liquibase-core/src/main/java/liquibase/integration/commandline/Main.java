@@ -100,6 +100,7 @@ public class Main {
     protected String logFile;
     protected String outputFile;
     protected String timezone;
+    protected Boolean flatten;
 
     protected Map<String, Object> changeLogParameters = new HashMap<String, Object>();
 
@@ -478,6 +479,9 @@ public class Main {
         if (this.includeSystemClasspath == null) {
             this.includeSystemClasspath = Boolean.TRUE;
         }
+        if (this.flatten == null) {
+            this.flatten = Boolean.FALSE;
+        }
 
     }
 
@@ -637,6 +641,7 @@ public class Main {
                 context.setWorkingDir(trimToNull(workingDir));
                 context.setIncludes(trimToNull(includes));
                 context.setExcludes(trimToNull(excludes));
+                context.setFlatten(flatten);
                 CommandLineUtils.doGenerateChangeLog(context);
                 return;
             }

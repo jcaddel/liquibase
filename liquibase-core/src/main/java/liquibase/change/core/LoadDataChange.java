@@ -39,6 +39,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
     private String quotchar = liquibase.util.csv.opencsv.CSVReader.DEFAULT_QUOTE_CHARACTER + "";
     @ChangeProperty(includeInSerialization = false)
     private NullValue nullValue = new NullValue();
+    private String flattened;
 
     private List<LoadDataColumnConfig> columns = new ArrayList<LoadDataColumnConfig>();
 
@@ -336,5 +337,13 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
 
     public void setNullValue(NullValue nullValue) {
         this.nullValue = nullValue;
+    }
+
+    public String getFlattened() {
+        return flattened;
+    }
+
+    public void setFlattened(String flattened) {
+        this.flattened = flattened;
     }
 }
