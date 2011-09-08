@@ -126,7 +126,13 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
         } else if (SqlType.isDate(type)) {
             valueConfig.setValueDate(value.toString());
         } else if (SqlType.isString(type)) {
-            valueConfig.setValue(value.toString());
+            if (Boolean.parseBoolean(flattened)) {
+                // If the CSV data was "flattened" before writing it to the CSV file, we need to unflatten it
+                valueConfig.setValue(StringUtils.unflatten(value.toString()));
+            } else {
+                // Otherwise just use it as is
+                valueConfig.setValue(value.toString());
+            }
         } else if (columnConfig.getType().equalsIgnoreCase("COMPUTED")) {
             valueConfig.setValue(value.toString());
         } else {

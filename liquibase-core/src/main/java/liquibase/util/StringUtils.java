@@ -10,19 +10,31 @@ import java.util.regex.Pattern;
  * Various utility methods for working with strings.
  */
 public class StringUtils {
+    public static final String LIQUIBASE_CR = "${liquibase.cr}";
+    public static final String LIQUIBASE_LF = "${liquibase.lf}";
 
+    /**
+     * Replace linefeed and carriage return characters with ${liquibase.lf} and ${liquibase.cr}
+     *
+     * @see unflatten
+     */
     public static String flatten(String s) {
         if (s == null) {
             return null;
         }
-        return s.replace("\n", "${liquibase.lf}").replace("\r", "${liquibase.cr}");
+        return s.replace("\n", LIQUIBASE_LF).replace("\r", LIQUIBASE_CR);
     }
 
-    public static String inflate(String s) {
+    /**
+     * Replace ${liquibase.lf} and ${liquibase.cr} with the linefeed and carriage return characters
+     *
+     * @see flatten
+     */
+    public static String unflatten(String s) {
         if (s == null) {
             return null;
         }
-        return s.replace("${liquibase.lf}", "\n").replace("${liquibase.cr}", "\r");
+        return s.replace(LIQUIBASE_LF, "\n").replace(LIQUIBASE_CR, "\r");
     }
 
     public static String trimToEmpty(String string) {
