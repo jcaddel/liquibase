@@ -45,8 +45,8 @@ public class MySQLSnapshotGenerator extends liquibase.snapshot.jvm.MySQLDatabase
     }
 
     @Override
-    protected void readSequences(DatabaseSnapshot snapshot, String schema, DatabaseMetaData dbmd) throws SQLException,
-            DatabaseException {
+    protected void readSequences(DatabaseSnapshot snapshot, String schema, DatabaseMetaData dbmd)
+            throws DatabaseException {
 
         Database database = snapshot.getDatabase();
         if (!database.supportsSequences()) {
@@ -54,11 +54,15 @@ public class MySQLSnapshotGenerator extends liquibase.snapshot.jvm.MySQLDatabase
             return;
         }
 
-        ResultSet rs = super.getAllTablesResultSet(schema, database, dbmd);
-        List<Table> sequences = getSequenceTables(database, rs);
-        System.out.println("found " + sequences.size() + " sequences");
-        for (Table sequence : sequences) {
-            System.out.println(sequence.getName());
+        try {
+            ResultSet rs = super.getAllTablesResultSet(schema, database, dbmd);
+            List<Table> sequences = getSequenceTables(database, rs);
+            System.out.println("found " + sequences.size() + " sequences");
+            for (Table sequence : sequences) {
+                System.out.println(sequence.getName());
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
         }
     }
 

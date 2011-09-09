@@ -1,9 +1,13 @@
 package liquibase.database.structure;
 
+import java.math.BigInteger;
+
 public class Sequence implements DatabaseObject, Comparable<Sequence> {
     private String name;
     private String schema;
+    private BigInteger startValue;
 
+    @Override
     public DatabaseObject[] getContainingObjects() {
         return null;
     }
@@ -16,6 +20,7 @@ public class Sequence implements DatabaseObject, Comparable<Sequence> {
         this.name = name;
     }
 
+    @Override
     public int compareTo(Sequence o) {
         return this.getName().compareTo(o.getName());
     }
@@ -57,4 +62,13 @@ public class Sequence implements DatabaseObject, Comparable<Sequence> {
     public void setSchema(String schema) {
         this.schema = schema;
     }
+
+    public BigInteger getStartValue() {
+        return startValue;
+    }
+
+    public void setStartValue(BigInteger startValue) {
+        this.startValue = startValue;
+    }
+
 }

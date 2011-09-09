@@ -33,11 +33,13 @@ import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGenerator;
 import liquibase.snapshot.SnapshotContext;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.SelectSequencesStatement;
 import liquibase.util.JdbcUtils;
@@ -85,10 +87,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             try {
                 return rs.next();
             } finally {
-                try {
-                    rs.close();
-                } catch (SQLException ignore) {
-                }
+                JdbcUtils.closeResultSet(rs);
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
@@ -104,10 +103,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             try {
                 return rs.next();
             } finally {
-                try {
-                    rs.close();
-                } catch (SQLException ignore) {
-                }
+                JdbcUtils.closeResultSet(rs);
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
@@ -149,12 +145,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         } catch (Exception e) {
             throw new DatabaseException(e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ignore) {
-                }
-            }
+            JdbcUtils.closeResultSet(rs);
         }
     }
 
@@ -174,12 +165,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         } catch (Exception e) {
             throw new DatabaseException(e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ignore) {
-                }
-            }
+            JdbcUtils.closeResultSet(rs);
         }
     }
 
@@ -1051,30 +1037,44 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
     // }
     // }
 
-    protected void readSequences(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
-            throws SQLException, DatabaseException {
+    protected void readSequences(DatabaseSnapshot snapshot, String schema, DatabaseMetaData dbmd)
+            throws DatabaseException {
         Database database = snapshot.getDatabase();
-        if (database.supportsSequences()) {
-            updateListeners("Reading sequences for " + database.toString() + " ...");
-
-            String convertedSchemaName = database.convertRequestedSchemaToSchema(schema);
-
-            // noinspection unchecked
-            List<String> sequenceNames = (List<String>) ExecutorService.getInstance().getExecutor(database)
-                    .queryForList(new SelectSequencesStatement(schema), String.class);
-
-            if (sequenceNames != null) {
-                for (String sequenceName : sequenceNames) {
-                    Sequence seq = new Sequence();
-                    seq.setName(sequenceName.trim());
-                    seq.setSchema(convertedSchemaName);
-
-                    snapshot.getSequences().add(seq);
-                }
-            }
-        } else {
+        if (!database.supportsSequences()) {
             updateListeners("Sequences not supported for " + database.toString() + " ...");
+            return;
         }
+
+        updateListeners("Reading sequences for " + database.toString() + " ...");
+
+        String convertedSchemaName = database.convertRequestedSchemaToSchema(schema);
+
+        List<String> sequenceNames = getSequenceNames(database, schema);
+        List<Sequence> sequences = getSequences(sequenceNames, convertedSchemaName);
+        snapshot.getSequences().addAll(sequences);
+    }
+
+    protected List<Sequence> getSequences(List<String> sequenceNames, String schema) {
+        if (sequenceNames == null) {
+            return new ArrayList<Sequence>();
+        }
+        List<Sequence> sequences = new ArrayList<Sequence>();
+        for (String sequenceName : sequenceNames) {
+            Sequence sequence = new Sequence();
+            sequence.setName(sequenceName.trim());
+            sequence.setSchema(schema);
+            sequences.add(sequence);
+        }
+        return sequences;
+    }
+
+    protected List<String> getSequenceNames(Database database, String schema) throws DatabaseException {
+        // no inspection unchecked
+        ExecutorService service = ExecutorService.getInstance();
+        Executor executor = service.getExecutor(database);
+
+        SqlStatement sql = new SelectSequencesStatement(schema);
+        return (List<String>) executor.queryForList(sql, String.class);
     }
 
     protected void updateListeners(String message) {

@@ -1,19 +1,19 @@
-package liquibase.sqlgenerator.core;
+package liquibase.sqlgenerator.ext;
 
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.core.SelectSequencesGeneratorOracle;
 import liquibase.statement.core.SelectSequencesStatement;
 
-public class SelectSequencesGeneratorOracle extends AbstractSqlGenerator<SelectSequencesStatement> {
+public class OracleSelectSequencesGenerator extends SelectSequencesGeneratorOracle {
     @Override
     public int getPriority() {
-        return PRIORITY_DATABASE;
+        return 6;
     }
 
     @Override
@@ -22,18 +22,22 @@ public class SelectSequencesGeneratorOracle extends AbstractSqlGenerator<SelectS
     }
 
     @Override
-    public ValidationErrors validate(SelectSequencesStatement statement, Database database,
-            SqlGeneratorChain sqlGeneratorChain) {
-        return new ValidationErrors();
-    }
-
-    @Override
     public Sql[] generateSql(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         try {
-            return new Sql[] { new UnparsedSql("SELECT SEQUENCE_NAME FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '"
-                    + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'") };
+            String rawSql = getSql(statement, database);
+            return new Sql[] { new UnparsedSql(rawSql) };
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
+    }
+
+    protected String getSql(SelectSequencesStatement statement, Database database) throws DatabaseException {
+        String schema = database.convertRequestedSchemaToSchema(statement.getSchemaName());
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT SEQUENCE_NAME\n");
+        sb.append(" , LAST_NUMBER\n");
+        sb.append("FROM ALL_SEQUENCES\n");
+        sb.append("WHERE SEQUENCE_OWNER = '" + schema + "'");
+        return sb.toString();
     }
 }

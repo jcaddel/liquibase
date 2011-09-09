@@ -735,6 +735,7 @@ public class DiffResult {
 
             CreateSequenceChange change = new CreateSequenceChange();
             change.setSequenceName(sequence.getName());
+            change.setStartValue(sequence.getStartValue());
             if (!EXCLUDE_SCHEMA) {
                 change.setSchemaName(sequence.getSchema());
             }
