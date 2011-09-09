@@ -1,5 +1,6 @@
 package liquibase.snapshot.ext;
 
+import java.math.BigInteger;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -7,12 +8,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import liquibase.database.Database;
+import liquibase.database.structure.Sequence;
 import liquibase.database.structure.Table;
 import liquibase.database.structure.View;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringFilter;
-import liquibase.util.TimeZoneUtil;
 
 /**
  * Provides MySQL specific logic for capturing a snapshot of a database via JDBC
@@ -21,7 +26,6 @@ import liquibase.util.TimeZoneUtil;
  */
 public class MySQLSnapshotGenerator extends liquibase.snapshot.jvm.MySQLDatabaseSnapshotGenerator {
     public static final int PRIORITY = 6;
-    TimeZoneUtil tzu = new TimeZoneUtil();
 
     @Override
     public int getPriority(Database database) {
@@ -31,6 +35,42 @@ public class MySQLSnapshotGenerator extends liquibase.snapshot.jvm.MySQLDatabase
     protected boolean isSequenceTable(Table table) {
         String name = table.getName().toLowerCase();
         return name.endsWith("_s");
+    }
+
+    protected Sequence getSequence(Database database, Table table) throws DatabaseException {
+        ExecutorService service = ExecutorService.getInstance();
+        Executor executor = service.getExecutor(database);
+        SqlStatement sql = new RawSqlStatement("SELECT ID FROM " + table.getName());
+        List<String> idValues = (List<String>) executor.queryForList(sql, String.class);
+
+        BigInteger startValue = getStartValue(idValues);
+
+        Sequence sequence = new Sequence();
+        sequence.setName(table.getName());
+        sequence.setStartValue(startValue);
+        return sequence;
+    }
+
+    protected BigInteger getStartValue(List<String> idValues) throws DatabaseException {
+        if (idValues == null) {
+            return null;
+        }
+        if (idValues.size() == 0) {
+            return null;
+        }
+        if (idValues.size() > 1) {
+            throw new DatabaseException("Expected 0 or 1 values");
+        }
+        return new BigInteger(idValues.get(1));
+    }
+
+    protected List<Sequence> getSequences(Database database, List<Table> sequenceTables) throws DatabaseException {
+        List<Sequence> sequences = new ArrayList<Sequence>();
+        for (Table table : sequenceTables) {
+            Sequence sequence = getSequence(database, table);
+            sequences.add(sequence);
+        }
+        return sequences;
     }
 
     protected List<Table> getSequenceTables(Database database, ResultSet rs) throws SQLException {
@@ -49,18 +89,11 @@ public class MySQLSnapshotGenerator extends liquibase.snapshot.jvm.MySQLDatabase
             throws DatabaseException {
 
         Database database = snapshot.getDatabase();
-        if (!database.supportsSequences()) {
-            updateListeners("Sequences not supported for " + database.toString() + " ...");
-            return;
-        }
-
         try {
             ResultSet rs = super.getAllTablesResultSet(schema, database, dbmd);
-            List<Table> sequences = getSequenceTables(database, rs);
-            System.out.println("found " + sequences.size() + " sequences");
-            for (Table sequence : sequences) {
-                System.out.println(sequence.getName());
-            }
+            List<Table> sequenceTables = getSequenceTables(database, rs);
+            List<Sequence> sequences = getSequences(database, sequenceTables);
+            snapshot.getSequences().addAll(sequences);
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }

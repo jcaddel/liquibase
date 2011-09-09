@@ -10,8 +10,8 @@ public class GenerateChangeLogTest {
 
     @Test
     public void cycleRice() throws Exception {
-        // cycleApp("rice", "mysql");
-        cycleApp("rice", "oracle");
+        cycleApp("rice", "mysql");
+        // cycleApp("rice", "oracle");
     }
 
     // @Test
@@ -51,8 +51,7 @@ public class GenerateChangeLogTest {
         args.setJdbc(jdbc);
         args.setCommand("generateChangeLog");
 
-        // args.setOther(mtu.toOther(MainTestUtils.SCHEMA));
-        args.setOther(mtu.toOther(new String[] { "sequences" }));
+        args.setOther(mtu.toOther(MainTestUtils.SCHEMA));
         args.setChangeLog(mtu.getChangeLogFile(gav, "schema.xml").getCanonicalPath());
         mtu.executeMain(args);
 
