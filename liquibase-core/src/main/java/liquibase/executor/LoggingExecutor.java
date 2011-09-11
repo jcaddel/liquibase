@@ -105,7 +105,7 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
         DelimiterStyle style = (delimiterStyle == null) ? database.getDelimiterStyle() : delimiterStyle;
         String delimiter = database.getDelimiter();
         switch (style) {
-        case DEFAULT:
+        case NORMAL:
             return delimiter + linefeed;
         case ROW:
             return linefeed + delimiter + linefeed;

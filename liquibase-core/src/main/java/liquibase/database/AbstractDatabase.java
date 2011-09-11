@@ -81,7 +81,7 @@ import liquibase.util.StringUtils;
  */
 public abstract class AbstractDatabase implements Database {
     public static final String DEFAULT_SQL_DELIMITER = ";";
-    public static final DelimiterStyle DEFAULT_DELIMITER_STYLE = DelimiterStyle.DEFAULT;
+    public static final DelimiterStyle DEFAULT_DELIMITER_STYLE = DelimiterStyle.NORMAL;
 
     ISODateFormat isoDateFormat = new ISODateFormat();
     private String delimiter = DEFAULT_SQL_DELIMITER;

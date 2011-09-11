@@ -37,7 +37,7 @@ public class MockDatabase implements Database {
 
     @Override
     public DelimiterStyle getDelimiterStyle() {
-        return DelimiterStyle.DEFAULT;
+        return DelimiterStyle.NORMAL;
     }
 
     @Override

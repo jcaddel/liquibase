@@ -4,7 +4,7 @@ import liquibase.Constants;
 import liquibase.database.DelimiterStyle;
 
 public class MySQLDatabase extends liquibase.database.core.MySQLDatabase {
-    public static final DelimiterStyle DEFAULT_DELIMITER_STYLE = DelimiterStyle.DEFAULT;
+    public static final DelimiterStyle DEFAULT_DELIMITER_STYLE = DelimiterStyle.NORMAL;
 
     public MySQLDatabase() {
         super();
