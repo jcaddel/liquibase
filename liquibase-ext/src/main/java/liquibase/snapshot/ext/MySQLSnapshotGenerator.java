@@ -136,8 +136,8 @@ public class MySQLSnapshotGenerator extends liquibase.snapshot.jvm.MySQLDatabase
     }
 
     /**
-     * Override the super class method so tables that are only being used to produce sequences do not get lumped in with
-     * the other tables. Sequence only tables need to produce <createSequence> tags instead of <creatTable> tags
+     * Override the super class method so tables being used to produce sequences do not get lumped in with the other
+     * tables. Sequence tables need to produce <createSequence> tags instead of <creatTable> tags
      */
     @Override
     protected boolean isIgnoreTable(Database database, Table table, StringFilter filter) {
