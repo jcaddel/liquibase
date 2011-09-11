@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.ext;
 
+import liquibase.Constants;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.DatabaseException;
@@ -13,7 +14,7 @@ import liquibase.statement.core.SelectSequencesStatement;
 public class OracleSelectSequencesGenerator extends SelectSequencesGeneratorOracle {
     @Override
     public int getPriority() {
-        return 6;
+        return Constants.DEFAULT_EXT_PRIORITY;
     }
 
     @Override

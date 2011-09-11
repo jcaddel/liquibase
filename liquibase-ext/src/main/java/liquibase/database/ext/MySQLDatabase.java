@@ -1,19 +1,19 @@
 package liquibase.database.ext;
 
+import liquibase.Constants;
 import liquibase.database.DelimiterStyle;
 
 public class MySQLDatabase extends liquibase.database.core.MySQLDatabase {
-    public static final DelimiterStyle ROW = DelimiterStyle.ROW;
-    private static final int PRIORITY = 6;
+    public static final DelimiterStyle DEFAULT_DELIMITER_STYLE = DelimiterStyle.DEFAULT;
 
     public MySQLDatabase() {
         super();
-        setDelimiterStyle(ROW);
+        setDelimiterStyle(DEFAULT_DELIMITER_STYLE);
     }
 
     @Override
     public int getPriority() {
-        return PRIORITY;
+        return Constants.DEFAULT_EXT_PRIORITY;
     }
 
     @Override

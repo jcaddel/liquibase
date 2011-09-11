@@ -1,11 +1,11 @@
 package liquibase.database.ext;
 
+import liquibase.Constants;
 import liquibase.database.DelimiterStyle;
 
 public class OracleDatabase extends liquibase.database.core.OracleDatabase {
     public static final String SLASH = "/";
     public static final DelimiterStyle ROW = DelimiterStyle.ROW;
-    private static final int PRIORITY = 6;
 
     public OracleDatabase() {
         super();
@@ -15,6 +15,6 @@ public class OracleDatabase extends liquibase.database.core.OracleDatabase {
 
     @Override
     public int getPriority() {
-        return PRIORITY;
+        return Constants.DEFAULT_EXT_PRIORITY;
     }
 }

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import liquibase.Constants;
 import liquibase.database.Database;
 import liquibase.database.structure.Sequence;
 import liquibase.exception.DatabaseException;
@@ -21,11 +22,10 @@ import liquibase.statement.core.SelectSequencesStatement;
  * @author Jeff Caddel
  */
 public class OracleSnapshotGenerator extends liquibase.snapshot.jvm.OracleDatabaseSnapshotGenerator {
-    public static final int PRIORITY = 6;
 
     @Override
     public int getPriority(Database database) {
-        return PRIORITY;
+        return Constants.DEFAULT_EXT_PRIORITY;
     }
 
     @Override

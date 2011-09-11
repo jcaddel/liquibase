@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import liquibase.Constants;
 import liquibase.database.Database;
 import liquibase.database.structure.Sequence;
 import liquibase.database.structure.Table;
@@ -25,11 +26,10 @@ import liquibase.util.StringFilter;
  * @author Jeff Caddel
  */
 public class MySQLSnapshotGenerator extends liquibase.snapshot.jvm.MySQLDatabaseSnapshotGenerator {
-    public static final int PRIORITY = 6;
 
     @Override
     public int getPriority(Database database) {
-        return PRIORITY;
+        return Constants.DEFAULT_EXT_PRIORITY;
     }
 
     protected boolean isSequenceTable(Table table) {

@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.ext;
 
+import liquibase.Constants;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.sqlgenerator.core.InsertGenerator;
@@ -7,13 +8,12 @@ import liquibase.statement.core.InsertStatement;
 import liquibase.util.StringUtils;
 
 public abstract class FlattenInsertGenerator extends InsertGenerator {
-    private static final int PRIORITY = 6;
 
     boolean flatten = true;
 
     @Override
     public int getPriority() {
-        return PRIORITY;
+        return Constants.DEFAULT_EXT_PRIORITY;
     }
 
     @Override

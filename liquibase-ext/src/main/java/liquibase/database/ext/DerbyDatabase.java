@@ -2,13 +2,13 @@ package liquibase.database.ext;
 
 import java.sql.Driver;
 
+import liquibase.Constants;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 
 public class DerbyDatabase extends liquibase.database.core.DerbyDatabase {
-    private static final int PRIORITY = 6;
 
     private static final Logger logger = LogFactory.getLogger();
 
@@ -47,6 +47,6 @@ public class DerbyDatabase extends liquibase.database.core.DerbyDatabase {
 
     @Override
     public int getPriority() {
-        return PRIORITY;
+        return Constants.DEFAULT_EXT_PRIORITY;
     }
 }

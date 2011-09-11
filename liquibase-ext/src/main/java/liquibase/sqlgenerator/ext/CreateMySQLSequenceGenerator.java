@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.ext;
 
 import java.math.BigInteger;
 
+import liquibase.Constants;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.sql.Sql;
@@ -14,7 +15,7 @@ public class CreateMySQLSequenceGenerator extends CreateSequenceGenerator {
 
     @Override
     public int getPriority() {
-        return 6;
+        return Constants.DEFAULT_EXT_PRIORITY;
     }
 
     @Override
