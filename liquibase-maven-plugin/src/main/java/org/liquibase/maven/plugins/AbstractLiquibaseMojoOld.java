@@ -31,14 +31,14 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
 /**
  * A base class for providing Liquibase {@link liquibase.Liquibase} functionality.
- * 
+ *
  * @author Peter Murray
- * 
+ *
  *         Test dependency is used because when you run a goal outside the build phases you want to have the same
  *         dependencies that it would had if it was ran inside test phase
  * @requiresDependencyResolution test
  */
-public abstract class AbstractLiquibaseMojo extends AbstractMojo {
+public abstract class AbstractLiquibaseMojoOld extends AbstractMojo {
 
     /**
      * Suffix for fields that are representing a default value for a another field.
@@ -47,21 +47,21 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     /**
      * The fully qualified name of the driver class to use to connect to the database.
-     * 
+     *
      * @parameter expression="${liquibase.driver}"
      */
     protected String driver;
 
     /**
      * The Database URL to connect to for executing Liquibase.
-     * 
+     *
      * @parameter expression="${liquibase.url}"
      */
     protected String url;
 
     /**
      * The Maven Wagon manager to use when obtaining server authentication details.
-     * 
+     *
      * @component role="org.apache.maven.artifact.manager.WagonManager"
      * @required
      * @readonly
@@ -69,21 +69,21 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected WagonManager wagonManager;
     /**
      * The server id in settings.xml to use when authenticating with.
-     * 
+     *
      * @parameter expression="${liquibase.server}"
      */
     private String server;
 
     /**
      * The database username to use to connect to the specified database.
-     * 
+     *
      * @parameter expression="${liquibase.username}"
      */
     protected String username;
 
     /**
      * The database password to use to connect to the specified database.
-     * 
+     *
      * @parameter expression="${liquibase.password}"
      */
     protected String password;
@@ -91,7 +91,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * Use an empty string as the password for the database connection. This should not be used along side the
      * {@link #password} setting.
-     * 
+     *
      * @parameter expression="${liquibase.emptyPassword}" default-value="false"
      * @deprecated Use an empty or null value for the password instead.
      */
@@ -100,14 +100,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     /**
      * The default schema name to use the for database connection.
-     * 
+     *
      * @parameter expression="${liquibase.defaultSchemaName}"
      */
     protected String defaultSchemaName;
 
     /**
      * The class to use as the database object.
-     * 
+     *
      * @parameter expression="${liquibase.databaseClass}"
      */
     protected String databaseClass;
@@ -115,7 +115,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * Controls the prompting of users as to whether or not they really want to run the changes on a database that is
      * not local to the machine that the user is current executing the plugin on.
-     * 
+     *
      * @parameter expression="${liquibase.promptOnNonLocalDatabase}" default-value="true"
      */
     protected boolean promptOnNonLocalDatabase;
@@ -123,7 +123,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * Allows for the maven project artifact to be included in the class loader for obtaining the Liquibase property and
      * DatabaseChangeLog files.
-     * 
+     *
      * @parameter expression="${liquibase.includeArtifact}" default-value="true"
      */
     protected boolean includeArtifact;
@@ -131,14 +131,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * Allows for the maven test output directory to be included in the class loader for obtaining the Liquibase
      * property and DatabaseChangeLog files.
-     * 
+     *
      * @parameter expression="${liquibase.includeTestOutputDirectory}" default-value="true"
      */
     protected boolean includeTestOutputDirectory;
 
     /**
      * Controls the verbosity of the output from invoking the plugin.
-     * 
+     *
      * @parameter expression="${liquibase.verbose}" default-value="false"
      * @description Controls the verbosity of the plugin when executing
      */
@@ -147,7 +147,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * Controls the level of logging from Liquibase when executing. The value can be "all", "finest", "finer", "fine",
      * "info", "warning", "severe" or "off". The value is case insensitive.
-     * 
+     *
      * @parameter expression="${liquibase.logging}" default-value="INFO"
      * @description Controls the verbosity of the plugin when executing
      */
@@ -155,7 +155,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     /**
      * The Liquibase properties file used to configure the Liquibase {@link liquibase.Liquibase}.
-     * 
+     *
      * @parameter expression="${liquibase.propertyFile}"
      */
     protected String propertyFile;
@@ -164,28 +164,28 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * Flag allowing for the Liquibase properties file to override any settings provided in the Maven plugin
      * configuration. By default if a property is explicity specified it is not overridden if it also appears in the
      * properties file.
-     * 
+     *
      * @parameter expression="${liquibase.propertyFileWillOverride}" default-value="false"
      */
     protected boolean propertyFileWillOverride;
 
     /**
      * Flag for forcing the checksums to be cleared from teh DatabaseChangeLog table.
-     * 
+     *
      * @parameter expression="${liquibase.clearCheckSums}" default-value="false"
      */
     protected boolean clearCheckSums;
 
     /**
      * List of system properties to pass to the database.
-     * 
+     *
      * @parameter
      */
     protected Properties systemProperties;
 
     /**
      * The Maven project that plugin is running under.
-     * 
+     *
      * @parameter expression="${project}"
      * @required
      * @readonly
@@ -199,21 +199,21 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     /**
      * Array to put a expression variable to maven plugin.
-     * 
+     *
      * @parameter
      */
     private Properties expressionVars;
 
     /**
      * Set this to 'true' to skip running liquibase. Its use is NOT RECOMMENDED, but quite convenient on occasion.
-     * 
+     *
      * @parameter expression="${liquibase.should.run}"
      */
     protected boolean skip;
 
     /**
      * Array to put a expression variable to maven plugin.
-     * 
+     *
      * @parameter
      */
     private Map<?, ?> expressionVariables;
@@ -234,7 +234,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
             getLog().warn(
                     "Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY
-                    + "' system property was set to false");
+                            + "' system property was set to false");
             return;
         }
 
@@ -373,7 +373,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * Performs some validation after the properties file has been loaded checking that all properties required have
      * been specified.
-     * 
+     *
      * @throws MojoFailureException
      *             If any property that is required has not been specified.
      */
@@ -394,7 +394,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     /**
      * Prints the settings that have been set of defaulted for the plugin. These will only be shown in verbose mode.
-     * 
+     *
      * @param indent
      *            The indent string to use when printing the settings.
      */
@@ -436,7 +436,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     /**
      * Parses a properties file and sets the assocaited fields in the plugin.
-     * 
+     *
      * @param propertiesInputStream
      *            The input stream which is the Liquibase properties that needs to be parsed.
      * @throws org.apache.maven.plugin.MojoExecutionException
@@ -477,7 +477,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * This method will check to see if the user has specified a value different to that of the default value. This is
      * not an ideal solution, but should cover most situations in the use of the plugin.
-     * 
+     *
      * @param f
      *            The Field to check if a user has specified a value for.
      * @return <code>true</code> if the user has specified a value.

@@ -2,15 +2,16 @@ package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
+
 import org.apache.maven.plugin.MojoFailureException;
 
 /**
  * Writes a Liquibase tag to the database.
- * 
+ *
  * @author Peter Murray
  * @goal tag
  */
-public class LiquibaseTag extends AbstractLiquibaseMojo {
+public class LiquibaseTag extends AbstractLiquibaseMojoOld {
 
     /**
      * @parameter expression="${liquibase.tag}"

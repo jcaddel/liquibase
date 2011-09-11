@@ -18,7 +18,7 @@ import org.codehaus.plexus.util.StringUtils;
  *
  * @goal generateChangeLog
  */
-public class LiquibaseGenerateChangeLogMojo extends AbstractLiquibaseMojo2 {
+public class LiquibaseGenerateChangeLogMojo extends AbstractLiquibaseMojo {
 
     private static final String EXPORT_DATA_TYPE = "data";
     CommandLineUtils cliUtils = new CommandLineUtils();

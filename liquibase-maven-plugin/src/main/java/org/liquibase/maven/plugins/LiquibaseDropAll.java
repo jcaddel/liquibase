@@ -5,17 +5,17 @@ import liquibase.exception.LiquibaseException;
 
 /**
  * Drops all database objects owned by the user. Note that functions, procedures and packages are not dropped.
- * 
+ *
  * @author Ferenc Gratzer
  * @description Liquibase DropAll Maven plugin
  * @goal dropAll
  * @since 2.0.2
  */
-public class LiquibaseDropAll extends AbstractLiquibaseMojo {
+public class LiquibaseDropAll extends AbstractLiquibaseMojoOld {
 
     /**
      * The schemas to be dropped. Comma separated list.
-     * 
+     *
      * @parameter expression="${liquibase.schemas}"
      */
     protected String schemas;

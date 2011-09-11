@@ -25,7 +25,7 @@ public abstract class AbstractLiquibaseMojoTest extends AbstractMojoTestCase {
 
     public static final String ARTIFACT_ID = "liquibase-maven-plugin";
 
-    protected void loadPropertiesFileIfPresent(AbstractLiquibaseMojo mojo) throws MojoExecutionException,
+    protected void loadPropertiesFileIfPresent(AbstractLiquibaseMojoOld mojo) throws MojoExecutionException,
             MojoFailureException {
 
         File rootDir = new File(getBasedir(), "target/test-classes");

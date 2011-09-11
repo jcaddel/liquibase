@@ -17,7 +17,7 @@ import org.apache.maven.plugin.MojoExecutionException;
  * 
  * @author Peter Murray
  */
-public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMojo2 {
+public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMojo {
 
     /**
      * Specifies the change log file to use for Liquibase.

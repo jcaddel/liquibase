@@ -30,7 +30,7 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
  *
  * @author Peter Murray
  */
-public abstract class AbstractLiquibaseMojo2 extends AbstractMojo {
+public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     CommandLineUtils cliUtils = new CommandLineUtils();
 
     /**
