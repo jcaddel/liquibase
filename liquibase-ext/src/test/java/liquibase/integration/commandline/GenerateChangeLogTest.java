@@ -64,7 +64,8 @@ public class GenerateChangeLogTest {
         String workingDir = mtu.getWorkingDir();
         String[] other = { "--workingDir=" + workingDir,
                 "--dataDir=" + dataDir.getCanonicalPath(),
-                "--diffTypes=" + mtu.toCSV(MainTestUtils.DATA) };
+                "--diffTypes=" + mtu.toCSV(MainTestUtils.DATA),
+                "--flatten=true" };
         args.setOther(other);
         args.setChangeLog(mtu.getChangeLogFile(gav, "data.xml").getCanonicalPath());
         mtu.executeMain(args);
