@@ -602,6 +602,25 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 .getDataType(rs.getString("TYPE_NAME"), columnInfo.isAutoIncrement()).toString());
     } // end of method getColumnTypeAndDefValue()
 
+    protected String getForeignKeyPKWarning(ForeignKey fk, Table table) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Foreign key ");
+        sb.append(fk.getName());
+        sb.append(" references table ");
+        sb.append(table);
+        sb.append(", which is in a different schema. Retaining FK in diff, but table will not be diffed.");
+        return sb.toString();
+    }
+
+    protected String getForeignKeyFKWarning(ForeignKey fk, Table table) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Foreign key ");
+        sb.append(fk.getName());
+        sb.append(" is in table " + table);
+        sb.append(", which we cannot find. Ignoring.");
+        return sb.toString();
+    }
+
     protected void readForeignKeyInformation(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
             throws DatabaseException, SQLException {
         Database database = snapshot.getDatabase();
@@ -619,22 +638,13 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 Table tempPKTable = fk.getPrimaryKeyTable();
                 Table pkTable = snapshot.getTable(tempPKTable.getName());
                 if (pkTable == null) {
-                    LogFactory
-                            .getLogger()
-                            .warning(
-                                    "Foreign key "
-                                            + fk.getName()
-                                            + " references table "
-                                            + tempPKTable
-                                            + ", which is in a different schema. Retaining FK in diff, but table will not be diffed.");
+                    LogFactory.getLogger().warning(getForeignKeyPKWarning(fk, tempPKTable));
                 }
 
                 Table tempFkTable = fk.getForeignKeyTable();
                 Table fkTable = snapshot.getTable(tempFkTable.getName());
                 if (fkTable == null) {
-                    LogFactory.getLogger().warning(
-                            "Foreign key " + fk.getName() + " is in table " + tempFkTable
-                                    + ", which we cannot find. Ignoring.");
+                    LogFactory.getLogger().warning(getForeignKeyFKWarning(fk, tempFkTable));
                     continue;
                 }
 
@@ -688,7 +698,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
      * @throws liquibase.exception.DatabaseException
      *             Database Exception
      * */
-    public ForeignKey generateForeignKey(ForeignKeyInfo fkInfo, Database database, List<ForeignKey> fkList)
+    public ForeignKey generateForeignKey(ForeignKeyInfo fkInfo, Database database, List<ForeignKey> foreignKeys)
             throws DatabaseException {
         // Simple (non-composite) keys have KEY_SEQ=1, so create the ForeignKey.
         // In case of subsequent parts of composite keys (KEY_SEQ>1) don't create new instance, just reuse the one from
@@ -700,7 +710,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         if (fkInfo.getKeySeq() == 1 || (fkInfo.getReferencesUniqueColumn() && fkInfo.getKeySeq() == 0)) {
             foreignKey = new ForeignKey();
         } else {
-            for (ForeignKey foundFK : fkList) {
+            for (ForeignKey foundFK : foreignKeys) {
                 if (foundFK.getName().equalsIgnoreCase(fkInfo.getFkName())) {
                     foreignKey = foundFK;
                 }
@@ -764,24 +774,24 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
     @Override
     public List<ForeignKey> getForeignKeys(String schemaName, String foreignKeyTableName, Database database)
             throws DatabaseException {
-        List<ForeignKey> fkList = new ArrayList<ForeignKey>();
+        List<ForeignKey> foreignKeys = new ArrayList<ForeignKey>();
         try {
             String dbCatalog = database.convertRequestedSchemaToCatalog(schemaName);
             String dbSchema = database.convertRequestedSchemaToSchema(schemaName);
-            ResultSet rs = getMetaData(database).getImportedKeys(dbCatalog, dbSchema,
-                    convertTableNameToDatabaseTableName(foreignKeyTableName));
+            String tableName = convertTableNameToDatabaseTableName(foreignKeyTableName);
+            ResultSet rs = getMetaData(database).getImportedKeys(dbCatalog, dbSchema, tableName);
 
             try {
                 while (rs.next()) {
                     ForeignKeyInfo fkInfo = fillForeignKeyInfo(rs);
-
-                    fkList.add(generateForeignKey(fkInfo, database, fkList));
+                    ForeignKey foreignKey = generateForeignKey(fkInfo, database, foreignKeys);
+                    foreignKeys.add(foreignKey);
                 }
             } finally {
                 rs.close();
             }
 
-            return fkList;
+            return foreignKeys;
 
         } catch (Exception e) {
             throw new DatabaseException(e);
