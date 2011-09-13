@@ -18,6 +18,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DelimiterStyle;
 import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.ForeignKeyConstraintType;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
@@ -574,6 +575,30 @@ public class MockDatabase implements Database {
     @Override
     public boolean isReservedWord(String string) {
         return false;
+    }
+
+    @Override
+    public boolean isDefaultUpdateRule(ForeignKeyConstraintType rule) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean isDefaultDeleteRule(ForeignKeyConstraintType rule) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public ForeignKeyConstraintType getDefaultUpdateRule() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ForeignKeyConstraintType getDefaultDeleteRule() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

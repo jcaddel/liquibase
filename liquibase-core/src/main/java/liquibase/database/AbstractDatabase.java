@@ -33,6 +33,7 @@ import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.ForeignKey;
+import liquibase.database.structure.ForeignKeyConstraintType;
 import liquibase.database.structure.Sequence;
 import liquibase.database.structure.Table;
 import liquibase.database.structure.View;
@@ -1314,5 +1315,25 @@ public abstract class AbstractDatabase implements Database {
 
     public void setDelimiterStyle(DelimiterStyle delimiterStyle) {
         this.delimiterStyle = delimiterStyle;
+    }
+
+    @Override
+    public boolean isDefaultUpdateRule(ForeignKeyConstraintType rule) {
+        return false;
+    }
+
+    @Override
+    public boolean isDefaultDeleteRule(ForeignKeyConstraintType rule) {
+        return false;
+    }
+
+    @Override
+    public ForeignKeyConstraintType getDefaultUpdateRule() {
+        return null;
+    }
+
+    @Override
+    public ForeignKeyConstraintType getDefaultDeleteRule() {
+        return null;
     }
 }

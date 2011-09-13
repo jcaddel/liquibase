@@ -10,6 +10,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.ForeignKeyConstraintType;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.DateParseException;
@@ -26,6 +27,24 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase();
     String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase();
+
+    /**
+     * Return true if omitting this rule from the SQL describing a foreign key constraint results in the same database
+     * behavior as explicitly supplying it. eg for Oracle + MySQL not specifying an update rule results in the rule
+     * being "ON UPDATE NO ACTION" which is functionally equivalent to "ON UPDATE RESTRICT"
+     */
+    boolean isDefaultUpdateRule(ForeignKeyConstraintType rule);
+
+    ForeignKeyConstraintType getDefaultUpdateRule();
+
+    /**
+     * Return true if omitting this rule from the SQL describing a foreign key constraint results in the same database
+     * behavior as explicitly supplying it. eg for Oracle + MySQL not specifying a delete rule results in the rule being
+     * "ON DELETE NO ACTION" which is functionally equivalent to "ON DELETE RESTRICT"
+     */
+    boolean isDefaultDeleteRule(ForeignKeyConstraintType rule);
+
+    ForeignKeyConstraintType getDefaultDeleteRule();
 
     /**
      * Controls how the delimiter is printed when generating SQL statements
@@ -62,7 +81,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     /**
      * Determines if the database supports DDL within a transaction or not.
-     * 
+     *
      * @return True if the database supports DDL within a transaction, otherwise false.
      */
     boolean supportsDDLInTransaction();
@@ -119,14 +138,14 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     /**
      * Set the table name of the change log to the given table name
-     * 
+     *
      * @param tableName
      */
     public void setDatabaseChangeLogTableName(String tableName);
 
     /**
      * Set the table name of the change log lock to the given table name
-     * 
+     *
      * @param tableName
      */
     public void setDatabaseChangeLogLockTableName(String tableName);
@@ -187,12 +206,12 @@ public interface Database extends DatabaseObject, PrioritizedService {
     /**
      * Escapes a single column name in a database-dependent manner so reserved words can be used as a column name (i.e.
      * "return").
-     * 
+     *
      * @param schemaName
      * @param tableName
      * @param columnName
      *            column name
-     * 
+     *
      * @return escaped column name
      */
     String escapeColumnName(String schemaName, String tableName, String columnName);
@@ -200,7 +219,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
     /**
      * Escapes a list of column names in a database-dependent manner so reserved words can be used as a column name
      * (i.e. "return").
-     * 
+     *
      * @param columnNames
      *            list of column names
      * @return escaped column name list
@@ -252,29 +271,29 @@ public interface Database extends DatabaseObject, PrioritizedService {
     boolean isLocalDatabase() throws DatabaseException;
 
     void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors)
-    throws LiquibaseException, UnsupportedChangeException;
+            throws LiquibaseException, UnsupportedChangeException;
 
     /*
      * Executes the statements passed as argument to a target {@link Database}
-     * 
+     *
      * @param statements an array containing the SQL statements to be issued
-     * 
+     *
      * @param database the target {@link Database}
-     * 
+     *
      * @throws DatabaseException if there were problems issuing the statements
      */
 
     void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException;
 
     void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException,
-    UnsupportedChangeException, StatementNotSupportedOnDatabaseException, LiquibaseException;
+            UnsupportedChangeException, StatementNotSupportedOnDatabaseException, LiquibaseException;
 
     void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException,
-    UnsupportedChangeException, RollbackImpossibleException;
+            UnsupportedChangeException, RollbackImpossibleException;
 
     void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException,
-    UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException,
-    LiquibaseException;
+            UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException,
+            LiquibaseException;
 
     int getNextChangeSetSequenceValue() throws LiquibaseException;
 

@@ -504,7 +504,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         if (objectName == null) {
             return null;
         }
-        return objectName;
+        return objectName.toUpperCase();
     }
 
     protected void readColumns(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
@@ -633,7 +633,8 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
         // Then tries to find all other standard FKs
         for (Table table : snapshot.getTables()) {
-            for (ForeignKey fk : getForeignKeys(schema, table.getName(), snapshot.getDatabase())) {
+            List<ForeignKey> foreignKeys = getForeignKeys(schema, table.getName(), snapshot.getDatabase());
+            for (ForeignKey fk : foreignKeys) {
 
                 Table tempPKTable = fk.getPrimaryKeyTable();
                 Table pkTable = snapshot.getTable(tempPKTable.getName());

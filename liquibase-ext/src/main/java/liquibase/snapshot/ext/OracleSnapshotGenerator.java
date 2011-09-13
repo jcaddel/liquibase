@@ -2,12 +2,17 @@ package liquibase.snapshot.ext;
 
 import java.math.BigInteger;
 import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import liquibase.Constants;
 import liquibase.database.Database;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.PrimaryKey;
 import liquibase.database.structure.Sequence;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
@@ -22,10 +27,43 @@ import liquibase.statement.core.SelectSequencesStatement;
  * @author Jeff Caddel
  */
 public class OracleSnapshotGenerator extends liquibase.snapshot.jvm.OracleDatabaseSnapshotGenerator {
+    boolean ignoreTablespace = true;
 
     @Override
     public int getPriority(Database database) {
         return Constants.DEFAULT_EXT_PRIORITY;
+    }
+
+    @Override
+    protected void readColumns(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
+            throws DatabaseException, SQLException {
+        super.readColumns(snapshot, schema, databaseMetaData);
+        Collection<Column> columns = snapshot.getColumns();
+        if (columns == null) {
+            return;
+        }
+        if (ignoreTablespace) {
+            for (Column column : columns) {
+                column.setTablespace(null);
+            }
+        }
+    }
+
+    @Override
+    protected void readPrimaryKeys(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
+            throws DatabaseException, SQLException {
+        super.readPrimaryKeys(snapshot, schema, databaseMetaData);
+        Set<PrimaryKey> pks = snapshot.getPrimaryKeys();
+        if (pks == null) {
+            return;
+        }
+
+        if (ignoreTablespace) {
+            for (PrimaryKey pk : pks) {
+                pk.setTablespace(null);
+            }
+        }
+
     }
 
     @Override
@@ -60,5 +98,13 @@ public class OracleSnapshotGenerator extends liquibase.snapshot.jvm.OracleDataba
         sequence.setName(name);
         sequence.setStartValue(startValue);
         return sequence;
+    }
+
+    public boolean isIgnoreTablespace() {
+        return ignoreTablespace;
+    }
+
+    public void setIgnoreTablespace(boolean ignorePrimaryKeyTablespace) {
+        this.ignoreTablespace = ignorePrimaryKeyTablespace;
     }
 }

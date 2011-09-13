@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -45,10 +46,12 @@ import liquibase.change.core.InsertDataChange;
 import liquibase.change.core.LoadDataChange;
 import liquibase.change.core.LoadDataColumnConfig;
 import liquibase.change.core.ModifyDataTypeChange;
+import liquibase.change.core.compare.AddForeignKeyConstraintChangeComparator;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.ForeignKey;
+import liquibase.database.structure.ForeignKeyConstraintType;
 import liquibase.database.structure.Index;
 import liquibase.database.structure.PrimaryKey;
 import liquibase.database.structure.Sequence;
@@ -520,7 +523,7 @@ public class DiffResult {
             addInsertDataChanges(changeSets);
         }
 
-        addMissingForeignKeyChanges(changeSets);
+        addMissingForeignKeyChanges(changeSets, targetDatabase);
         addUnexpectedIndexChanges(changeSets);
         addUnexpectedColumnChanges(changeSets);
         addMissingSequenceChanges(changeSets);
@@ -690,7 +693,9 @@ public class DiffResult {
         }
     }
 
-    private void addMissingForeignKeyChanges(List<ChangeSet> changes) {
+    private void addMissingForeignKeyChanges(List<ChangeSet> changes, Database database) {
+        List<AddForeignKeyConstraintChange> fks = new ArrayList<AddForeignKeyConstraintChange>();
+
         for (ForeignKey fk : getMissingForeignKeys()) {
 
             AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
@@ -710,12 +715,32 @@ public class DiffResult {
 
             change.setDeferrable(fk.isDeferrable());
             change.setInitiallyDeferred(fk.isInitiallyDeferred());
-            change.setOnUpdate(fk.getUpdateRule());
-            change.setOnDelete(fk.getDeleteRule());
+            change.setOnUpdate(getUpdateRule(fk.getUpdateRule(), database));
+            change.setOnDelete(getDeleteRule(fk.getDeleteRule(), database));
 
             change.setReferencesUniqueColumn(fk.getReferencesUniqueColumn());
+            fks.add(change);
 
+        }
+        Collections.sort(fks, new AddForeignKeyConstraintChangeComparator());
+        for (Change change : fks) {
             changes.add(generateChangeSet(change));
+        }
+    }
+
+    protected ForeignKeyConstraintType getDeleteRule(ForeignKeyConstraintType rule, Database database) {
+        if (database.isDefaultDeleteRule(rule)) {
+            return database.getDefaultDeleteRule();
+        } else {
+            return rule;
+        }
+    }
+
+    protected ForeignKeyConstraintType getUpdateRule(ForeignKeyConstraintType rule, Database database) {
+        if (database.isDefaultUpdateRule(rule)) {
+            return database.getDefaultUpdateRule();
+        } else {
+            return rule;
         }
     }
 
