@@ -11,6 +11,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGenerator;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotContext;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -26,28 +27,40 @@ public class ModifyDataTypeGeneratorMySQL extends ModifyDataTypeGenerator {
     /**
      * Generate MySQL-specific modify statement.
      *
-     * @param statement Statement instance
-     * @param database Database instance
-     * @param sqlGeneratorChain SqlGeneratorChain instance
+     * @param statement
+     *            Statement instance
+     * @param database
+     *            Database instance
+     * @param sqlGeneratorChain
+     *            SqlGeneratorChain instance
      * @return SQL statement array
      */
+    @Override
     public Sql[] generateSql(ModifyDataTypeStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
         // Main alter statement
-        String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " MODIFY ";
+        String alterTable = "ALTER TABLE "
+                + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " MODIFY ";
 
         // Add column name
-        alterTable += database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " ";
+        alterTable += database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+                statement.getColumnName())
+                + " ";
 
         // Add column type
-        alterTable += TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(statement.getNewDataType(), false);
+        alterTable += TypeConverterFactory.getInstance().findTypeConverter(database)
+                .getDataType(statement.getNewDataType(), false);
 
         // Get column information to avoid inadvertently removing default value, null-ability, uniqueness, etc.
         DatabaseSnapshotGeneratorFactory factory = DatabaseSnapshotGeneratorFactory.getInstance();
         DatabaseSnapshotGenerator generator = factory.getGenerator(database);
         DatabaseSnapshot snapshot = null;
         try {
-            snapshot = generator.createSnapshot(database, statement.getSchemaName(), new HashSet<DiffStatusListener>());
+            SnapshotContext context = new SnapshotContext();
+            context.setDatabase(database);
+            context.setSchema(statement.getSchemaName());
+            context.setListeners(new HashSet<DiffStatusListener>());
+            snapshot = generator.createSnapshot(context);
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException("Error retrieving database snapshot", e);
         }
@@ -79,6 +92,6 @@ public class ModifyDataTypeGeneratorMySQL extends ModifyDataTypeGenerator {
             alterTable += " PRIMARY KEY";
         }
 
-        return new Sql[]{new UnparsedSql(alterTable)};
+        return new Sql[] { new UnparsedSql(alterTable) };
     }
 }
