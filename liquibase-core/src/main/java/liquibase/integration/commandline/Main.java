@@ -356,7 +356,7 @@ public class Main {
         stream.println("Required Parameters:");
         stream.println(" --changeLogFile=<path and filename>        Migration file");
         stream.println(" --username=<value>                         Database username");
-        stream.println(" --password=<value>                         Database password");
+        stream.println(" --password=<value>   | -p (prompt)         Database password");
         stream.println(" --url=<value>                              Database URL");
         stream.println("");
         stream.println("Optional Parameters:");
@@ -388,7 +388,7 @@ public class Main {
         stream.println("");
         stream.println("Required Diff Parameters:");
         stream.println(" --referenceUsername=<value>                Reference Database username");
-        stream.println(" --referencePassword=<value>                Reference Database password");
+        stream.println(" --referencePassword=<value> | -rp (prompt) Reference Database password");
         stream.println(" --referenceUrl=<value>                     Reference Database URL");
         stream.println("");
         stream.println("Optional Diff Parameters:");
@@ -452,6 +452,13 @@ public class Main {
                 } catch (Exception e) {
                     throw new CommandLineParsingException("Unknown parameter: '" + attributeName + "'");
                 }
+
+            } else if (arg.equals("-p")) {
+                // Prompt for password
+                password = new String(System.console().readPassword("DB Password:"));
+            } else if (arg.equals("-rp")) {
+                // Prompt for reference password
+                referencePassword = new String(System.console().readPassword("Reference DB Password:"));
             } else {
                 throw new CommandLineParsingException("Unexpected value " + arg + ": parameters must start with a '--'");
             }
