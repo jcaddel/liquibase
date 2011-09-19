@@ -20,6 +20,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.core.AddColumnStatement;
 
 public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGenerator {
@@ -66,7 +67,8 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
         }
 
         if (statement.isAutoIncrement()) {
-            alterTable += " " + database.getAutoIncrementClause(null, null);  // startWith and incrementBy not supported
+            AutoIncrementConstraint autoIncrementConstraint = statement.getAutoIncrementConstraint();
+            alterTable += " " + database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
         }
 
         if (!statement.isNullable()) {
