@@ -28,7 +28,7 @@ import liquibase.util.StringUtils;
 /**
  * Adds a column to an existing table.
  */
-public class AddColumnChange extends AbstractChange implements ChangeWithColumns {
+public class AddColumnChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String schemaName;
     private String tableName;

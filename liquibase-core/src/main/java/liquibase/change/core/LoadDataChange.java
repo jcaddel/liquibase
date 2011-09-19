@@ -29,7 +29,7 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;
 
-public class LoadDataChange extends AbstractChange implements ChangeWithColumns {
+public class LoadDataChange extends AbstractChange implements ChangeWithColumns<LoadDataColumnConfig> {
 
     private String schemaName;
     private String tableName;
@@ -100,13 +100,13 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
     }
 
     @Override
-    public void addColumn(ColumnConfig column) {
-        columns.add((LoadDataColumnConfig) column);
+    public void addColumn(LoadDataColumnConfig column) {
+        columns.add(column);
     }
 
     @Override
-    public List<ColumnConfig> getColumns() {
-        return (List<ColumnConfig>) (List) columns;
+    public List<LoadDataColumnConfig> getColumns() {
+        return columns;
     }
 
     protected Object convertValue(Object value, ColumnConfig columnConfig) {
