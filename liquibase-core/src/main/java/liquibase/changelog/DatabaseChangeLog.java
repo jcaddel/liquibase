@@ -39,6 +39,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         preconditionContainer = precond;
     }
 
+
     public ChangeLogParameters getChangeLogParameters() {
         return changeLogParameters;
     }
@@ -60,7 +61,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         if (logicalFilePath == null) {
             returnPath = physicalFilePath;
         }
-        return returnPath.replaceAll("\\\\", "/");
+        return returnPath.replaceAll("\\\\","/");
     }
 
     public void setLogicalFilePath(String logicalFilePath) {
@@ -84,10 +85,15 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return getFilePath().compareTo(o.getFilePath());
     }
 
+
     public ChangeSet getChangeSet(String path, String author, String id) {
         for (ChangeSet changeSet : changeSets) {
-            if (changeSet.getFilePath().equalsIgnoreCase(path) && changeSet.getAuthor().equalsIgnoreCase(author)
-                    && changeSet.getId().equalsIgnoreCase(id)) {
+            if (changeSet.getFilePath().equalsIgnoreCase(path)
+                    && changeSet.getAuthor().equalsIgnoreCase(author)
+                    && changeSet.getId().equalsIgnoreCase(id)
+                    && (null == changeSet.getDbmsSet()
+                    || changeSet.getDbmsSet().isEmpty()
+                    || changeSet.getDbmsSet().contains(changeLogParameters.getValue("database.typeName").toString()))) {
                 return changeSet;
             }
         }
@@ -105,10 +111,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
         DatabaseChangeLog that = (DatabaseChangeLog) o;
 
@@ -123,8 +127,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     public void validate(Database database, String... contexts) throws LiquibaseException {
 
-        ChangeLogIterator logIterator = new ChangeLogIterator(this, new DbmsChangeSetFilter(database),
-                new ContextChangeSetFilter(contexts));
+        ChangeLogIterator logIterator = new ChangeLogIterator(this, new DbmsChangeSetFilter(database), new ContextChangeSetFilter(contexts));
 
         ValidatingVisitor validatingVisitor = new ValidatingVisitor(database.getRanChangeSetList());
         validatingVisitor.validate(database, this);
@@ -133,7 +136,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         for (String message : validatingVisitor.getWarnings().getMessages()) {
             LogFactory.getLogger().warning(message);
         }
-
+        
         if (!validatingVisitor.validationPassed()) {
             throw new ValidationFailedException(validatingVisitor);
         }
