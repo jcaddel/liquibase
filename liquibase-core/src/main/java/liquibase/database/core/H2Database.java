@@ -43,30 +43,30 @@ public class H2Database extends AbstractDatabase {
         return "H2".equals(conn.getDatabaseProductName());
     }
 
-    // public void dropDatabaseObjects(String schema) throws DatabaseException {
-    // DatabaseConnection conn = getConnection();
-    // Statement dropStatement = null;
-    // try {
-    // dropStatement = conn.createStatement();
-    // dropStatement.executeUpdate("DROP ALL OBJECTS");
-    // changeLogTableExists = false;
-    // changeLogLockTableExists = false;
-    // changeLogCreateAttempted = false;
-    // changeLogLockCreateAttempted = false;
-    // } catch (SQLException e) {
-    // throw new DatabaseException(e);
-    // } finally {
-    // try {
-    // if (dropStatement != null) {
-    // dropStatement.close();
-    // }
-    // conn.commit();
-    // } catch (SQLException e) {
-    // ;
-    // }
-    // }
-    //
-    // }
+    //    public void dropDatabaseObjects(String schema) throws DatabaseException {
+//        DatabaseConnection conn = getConnection();
+//        Statement dropStatement = null;
+//        try {
+//            dropStatement = conn.createStatement();
+//            dropStatement.executeUpdate("DROP ALL OBJECTS");
+//            changeLogTableExists = false;
+//            changeLogLockTableExists = false;
+//            changeLogCreateAttempted = false;
+//            changeLogLockCreateAttempted = false;
+//        } catch (SQLException e) {
+//            throw new DatabaseException(e);
+//        } finally {
+//            try {
+//                if (dropStatement != null) {
+//                    dropStatement.close();
+//                }
+//                conn.commit();
+//            } catch (SQLException e) {
+//                ;
+//            }
+//        }
+//
+//    }
 
     public boolean supportsTablespaces() {
         return false;
@@ -76,12 +76,13 @@ public class H2Database extends AbstractDatabase {
     public String getViewDefinition(String schemaName, String name) throws DatabaseException {
         String definition = super.getViewDefinition(schemaName, name);
         if (!definition.startsWith("SELECT")) {
-            definition = definition.replaceFirst(".*?\n", ""); // some h2 versions return "create view....as\nselect
+            definition = definition.replaceFirst(".*?\n", ""); //some h2 versions return "create view....as\nselect
         }
 
-        definition = definition.replaceFirst("/\\*.*", ""); // sometimes includes comments at the end
+        definition = definition.replaceFirst("/\\*.*",""); //sometimes includes comments at the end
         return definition;
     }
+
 
     @Override
     public Date parseDate(String dateAsString) throws DateParseException {
@@ -103,15 +104,20 @@ public class H2Database extends AbstractDatabase {
     @Override
     public boolean isLocalDatabase() throws DatabaseException {
         String url = getConnection().getURL();
-        boolean isLocalURL = (super.isLocalDatabase() || url.startsWith("jdbc:h2:file:")
-                || url.startsWith("jdbc:h2:mem:") || url.startsWith("jdbc:h2:zip:") || url.startsWith("jdbc:h2:~"));
+        boolean isLocalURL = (
+                super.isLocalDatabase()
+                        || url.startsWith("jdbc:h2:file:")
+                        || url.startsWith("jdbc:h2:mem:")
+                        || url.startsWith("jdbc:h2:zip:")
+                        || url.startsWith("jdbc:h2:~")
+        );
         return isLocalURL;
     }
 
-    // @Override
-    // public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
-    // return super.convertRequestedSchemaToSchema(requestedSchema).toLowerCase();
-    // }
+//    @Override
+//    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
+//        return super.convertRequestedSchemaToSchema(requestedSchema).toLowerCase();
+//    }
 
     @Override
     public boolean supportsSequences() {
@@ -134,18 +140,15 @@ public class H2Database extends AbstractDatabase {
 
     /**
      * Recursive way of building CONCAT instruction
-     * 
-     * @param values
-     *            a non null List of String
-     * @return a String containing the CONCAT instruction with all elements, or only a value if there is only one
-     *         element in the list
+     *
+     * @param values a non null List of String
+     * @return a String containing the CONCAT instruction with all elements, or only a value if there is only one element in the list
      */
     private String getConcatSql(List<String> values) {
         if (values.size() == 1) {
             return values.get(0);
         } else {
-            return START_CONCAT + values.get(0) + SEP_CONCAT + getConcatSql(values.subList(1, values.size()))
-                    + END_CONCAT;
+            return START_CONCAT + values.get(0) + SEP_CONCAT + getConcatSql(values.subList(1, values.size())) + END_CONCAT;
         }
     }
 
@@ -171,11 +174,11 @@ public class H2Database extends AbstractDatabase {
 
     @Override
     public String escapeDatabaseObject(String objectName) {
-        if (objectName != null) {
+    	if (objectName != null) {
             if (isReservedWord(objectName)) {
-                return "\"" + objectName + "\"";
+                return "\""+objectName.toUpperCase()+"\"";
             }
-        }
+    	}
         return objectName;
     }
 
@@ -185,297 +188,297 @@ public class H2Database extends AbstractDatabase {
     }
 
     private static List keywords = Arrays.asList(
-    // "ADD",
-    // "ALL",
-    // "ALLOCATE",
-    // "ALTER",
-    // "AND",
-    // "ANY",
-    // "ARE",
-    // "ARRAY",
-    // "AS",
-    // "ASENSITIVE",
-    // "ASYMMETRIC",
-    // "AT",
-    // "ATOMIC",
-    // "AUTHORIZATION",
-    // "BEGIN",
-    // "BETWEEN",
-    // "BIGINT",
-    // "BINARY",
-    // "BLOB",
-    // "BOOLEAN",
-    // "BOTH",
-    // "BY",
-    // "CALL",
-    // "CALLED",
-    // "CASCADED",
-    // "CASE",
-    // "CAST",
-    // "CHAR",
-    // "CHARACTER",
-    // "CHECK",
-    // "CLOB",
-    // "CLOSE",
-    // "COLLATE",
-    // "COLUMN",
-    // "COMMIT",
-    // "CONDITION",
-    // "CONNECT",
-    // "CONSTRAINT",
-    // "CONTINUE",
-    // "CORRESPONDING",
-    // "CREATE",
-    // "CROSS",
-    // "CUBE",
-    // "CURRENT",
-    // "CURRENT_DATE",
-    // "CURRENT_DEFAULT_TRANSFORM_GRO",
-    // "CURRENT_PATH",
-    // "CURRENT_ROLE",
-    // "CURRENT_TIME",
-    // "CURRENT_TIMESTAMP",
-    // "CURRENT_TRANSFORM_GROUP_FOR_T",
-    // "CURRENT_USER",
-    // "CURSOR",
-    // "CYCLE",
-    // "DATE",
-    // "DAY",
-    // "DEALLOCATE",
-    // "DEC",
-    // "DECIMAL",
-    // "DECLARE",
-    // "DEFAULT",
-    // "DELETE",
-    // "DEREF",
-    // "DESCRIBE",
-    // "DETERMINISTIC",
-    // "DISCONNECT",
-    // "DISTINCT",
-    // "DO",
-    // "DOUBLE",
-    // "DROP",
-    // "DYNAMIC",
-    // "EACH",
-    // "ELEMENT",
-    // "ELSE",
-    // "ELSEIF",
-    // "END",
-    // "ESCAPE",
-    // "EXCEPT",
-    // "EXEC",
-    // "EXECUTE",
-    // "EXISTS",
-    // "EXIT",
-    // "EXTERNAL",
-    // "FALSE",
-    // "FETCH",
-    // "FILTER",
-    // "FLOAT",
-    // "FOR",
-    // "FOREIGN",
-    // "FREE",
-    // "FROM",
-    // "FULL",
-    // "FUNCTION",
-    // "GET",
-    // "GLOBAL",
-    // "GRANT",
-    // "GROUP",
-    // "GROUPING",
-    // "HANDLER",
-    // "HAVING",
-    // "HOLD",
-    // "HOUR",
-    // "IDENTITY",
-    // "IF",
-    // "IMMEDIATE",
-    // "IN",
-    // "INDICATOR",
-    // "INNER",
-    // "INOUT",
-    // "INPUT",
-    // "INSENSITIVE",
-    // "INSERT",
-    // "INT",
-    // "INTEGER",
-    // "INTERSECT",
-    // "INTERVAL",
-    // "INTO",
-    // "IS",
-    // "ITERATE",
-    // "JOIN",
-    // "LANGUAGE",
-    // "LARGE",
-    // "LATERAL",
-    // "LEADING",
-    // "LEAVE",
-    // "LEFT",
-    // "LIKE",
-    // "LOCAL",
-    // "LOCALTIME",
-    // "LOCALTIMESTAMP",
-    // "LOOP",
-    // "MATCH",
-    // "MEMBER",
-    // "MERGE",
-    // "METHOD",
-    // "MINUTE",
-    // "MODIFIES",
-    // "MODULE",
-    // "MONTH",
-    // "MULTISET",
-    // "NATIONAL",
-    // "NATURAL",
-    // "NCHAR",
-    // "NCLOB",
-    // "NEW",
-    // "NO",
-    // "NONE",
-    // "NOT",
-    // "NULL",
-    // "NUMERIC",
-    // "OF",
-    // "OLD",
-    // "ON",
-    // "ONLY",
-    // "OPEN",
-    // "OR",
-    // "ORDER",
-    // "OUT",
-    // "OUTER",
-    // "OUTPUT",
-    // "OVER",
-    // "OVERLAPS",
-    // "PARAMETER",
-    // "PARTITION",
-    // "PRECISION",
-    // "PREPARE",
-    // "PRIMARY",
-    // "PROCEDURE",
-    // "RANGE",
-    // "READS",
-    // "REAL",
-    // "RECURSIVE",
-    // "REF",
-    // "REFERENCES",
-    // "REFERENCING",
-    // "RELEASE",
-    // "REPEAT",
-    // "RESIGNAL",
-    // "RESULT",
-    // "RETURN",
-    // "RETURNS",
-    // "REVOKE",
-    // "RIGHT",
-    // "ROLLBACK",
-    // "ROLLUP",
-    // "ROW",
-    // "ROWS",
-    // "SAVEPOINT",
-    // "SCOPE",
-    // "SCROLL",
-    // "SEARCH",
-    // "SECOND",
-    // "SELECT",
-    // "SENSITIVE",
-    // "SESSION_USER",
-    // "SET",
-    // "SIGNAL",
-    // "SIMILAR",
-    // "SMALLINT",
-    // "SOME",
-    // "SPECIFIC",
-    // "SPECIFICTYPE",
-    // "SQL",
-    // "SQLEXCEPTION",
-    // "SQLSTATE",
-    // "SQLWARNING",
-    // "START",
-    // "STATIC",
-    // "SUBMULTISET",
-    // "SYMMETRIC",
-    // "SYSTEM",
-    // "SYSTEM_USER",
-    // "TABLE",
-    // "TABLESAMPLE",
-    // "THEN",
-    // "TIME",
-    // "TIMESTAMP",
-    // "TIMEZONE_HOUR",
-    // "TIMEZONE_MINUTE",
-    // "TO",
-    // "TRAILING",
-    // "TRANSLATION",
-    // "TREAT",
-    // "TRIGGER",
-    // "TRUE",
-    // "UNDO",
-    // "UNION",
-    // "UNIQUE",
-    // "UNKNOWN",
-    // "UNNEST",
-    // "UNTIL",
-    // "UPDATE",
+//            "ADD",
+//            "ALL",
+//            "ALLOCATE",
+//            "ALTER",
+//            "AND",
+//            "ANY",
+//            "ARE",
+//            "ARRAY",
+//            "AS",
+//            "ASENSITIVE",
+//            "ASYMMETRIC",
+//            "AT",
+//            "ATOMIC",
+//            "AUTHORIZATION",
+//            "BEGIN",
+//            "BETWEEN",
+//            "BIGINT",
+//            "BINARY",
+//            "BLOB",
+//            "BOOLEAN",
+//            "BOTH",
+//            "BY",
+//            "CALL",
+//            "CALLED",
+//            "CASCADED",
+//            "CASE",
+//            "CAST",
+//            "CHAR",
+//            "CHARACTER",
+//            "CHECK",
+//            "CLOB",
+//            "CLOSE",
+//            "COLLATE",
+//            "COLUMN",
+//            "COMMIT",
+//            "CONDITION",
+//            "CONNECT",
+//            "CONSTRAINT",
+//            "CONTINUE",
+//            "CORRESPONDING",
+//            "CREATE",
+//            "CROSS",
+//            "CUBE",
+//            "CURRENT",
+//            "CURRENT_DATE",
+//            "CURRENT_DEFAULT_TRANSFORM_GRO",
+//            "CURRENT_PATH",
+//            "CURRENT_ROLE",
+//            "CURRENT_TIME",
+//            "CURRENT_TIMESTAMP",
+//            "CURRENT_TRANSFORM_GROUP_FOR_T",
+//            "CURRENT_USER",
+//            "CURSOR",
+//            "CYCLE",
+//            "DATE",
+//            "DAY",
+//            "DEALLOCATE",
+//            "DEC",
+//            "DECIMAL",
+//            "DECLARE",
+//            "DEFAULT",
+//            "DELETE",
+//            "DEREF",
+//            "DESCRIBE",
+//            "DETERMINISTIC",
+//            "DISCONNECT",
+//            "DISTINCT",
+//            "DO",
+//            "DOUBLE",
+//            "DROP",
+//            "DYNAMIC",
+//            "EACH",
+//            "ELEMENT",
+//            "ELSE",
+//            "ELSEIF",
+//            "END",
+//            "ESCAPE",
+//            "EXCEPT",
+//            "EXEC",
+//            "EXECUTE",
+//            "EXISTS",
+//            "EXIT",
+//            "EXTERNAL",
+//            "FALSE",
+//            "FETCH",
+//            "FILTER",
+//            "FLOAT",
+//            "FOR",
+//            "FOREIGN",
+//            "FREE",
+//            "FROM",
+//            "FULL",
+//            "FUNCTION",
+//            "GET",
+//            "GLOBAL",
+//            "GRANT",
+//            "GROUP",
+//            "GROUPING",
+//            "HANDLER",
+//            "HAVING",
+//            "HOLD",
+//            "HOUR",
+//            "IDENTITY",
+//            "IF",
+//            "IMMEDIATE",
+//            "IN",
+//            "INDICATOR",
+//            "INNER",
+//            "INOUT",
+//            "INPUT",
+//            "INSENSITIVE",
+//            "INSERT",
+//            "INT",
+//            "INTEGER",
+//            "INTERSECT",
+//            "INTERVAL",
+//            "INTO",
+//            "IS",
+//            "ITERATE",
+//            "JOIN",
+//            "LANGUAGE",
+//            "LARGE",
+//            "LATERAL",
+//            "LEADING",
+//            "LEAVE",
+//            "LEFT",
+//            "LIKE",
+//            "LOCAL",
+//            "LOCALTIME",
+//            "LOCALTIMESTAMP",
+//            "LOOP",
+//            "MATCH",
+//            "MEMBER",
+//            "MERGE",
+//            "METHOD",
+//            "MINUTE",
+//            "MODIFIES",
+//            "MODULE",
+//            "MONTH",
+//            "MULTISET",
+//            "NATIONAL",
+//            "NATURAL",
+//            "NCHAR",
+//            "NCLOB",
+//            "NEW",
+//            "NO",
+//            "NONE",
+//            "NOT",
+//            "NULL",
+//            "NUMERIC",
+//            "OF",
+//            "OLD",
+//            "ON",
+//            "ONLY",
+//            "OPEN",
+//            "OR",
+//            "ORDER",
+//            "OUT",
+//            "OUTER",
+//            "OUTPUT",
+//            "OVER",
+//            "OVERLAPS",
+//            "PARAMETER",
+//            "PARTITION",
+//            "PRECISION",
+//            "PREPARE",
+//            "PRIMARY",
+//            "PROCEDURE",
+//            "RANGE",
+//            "READS",
+//            "REAL",
+//            "RECURSIVE",
+//            "REF",
+//            "REFERENCES",
+//            "REFERENCING",
+//            "RELEASE",
+//            "REPEAT",
+//            "RESIGNAL",
+//            "RESULT",
+//            "RETURN",
+//            "RETURNS",
+//            "REVOKE",
+//            "RIGHT",
+//            "ROLLBACK",
+//            "ROLLUP",
+//            "ROW",
+//            "ROWS",
+//            "SAVEPOINT",
+//            "SCOPE",
+//            "SCROLL",
+//            "SEARCH",
+//            "SECOND",
+//            "SELECT",
+//            "SENSITIVE",
+//            "SESSION_USER",
+//            "SET",
+//            "SIGNAL",
+//            "SIMILAR",
+//            "SMALLINT",
+//            "SOME",
+//            "SPECIFIC",
+//            "SPECIFICTYPE",
+//            "SQL",
+//            "SQLEXCEPTION",
+//            "SQLSTATE",
+//            "SQLWARNING",
+//            "START",
+//            "STATIC",
+//            "SUBMULTISET",
+//            "SYMMETRIC",
+//            "SYSTEM",
+//            "SYSTEM_USER",
+//            "TABLE",
+//            "TABLESAMPLE",
+//            "THEN",
+//            "TIME",
+//            "TIMESTAMP",
+//            "TIMEZONE_HOUR",
+//            "TIMEZONE_MINUTE",
+//            "TO",
+//            "TRAILING",
+//            "TRANSLATION",
+//            "TREAT",
+//            "TRIGGER",
+//            "TRUE",
+//            "UNDO",
+//            "UNION",
+//            "UNIQUE",
+//            "UNKNOWN",
+//            "UNNEST",
+//            "UNTIL",
+//            "UPDATE",
             "USER",
-            // "USING",
-            // "VALUE",
-            // "VALUES",
-            // "VARCHAR",
-            // "VARYING",
-            // "WHEN",
-            // "WHENEVER",
-            // "WHERE",
-            // "WHILE",
-            // "WINDOW",
-            // "WITH",
-            // "WITHIN",
-            // "WITHOUT",
-            // "YEAR",
-            // "ALIAS",
-            // "AUTOCOMMIT",
-            // "CACHED",
-            // "CHECKPOINT",
-            // "EXPLAIN",
-            // "IGNORECASE",
-            // "INDEX",
-            // "LOGSIZE",
-            // "MATCHED",
-            // "MAXROWS",
-            // "MEMORY",
-            // "MINUS",
-            // "NEXT",
-            // "OPENBRACKET",
+//            "USING",
+//            "VALUE",
+//            "VALUES",
+//            "VARCHAR",
+//            "VARYING",
+//            "WHEN",
+//            "WHENEVER",
+//            "WHERE",
+//            "WHILE",
+//            "WINDOW",
+//            "WITH",
+//            "WITHIN",
+//            "WITHOUT",
+//            "YEAR",
+//            "ALIAS",
+//            "AUTOCOMMIT",
+//            "CACHED",
+//            "CHECKPOINT",
+//            "EXPLAIN",
+//            "IGNORECASE",
+//            "INDEX",
+//            "LOGSIZE",
+//            "MATCHED",
+//            "MAXROWS",
+//            "MEMORY",
+//            "MINUS",
+//            "NEXT",
+//            "OPENBRACKET",
             "PASSWORD"
-    // "PLAN",
-    // "PROPERTY",
-    // "READONLY",
-    // "REFERENTIAL_INTEGRITY",
-    // "RENAME",
-    // "RESTART",
-    // "SCRIPT",
-    // "SCRIPTFORMAT",
-    // "SEMICOLON",
-    // "SEQUENCE",
-    // "SHUTDOWN",
-    // "SOURCE",
-    // "TEMP",
-    // "TEXT",
-    // "VIEW",
-    // "WRITE_DELAY",
-    // "VAR_POP",
-    // "VAR_SAMP",
-    // "STDDEV_POP",
-    // "STDDEV_SAMP",
-    // "DEFRAG",
-    // "INCREMENT",
-    // "TOCHAR",
-    // "DATABASE",
-    // "SCHEMA",
-    // "ROLE",
-    // "DOW",
-    // "INITIAL"
-            );
+//            "PLAN",
+//            "PROPERTY",
+//            "READONLY",
+//            "REFERENTIAL_INTEGRITY",
+//            "RENAME",
+//            "RESTART",
+//            "SCRIPT",
+//            "SCRIPTFORMAT",
+//            "SEMICOLON",
+//            "SEQUENCE",
+//            "SHUTDOWN",
+//            "SOURCE",
+//            "TEMP",
+//            "TEXT",
+//            "VIEW",
+//            "WRITE_DELAY",
+//            "VAR_POP",
+//            "VAR_SAMP",
+//            "STDDEV_POP",
+//            "STDDEV_SAMP",
+//            "DEFRAG",
+//            "INCREMENT",
+//            "TOCHAR",
+//            "DATABASE",
+//            "SCHEMA",
+//            "ROLE",
+//            "DOW",
+//            "INITIAL"
+    );
 
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
