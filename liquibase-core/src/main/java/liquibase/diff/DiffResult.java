@@ -83,7 +83,7 @@ public class DiffResult {
     private static final boolean EXCLUDE_SCHEMA = "true".equalsIgnoreCase(System.getProperty(EXCLUDE_SCHEMA_KEY));
     ISODateFormat isoDateFormat = new ISODateFormat();
 
-    private String idRoot = String.valueOf(new Date().getTime());
+    private String idRoot = Long.toHexString(System.currentTimeMillis());
     private int changeNumber = 1;
 
     private DatabaseSnapshot referenceSnapshot;
@@ -1007,12 +1007,12 @@ public class DiffResult {
 
                     constraintsConfig.setNullable(false);
                 }
-//                if (column.isUnique()) {
-//                    if (constraintsConfig == null) {
-//                        constraintsConfig = new ConstraintsConfig();
-//                    }
-//                   constraintsConfig.setUnique(true);
-//               }
+                // if (column.isUnique()) {
+                // if (constraintsConfig == null) {
+                // constraintsConfig = new ConstraintsConfig();
+                // }
+                // constraintsConfig.setUnique(true);
+                // }
                 if (constraintsConfig != null) {
                     columnConfig.setConstraints(constraintsConfig);
                 }
