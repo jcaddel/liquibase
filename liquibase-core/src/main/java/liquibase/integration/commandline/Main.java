@@ -222,8 +222,39 @@ public class Main {
             if (isChangeLogRequired(command) && changeLogFile == null) {
                 messages.add("--changeLog is required");
             }
+
+            if (isNoArgCommand(command) && !commandParams.isEmpty()) {
+                messages.add("unexpected command parameters: " + commandParams);
+            } else {
+                checkForUnexpectedCommandParameter(messages);
+            }
         }
         return messages;
+    }
+
+    private void checkForUnexpectedCommandParameter(List<String> messages) {
+        if ("updateCount".equalsIgnoreCase(command) || "updateCountSQL".equalsIgnoreCase(command)
+                || "rollback".equalsIgnoreCase(command) || "rollbackToDate".equalsIgnoreCase(command)
+                || "rollbackCount".equalsIgnoreCase(command) || "rollbackSQL".equalsIgnoreCase(command)
+                || "rollbackToDateSQL".equalsIgnoreCase(command) || "rollbackCountSQL".equalsIgnoreCase(command)
+                || "dbDoc".equalsIgnoreCase(command) || "tag".equalsIgnoreCase(command)) {
+            if (commandParams.size() > 0 && commandParams.iterator().next().startsWith("-")) {
+                messages.add("unexpected command parameters: " + commandParams);
+            }
+        } else if ("status".equalsIgnoreCase(command)) {
+            if (commandParams.size() > 0 && !commandParams.iterator().next().equalsIgnoreCase("--verbose")) {
+                messages.add("unexpected command parameters: " + commandParams);
+            }
+        } else if ("diff".equalsIgnoreCase(command) || "diffChangeLog".equalsIgnoreCase(command)) {
+            if (commandParams.size() > 0) {
+                for (String cmdParm : commandParams) {
+                    if (!cmdParm.startsWith("--referenceUsername") && !cmdParm.startsWith("--referencePassword")
+                            && !cmdParm.startsWith("--referenceDriver") && !cmdParm.startsWith("--referenceUrl")) {
+                        messages.add("unexpected command parameters: " + commandParams);
+                    }
+                }
+            }
+        }
     }
 
     private boolean isChangeLogRequired(String command) {
@@ -244,6 +275,17 @@ public class Main {
                 || "validate".equalsIgnoreCase(arg) || "help".equalsIgnoreCase(arg) || "diff".equalsIgnoreCase(arg)
                 || "diffChangeLog".equalsIgnoreCase(arg) || "generateChangeLog".equalsIgnoreCase(arg)
                 || "clearCheckSums".equalsIgnoreCase(arg) || "dbDoc".equalsIgnoreCase(arg)
+                || "changelogSync".equalsIgnoreCase(arg) || "changelogSyncSQL".equalsIgnoreCase(arg)
+                || "markNextChangeSetRan".equalsIgnoreCase(arg) || "markNextChangeSetRanSQL".equalsIgnoreCase(arg);
+    }
+
+    private boolean isNoArgCommand(String arg) {
+        return "migrate".equals(arg) || "migrateSQL".equalsIgnoreCase(arg) || "update".equalsIgnoreCase(arg)
+                || "updateSQL".equalsIgnoreCase(arg) || "futureRollbackSQL".equalsIgnoreCase(arg)
+                || "updateTestingRollback".equalsIgnoreCase(arg) || "listLocks".equalsIgnoreCase(arg)
+                || "dropAll".equalsIgnoreCase(arg) || "releaseLocks".equalsIgnoreCase(arg)
+                || "validate".equalsIgnoreCase(arg) || "help".equalsIgnoreCase(arg)
+                || "generateChangeLog".equalsIgnoreCase(arg) || "clearCheckSums".equalsIgnoreCase(arg)
                 || "changelogSync".equalsIgnoreCase(arg) || "changelogSyncSQL".equalsIgnoreCase(arg)
                 || "markNextChangeSetRan".equalsIgnoreCase(arg) || "markNextChangeSetRanSQL".equalsIgnoreCase(arg);
     }
@@ -287,6 +329,14 @@ public class Main {
         }
         stream.println();
         printHelp(stream);
+    }
+
+    protected void printWarning(List<String> warningMessages, PrintStream stream) {
+        stream.println("Warnings:");
+        for (String message : warningMessages) {
+            stream.println(" " + message);
+        }
+        stream.println();
     }
 
     protected void printHelp(PrintStream stream) {
