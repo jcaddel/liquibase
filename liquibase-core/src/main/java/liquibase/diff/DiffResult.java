@@ -58,6 +58,7 @@ import liquibase.database.structure.Sequence;
 import liquibase.database.structure.Table;
 import liquibase.database.structure.UniqueConstraint;
 import liquibase.database.structure.View;
+import liquibase.database.structure.type.DataType;
 import liquibase.database.typeconversion.TypeConverter;
 import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.DatabaseException;
@@ -903,6 +904,9 @@ public class DiffResult {
                 continue;
             }
 
+            TypeConverterFactory factory = TypeConverterFactory.getInstance();
+            TypeConverter converter = factory.findTypeConverter(database);
+
             AddColumnChange change = new AddColumnChange();
             change.setTableName(column.getTable().getName());
             change.setSchemaName(column.getTable().getSchema());
@@ -910,15 +914,15 @@ public class DiffResult {
             ColumnConfig columnConfig = new ColumnConfig();
             columnConfig.setName(column.getName());
 
-            String dataType = TypeConverterFactory.getInstance().findTypeConverter(database)
-                    .convertToDatabaseTypeString(column, database);
+            String dataType = converter.convertToDatabaseTypeString(column, database);
 
             columnConfig.setType(dataType);
 
             Object defaultValue = column.getDefaultValue();
             if (defaultValue != null) {
-                String defaultValueString = TypeConverterFactory.getInstance().findTypeConverter(database)
-                        .getDataType(defaultValue).convertObjectToString(defaultValue, database);
+                DataType databaseDataType = converter.getDataType(defaultValue);
+                String defaultValueString = databaseDataType.convertObjectToString(defaultValue, database);
+
                 if (defaultValueString != null) {
                     defaultValueString = defaultValueString.replaceFirst("'", "").replaceAll("'$", "");
                 }
