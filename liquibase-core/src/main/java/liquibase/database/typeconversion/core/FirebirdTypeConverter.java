@@ -7,6 +7,8 @@ import liquibase.database.structure.type.ClobType;
 import liquibase.database.structure.type.CurrencyType;
 import liquibase.database.structure.type.DataType;
 import liquibase.database.structure.type.DateTimeType;
+import liquibase.database.structure.type.NumberType;
+import liquibase.database.structure.type.NumericType;
 
 public class FirebirdTypeConverter extends AbstractTypeConverter {
 
