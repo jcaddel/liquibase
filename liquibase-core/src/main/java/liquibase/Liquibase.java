@@ -485,8 +485,8 @@ public class Liquibase {
 
             logIterator.run(new RollbackVisitor(database), database);
         } finally {
-            ExecutorService.getInstance().setExecutor(database, oldTemplate);
             lockService.releaseLock();
+            ExecutorService.getInstance().setExecutor(database, oldTemplate);
         }
 
         try {
