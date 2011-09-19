@@ -2,6 +2,7 @@ package liquibase.database.core;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -220,8 +221,9 @@ public class MockDatabase implements Database {
     }
 
     @Override
-    public String getAutoIncrementClause() {
-        return "AUTO_INCREMENT_CLAUSE";
+    public String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy) {
+        return "AUTO_INCREMENT_CLAUSE" + startWith != null ? (" " + startWith)
+                : "" + incrementBy != null ? (" " + incrementBy) : "";
     }
 
     public SqlStatement getCommitSQL() {

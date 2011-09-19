@@ -748,13 +748,13 @@ public class Liquibase {
      * Add safe database properties as changelog parameters.<br/>
      * Safe properties are the ones that doesn't have side effects in liquibase state and also don't change in during
      * the liquibase execution
-     *
+     * 
      * @param database
      *            Database which propeties are put in the changelog
      * @throws DatabaseException
      */
     private void setDatabasePropertiesAsChangelogParameters(Database database) throws DatabaseException {
-        setChangeLogParameter("database.autoIncrementClause", database.getAutoIncrementClause());
+        setChangeLogParameter("database.autoIncrementClause", database.getAutoIncrementClause(null, null));
         setChangeLogParameter("database.currentDateTimeFunction", database.getCurrentDateTimeFunction());
         setChangeLogParameter("database.databaseChangeLogLockTableName", database.getDatabaseChangeLogLockTableName());
         setChangeLogParameter("database.databaseChangeLogTableName", database.getDatabaseChangeLogTableName());

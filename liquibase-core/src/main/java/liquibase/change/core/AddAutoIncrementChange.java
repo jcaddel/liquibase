@@ -1,5 +1,7 @@
 package liquibase.change.core;
 
+import java.math.BigInteger;
+
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
@@ -13,8 +15,9 @@ import liquibase.statement.core.SetNullableStatement;
 import liquibase.util.StringUtils;
 
 /**
- * Makes an existing column into an auto-increment column. This change is only valid for databases with
- * auto-increment/identity columns. The current version does not support MS-SQL.
+ * Makes an existing column into an auto-increment column.
+ * This change is only valid for databases with auto-increment/identity columns.
+ * The current version does not support MS-SQL.
  */
 public class AddAutoIncrementChange extends AbstractChange {
 
@@ -22,7 +25,9 @@ public class AddAutoIncrementChange extends AbstractChange {
     private String tableName;
     private String columnName;
     private String columnDataType;
-
+    private BigInteger startWith;
+    private BigInteger incrementBy;
+    
     public AddAutoIncrementChange() {
         super("addAutoIncrement", "Set Column as Auto-Increment", ChangeMetaData.PRIORITY_DEFAULT);
     }
@@ -59,18 +64,33 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
+    public BigInteger getStartWith() {
+    	return startWith;
+    }
+    
+    public void setStartWith(BigInteger startWith) {
+    	this.startWith = startWith;
+    }
+    
+    public BigInteger getIncrementBy() {
+    	return incrementBy;
+    }
+    
+    public void setIncrementBy(BigInteger incrementBy) {
+    	this.incrementBy = incrementBy;
+    }
+    
     public SqlStatement[] generateStatements(Database database) {
         if (database instanceof PostgresDatabase) {
             String sequenceName = (getTableName() + "_" + getColumnName() + "_seq").toLowerCase();
-            return new SqlStatement[] {
+            return new SqlStatement[]{
                     new CreateSequenceStatement(schemaName, sequenceName),
                     new SetNullableStatement(schemaName, getTableName(), getColumnName(), null, false),
-                    new AddDefaultValueStatement(schemaName, getTableName(), getColumnName(), getColumnDataType(),
-                            new DatabaseFunction("NEXTVAL('" + sequenceName + "')")), };
+                    new AddDefaultValueStatement(schemaName, getTableName(), getColumnName(), getColumnDataType(), new DatabaseFunction("NEXTVAL('"+sequenceName+"')")),
+            };
         }
 
-        return new SqlStatement[] { new AddAutoIncrementStatement(getSchemaName(), getTableName(), getColumnName(),
-                getColumnDataType()) };
+        return new SqlStatement[]{new AddAutoIncrementStatement(getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), getStartWith(), getIncrementBy())};
     }
 
     public String getConfirmationMessage() {

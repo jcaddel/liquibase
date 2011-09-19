@@ -1,5 +1,7 @@
 package liquibase.database.structure;
 
+import java.math.BigInteger;
+
 import liquibase.util.SqlUtil;
 
 public class Column implements DatabaseObject, Comparable<Column> {
@@ -14,25 +16,28 @@ public class Column implements DatabaseObject, Comparable<Column> {
     private String typeName;
     private Object defaultValue;
     private boolean autoIncrement = false;
+    private BigInteger startWith;
+    private BigInteger incrementBy;
     private boolean primaryKey = false;
     private boolean unique = false;
-    // indicates that data type need to initialize precision and scale
-    // i.e. NUMBER vs NUMBER(22,0)
-    private boolean initPrecision = true;
+	// indicates that data type need to initialize precision and scale
+	// i.e. NUMBER vs NUMBER(22,0)
+	private boolean initPrecision = true;
 
     private boolean certainDataType = true;
     private String remarks;
 
-    // used for PK's index configuration
-    private String tablespace;
+	// used for PK's index configuration
+	private String tablespace;
 
     public Table getTable() {
         return table;
     }
 
-    @Override
     public DatabaseObject[] getContainingObjects() {
-        return new DatabaseObject[] { getTable() };
+        return new DatabaseObject[] {
+                getTable()
+        };
     }
 
     public Column setTable(Table table) {
@@ -40,6 +45,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
 
         return this;
     }
+
 
     public View getView() {
         return view;
@@ -51,16 +57,16 @@ public class Column implements DatabaseObject, Comparable<Column> {
         return this;
     }
 
-    public String getTablespace() {
-        return tablespace;
-    }
+	public String getTablespace() {
+		return tablespace;
+	}
 
-    public Column setTablespace(String tablespace) {
-        this.tablespace = tablespace;
-        return this;
-    }
+	public Column setTablespace(String tablespace) {
+		this.tablespace = tablespace;
+		return  this;
+	}
 
-    public String getName() {
+	public String getName() {
         return name;
     }
 
@@ -69,6 +75,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
 
         return this;
     }
+
 
     public int getDataType() {
         return dataType;
@@ -110,6 +117,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
         return this;
     }
 
+
     public String getTypeName() {
         return typeName;
     }
@@ -119,6 +127,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
 
         return this;
     }
+
 
     public Object getDefaultValue() {
         return defaultValue;
@@ -138,13 +147,13 @@ public class Column implements DatabaseObject, Comparable<Column> {
         } else {
             tableOrViewName = table.getName();
         }
-        return tableOrViewName + "." + getName();
+        return tableOrViewName +"."+getName();
     }
 
-    @Override
+
     public int compareTo(Column o) {
         try {
-            // noinspection UnusedAssignment
+            //noinspection UnusedAssignment
             int returnValue = 0;
             if (this.getTable() != null && o.getTable() == null) {
                 return 1;
@@ -166,19 +175,16 @@ public class Column implements DatabaseObject, Comparable<Column> {
         }
     }
 
+
     @Override
     public boolean equals(Object o) {
         try {
-            if (this == o)
-                return true;
-            if (o == null || getClass() != o.getClass())
-                return false;
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
 
             Column column = (Column) o;
 
-            return name.equalsIgnoreCase(column.name)
-                    && !(table != null ? !table.equals(column.table) : column.table != null)
-                    && !(view != null ? !view.equals(column.view) : column.view != null);
+            return name.equalsIgnoreCase(column.name) && !(table != null ? !table.equals(column.table) : column.table != null) && !(view != null ? !view.equals(column.view) : column.view != null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -222,6 +228,26 @@ public class Column implements DatabaseObject, Comparable<Column> {
         return this;
     }
 
+    public BigInteger getStartWith() {
+    	return startWith;
+    }
+    
+    public Column setStartWith(BigInteger startWith) {
+    	this.startWith = startWith;
+    	
+    	return this;
+    }
+    
+    public BigInteger getIncrementBy() {
+    	return incrementBy;
+    }
+    
+    public Column setIncrementBy(BigInteger incrementBy) {
+    	this.incrementBy = incrementBy;
+    	
+    	return this;
+    }
+    
     public boolean isDataTypeDifferent(Column otherColumn) {
         if (!this.isCertainDataType() || !otherColumn.isCertainDataType()) {
             return false;
@@ -233,7 +259,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
         }
     }
 
-    @SuppressWarnings({ "SimplifiableIfStatement" })
+    @SuppressWarnings({"SimplifiableIfStatement"})
     public boolean isNullabilityDifferent(Column otherColumn) {
         if (this.isNullable() == null && otherColumn.isNullable() == null) {
             return false;
@@ -250,6 +276,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
     public boolean isDifferent(Column otherColumn) {
         return isDataTypeDifferent(otherColumn) || isNullabilityDifferent(otherColumn);
     }
+
 
     public boolean isPrimaryKey() {
         return primaryKey;
@@ -281,25 +308,26 @@ public class Column implements DatabaseObject, Comparable<Column> {
         return this;
     }
 
-    public boolean isInitPrecision() {
-        return initPrecision;
-    }
+	public boolean isInitPrecision() {
+		return initPrecision;
+	}
 
-    public void setInitPrecision(boolean initPrecision) {
-        this.initPrecision = initPrecision;
-    }
+	public void setInitPrecision(boolean initPrecision) {
+		this.initPrecision = initPrecision;
+	}
 
-    public LengthSemantics getLengthSemantics() {
-        return lengthSemantics;
+	public LengthSemantics getLengthSemantics() {
+      return lengthSemantics;
     }
 
     public Column setLengthSemantics(LengthSemantics lengthSemantics) {
-        this.lengthSemantics = lengthSemantics;
+      this.lengthSemantics = lengthSemantics;
 
         return this;
     }
 
     public static enum LengthSemantics {
-        CHAR, BYTE
+      CHAR, BYTE
     }
 }
+

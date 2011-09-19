@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import java.math.BigInteger;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Date;
@@ -30,6 +31,8 @@ public class ColumnConfig {
 
     private ConstraintsConfig constraints;
     private Boolean autoIncrement;
+    private BigInteger startWith;
+    private BigInteger incrementBy;
     private String remarks;
 
     public ColumnConfig(Column columnStructure) {
@@ -39,6 +42,8 @@ public class ColumnConfig {
             setDefaultValue(columnStructure.getDefaultValue().toString());
         }
         setAutoIncrement(columnStructure.isAutoIncrement());
+        setStartWith(columnStructure.getStartWith());
+        setIncrementBy(columnStructure.getIncrementBy());
         ConstraintsConfig constraints = new ConstraintsConfig();
         constraints.setNullable(columnStructure.isNullable());
         constraints.setPrimaryKey(columnStructure.isPrimaryKey());
@@ -332,5 +337,21 @@ public class ColumnConfig {
     public ColumnConfig setRemarks(String remarks) {
         this.remarks = remarks;
         return this;
+    }
+
+    public BigInteger getStartWith() {
+        return startWith;
+    }
+
+    public void setStartWith(BigInteger startWith) {
+        this.startWith = startWith;
+    }
+
+    public BigInteger getIncrementBy() {
+        return incrementBy;
+    }
+
+    public void setIncrementBy(BigInteger incrementBy) {
+        this.incrementBy = incrementBy;
     }
 }

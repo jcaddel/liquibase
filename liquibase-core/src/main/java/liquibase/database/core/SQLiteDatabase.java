@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -91,18 +92,30 @@ public class SQLiteDatabase extends AbstractDatabase {
     }
 
     @Override
+    protected String getAutoIncrementClause() {
+        return "AUTO_INCREMENT";
+    }
+
+    @Override
     public boolean supportsSchemas() {
+        return false;
+    }
+
+    @Override
+    protected boolean generateAutoIncrementStartWith(BigInteger startWith) {
+        // not supported
+        return false;
+    }
+
+    @Override
+    protected boolean generateAutoIncrementBy(BigInteger incrementBy) {
+        // not supported
         return false;
     }
 
     public String getTrigger(String table, String column) {
         return "CREATE TRIGGER insert_" + table + "_timeEnter AFTER  INSERT ON " + table + " BEGIN" + " UPDATE "
                 + table + " SET " + column + " = DATETIME('NOW')" + " WHERE rowid = new.rowid END ";
-    }
-
-    @Override
-    public String getAutoIncrementClause() {
-        return "AUTOINCREMENT";
     }
 
     public static List<SqlStatement> getAlterTableStatements(AlterTableVisitor alterTableVisitor, Database database,
