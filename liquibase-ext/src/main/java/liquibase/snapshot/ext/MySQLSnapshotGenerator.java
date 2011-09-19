@@ -6,9 +6,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import liquibase.Constants;
 import liquibase.database.Database;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.PrimaryKey;
 import liquibase.database.structure.Sequence;
 import liquibase.database.structure.Table;
 import liquibase.database.structure.View;
@@ -16,6 +19,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.SnapshotContext;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringFilter;
@@ -26,10 +30,70 @@ import liquibase.util.StringFilter;
  * @author Jeff Caddel
  */
 public class MySQLSnapshotGenerator extends liquibase.snapshot.jvm.MySQLDatabaseSnapshotGenerator {
+    boolean ignorePrimaryKeyDefaultValues = true;
+    boolean derivePrimaryKeyNameFromTableName = true;
+    String defaultPrimaryKeyName = "PRIMARY";
 
     @Override
     public int getPriority(Database database) {
         return Constants.DEFAULT_EXT_PRIORITY;
+    }
+
+    protected void updatePKNames(DatabaseSnapshot snapshot) {
+        if (!derivePrimaryKeyNameFromTableName) {
+            return;
+        }
+
+        Set<Table> tables = snapshot.getTables();
+        for (Table table : tables) {
+            String tableName = table.getName();
+            PrimaryKey pk = snapshot.getPrimaryKeyForTable(tableName);
+            if (pk == null) {
+                continue;
+            }
+            String pkName = pk.getName();
+            if (isReplacePKName(pkName)) {
+                String newPkName = tableName + "P1";
+                pk.setName(newPkName);
+            }
+        }
+    }
+
+    protected boolean isReplacePKName(String name) {
+        if (name == null || name.trim().equals("")) {
+            return true;
+        }
+        if (defaultPrimaryKeyName.equalsIgnoreCase(name)) {
+            return true;
+        }
+        return false;
+    }
+
+    protected void updatePKDefaultValues(DatabaseSnapshot snapshot) {
+        if (!ignorePrimaryKeyDefaultValues) {
+            return;
+        }
+
+        Set<Table> tables = snapshot.getTables();
+        for (Table table : tables) {
+            List<Column> columns = table.getColumns();
+            for (Column column : columns) {
+                if (column.isPrimaryKey()) {
+                    column.setDefaultValue(null);
+                }
+            }
+        }
+
+    }
+
+    @Override
+    public DatabaseSnapshot createSnapshot(SnapshotContext context) throws DatabaseException {
+        DatabaseSnapshot snapshot = super.createSnapshot(context);
+
+        updatePKDefaultValues(snapshot);
+        updatePKNames(snapshot);
+
+        return snapshot;
     }
 
     protected boolean isSequenceTable(Table table) {
@@ -142,6 +206,30 @@ public class MySQLSnapshotGenerator extends liquibase.snapshot.jvm.MySQLDatabase
     @Override
     protected boolean isIgnoreTable(Database database, Table table, StringFilter filter) {
         return super.isIgnoreTable(database, table, filter) || isSequenceTable(table);
+    }
+
+    public boolean isIgnorePrimaryKeyDefaultValues() {
+        return ignorePrimaryKeyDefaultValues;
+    }
+
+    public void setIgnorePrimaryKeyDefaultValues(boolean ignorePrimaryKeyDefaultValues) {
+        this.ignorePrimaryKeyDefaultValues = ignorePrimaryKeyDefaultValues;
+    }
+
+    public boolean isDerivePrimaryKeyNameFromTableName() {
+        return derivePrimaryKeyNameFromTableName;
+    }
+
+    public void setDerivePrimaryKeyNameFromTableName(boolean derivePrimaryKeyNameFromTableName) {
+        this.derivePrimaryKeyNameFromTableName = derivePrimaryKeyNameFromTableName;
+    }
+
+    public String getDefaultPrimaryKeyName() {
+        return defaultPrimaryKeyName;
+    }
+
+    public void setDefaultPrimaryKeyName(String defaultPrimaryKeyName) {
+        this.defaultPrimaryKeyName = defaultPrimaryKeyName;
     }
 
 }
