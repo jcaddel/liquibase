@@ -10,8 +10,8 @@ public class GenerateChangeLogTest {
 
     @Test
     public void cycleRice() throws Exception {
-        // cycleApp("rice", "mysql");
-        cycleApp("rice", "oracle");
+        cycleApp("rice", "mysql");
+        // cycleApp("rice", "oracle");
     }
 
     // @Test
@@ -21,7 +21,7 @@ public class GenerateChangeLogTest {
         GAV gav = mtu.getRiceGAV();
         gav.setClassifier(type);
         File changeLog = mtu.getChangeLogFile(gav, "views.xml");
-        String[] other = { "--diffTypes=views", "--changeSetAuthor=jcaddel" };
+        String[] other = { "--diffTypes=views", "--changeSetAuthor=ci" };
         Args args = new Args();
         args.setGav(gav);
         args.setJdbc(jdbc);

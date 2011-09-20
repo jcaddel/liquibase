@@ -583,7 +583,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
      * <p/>
      * This method should be database engine specific. JDBC implementation requires database engine vendors to convert
      * native DB types to java objects. During conversion some metadata information are being lost or reported
-     * incorrectly via DatabaseMetaData objects. This method, if necessary, must be overriden. It must go below
+     * incorrectly via DatabaseMetaData objects. This method, if necessary, must be overridden. It must go below
      * DatabaseMetaData implementation and talk directly to database to get correct metadata information.
      */
     protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs, Database database) throws SQLException,

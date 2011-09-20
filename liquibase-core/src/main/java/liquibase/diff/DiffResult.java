@@ -542,7 +542,6 @@ public class DiffResult {
     private ChangeSet generateChangeSet(Change change) {
         ChangeSet changeSet = generateChangeSet();
         changeSet.addChange(change);
-
         return changeSet;
     }
 
@@ -964,88 +963,107 @@ public class DiffResult {
         return null;
     }
 
+    protected void handleConstraints(Table table, Column column, ColumnConfig columnConfig) {
+        ConstraintsConfig constraintsConfig = null;
+        if (column.isPrimaryKey()) {
+            PrimaryKey primaryKey = null;
+            for (PrimaryKey pk : getMissingPrimaryKeys()) {
+                if (pk.getTable().getName().equalsIgnoreCase(table.getName())) {
+                    primaryKey = pk;
+                }
+            }
+
+            if (primaryKey == null || primaryKey.getColumnNamesAsList().size() == 1) {
+                constraintsConfig = new ConstraintsConfig();
+                constraintsConfig.setPrimaryKey(true);
+                constraintsConfig.setPrimaryKeyTablespace(column.getTablespace());
+
+                if (primaryKey != null) {
+                    constraintsConfig.setPrimaryKeyName(primaryKey.getName());
+                    getMissingPrimaryKeys().remove(primaryKey);
+                }
+            }
+        }
+
+        if (column.isAutoIncrement()) {
+            columnConfig.setAutoIncrement(true);
+        }
+
+        if (column.isNullable() != null && !column.isNullable()) {
+            if (constraintsConfig == null) {
+                constraintsConfig = new ConstraintsConfig();
+            }
+
+            constraintsConfig.setNullable(false);
+        }
+        // if (column.isUnique()) {
+        // if (constraintsConfig == null) {
+        // constraintsConfig = new ConstraintsConfig();
+        // }
+        // constraintsConfig.setUnique(true);
+        // }
+        if (constraintsConfig != null) {
+            columnConfig.setConstraints(constraintsConfig);
+        }
+    }
+
+    protected ColumnConfig getColumnConfig(Database database, Table table, Column column, TypeConverter converter) {
+        String type = converter.convertToDatabaseTypeString(column, database);
+
+        ColumnConfig columnConfig = new ColumnConfig();
+        columnConfig.setName(column.getName());
+        columnConfig.setType(type);
+        columnConfig.setRemarks(column.getRemarks());
+        columnConfig.setAutoIncrement(column.isAutoIncrement());
+
+        handleConstraints(table, column, columnConfig);
+        updateDefaultValue(column, column.getDefaultValue(), columnConfig);
+
+        return columnConfig;
+    }
+
+    protected void updateDefaultValue(Column column, Object defaultValue, ColumnConfig columnConfig) {
+        if (defaultValue == null) {
+            // do nothing
+        } else if (column.isAutoIncrement()) {
+            // do nothing
+        } else if (defaultValue instanceof Date) {
+            columnConfig.setDefaultValueDate((Date) defaultValue);
+        } else if (defaultValue instanceof Boolean) {
+            columnConfig.setDefaultValueBoolean(((Boolean) defaultValue));
+        } else if (defaultValue instanceof Number) {
+            columnConfig.setDefaultValueNumeric(((Number) defaultValue));
+        } else if (defaultValue instanceof DatabaseFunction) {
+            columnConfig.setDefaultValueComputed((DatabaseFunction) defaultValue);
+        } else {
+            columnConfig.setDefaultValue(defaultValue.toString());
+        }
+    }
+
+    protected CreateTableChange getCreateTableChange(Database database, Table table, TypeConverter converter) {
+        CreateTableChange change = new CreateTableChange();
+        change.setTableName(table.getName());
+        change.setSchemaName(table.getSchema());
+        change.setRemarks(table.getRemarks());
+        for (Column column : table.getColumns()) {
+            ColumnConfig columnConfig = getColumnConfig(database, table, column, converter);
+            change.addColumn(columnConfig);
+        }
+        return change;
+
+    }
+
     private void addMissingTableChanges(List<ChangeSet> changes, Database database) {
+        TypeConverterFactory factory = TypeConverterFactory.getInstance();
+        TypeConverter converter = factory.findTypeConverter(database);
+
         for (Table missingTable : getMissingTables()) {
             if (referenceSnapshot.getDatabase().isLiquibaseTable(missingTable.getName())) {
                 continue;
             }
-
-            CreateTableChange change = new CreateTableChange();
-            change.setTableName(missingTable.getName());
-            change.setSchemaName(missingTable.getSchema());
-            if (missingTable.getRemarks() != null) {
-                change.setRemarks(missingTable.getRemarks());
-            }
-
-            for (Column column : missingTable.getColumns()) {
-                ColumnConfig columnConfig = new ColumnConfig();
-                columnConfig.setName(column.getName());
-                TypeConverter tc = TypeConverterFactory.getInstance().findTypeConverter(database);
-                String type = tc.convertToDatabaseTypeString(column, database);
-                columnConfig.setType(type);
-
-                ConstraintsConfig constraintsConfig = null;
-                if (column.isPrimaryKey()) {
-                    PrimaryKey primaryKey = getPrimaryKey(missingTable.getName());
-
-                    if (primaryKey == null || primaryKey.getColumnNamesAsList().size() == 1) {
-                        constraintsConfig = new ConstraintsConfig();
-                        constraintsConfig.setPrimaryKey(true);
-                        constraintsConfig.setPrimaryKeyTablespace(column.getTablespace());
-
-                        if (primaryKey != null) {
-                            constraintsConfig.setPrimaryKeyName(primaryKey.getName());
-                            getMissingPrimaryKeys().remove(primaryKey);
-                        }
-                    }
-                }
-
-                if (column.isAutoIncrement()) {
-                    columnConfig.setAutoIncrement(true);
-                }
-
-                if (column.isNullable() != null && !column.isNullable()) {
-                    if (constraintsConfig == null) {
-                        constraintsConfig = new ConstraintsConfig();
-                    }
-
-                    constraintsConfig.setNullable(false);
-                }
-                // if (column.isUnique()) {
-                // if (constraintsConfig == null) {
-                // constraintsConfig = new ConstraintsConfig();
-                // }
-                // constraintsConfig.setUnique(true);
-                // }
-                if (constraintsConfig != null) {
-                    columnConfig.setConstraints(constraintsConfig);
-                }
-
-                Object defaultValue = column.getDefaultValue();
-                if (defaultValue == null) {
-                    // do nothing
-                } else if (column.isAutoIncrement()) {
-                    // do nothing
-                } else if (defaultValue instanceof Date) {
-                    columnConfig.setDefaultValueDate((Date) defaultValue);
-                } else if (defaultValue instanceof Boolean) {
-                    columnConfig.setDefaultValueBoolean(((Boolean) defaultValue));
-                } else if (defaultValue instanceof Number) {
-                    columnConfig.setDefaultValueNumeric(((Number) defaultValue));
-                } else if (defaultValue instanceof DatabaseFunction) {
-                    columnConfig.setDefaultValueComputed((DatabaseFunction) defaultValue);
-                } else {
-                    columnConfig.setDefaultValue(defaultValue.toString());
-                }
-
-                if (column.getRemarks() != null) {
-                    columnConfig.setRemarks(column.getRemarks());
-                }
-
-                change.addColumn(columnConfig);
-            }
-
-            changes.add(generateChangeSet(change));
+            CreateTableChange change = getCreateTableChange(database, missingTable, converter);
+            ChangeSet changeSet = generateChangeSet(change);
+            changes.add(changeSet);
         }
     }
 
@@ -1384,4 +1402,5 @@ public class DiffResult {
     public void setFlatten(boolean flatten) {
         this.flatten = flatten;
     }
+
 }
