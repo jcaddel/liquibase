@@ -36,6 +36,8 @@ public interface TypeConverter extends PrioritizedService {
 
     String convertToDatabaseTypeString(Column referenceColumn, Database database);
 
+    String convertToJDBCTypeString(Column referenceColumn, Database database);
+
     DataType getDataType(Object object);
 
     DataType getDataType(String columnTypeString, Boolean autoIncrement);

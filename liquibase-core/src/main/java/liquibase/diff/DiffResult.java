@@ -1008,7 +1008,9 @@ public class DiffResult {
     }
 
     protected ColumnConfig getColumnConfig(Database database, Table table, Column column, TypeConverter converter) {
-        String type = converter.convertToDatabaseTypeString(column, database);
+        String databaseType = converter.convertToDatabaseTypeString(column, database);
+        String jdbcType = converter.convertToJDBCTypeString(column, database);
+        String type = jdbcType;
 
         ColumnConfig columnConfig = new ColumnConfig();
         columnConfig.setName(column.getName());

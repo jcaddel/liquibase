@@ -45,12 +45,15 @@ import liquibase.database.typeconversion.TypeConverter;
 import liquibase.exception.DateParseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.statement.DatabaseFunction;
+import liquibase.util.SqlType;
 import liquibase.util.StringUtils;
 
 public abstract class AbstractTypeConverter implements TypeConverter {
     public static final String NULL = "NULL";
     public static final String JAVA_SQL_TYPES = "java.sql.Types";
+    private final Logger logger = LogFactory.getLogger();
 
     List<Integer> noParens = Arrays.asList(Types.ARRAY, Types.BIGINT, Types.BINARY, Types.BIT, Types.BLOB,
             Types.BOOLEAN, Types.CLOB, Types.DATALINK, Types.DATE, Types.DISTINCT, Types.INTEGER, Types.JAVA_OBJECT,
@@ -470,6 +473,57 @@ public abstract class AbstractTypeConverter implements TypeConverter {
     @Override
     public BlobType getLongBlobType() {
         return getBlobType();
+    }
+
+    protected SqlType getSqlType(int dataType) {
+        SqlType[] types = SqlType.values();
+        for (SqlType type : types) {
+            if (type.getValue() == dataType) {
+                return type;
+            }
+        }
+        return null;
+    }
+
+    protected String getJDBCQualifier(Database database, Column column) {
+        int type = column.getDataType();
+        String typeName = column.getTypeName();
+
+        if (!isKnownType(type)) {
+            logger.warning("Unknown Data Type: " + type + " (" + typeName + ").  Assuming it does not take parameters");
+            return "";
+        }
+
+        if (noParens.contains(type)) {
+            return "";
+        }
+
+        if (oneParam.contains(type)) {
+            return "(" + column.getColumnSize() + ")";
+        }
+
+        if (twoParams.contains(type) && column.isInitPrecision()) {
+            return "(" + column.getColumnSize() + "," + column.getDecimalDigits() + ")";
+        } else {
+            return "";
+        }
+
+    }
+
+    protected boolean isKnownType(int type) {
+        return noParens.contains(type) || oneParam.contains(type) || twoParams.contains(type);
+    }
+
+    protected String getJDBCBase(Database database, Column column) {
+        SqlType type = getSqlType(column.getDataType());
+        return JAVA_SQL_TYPES + "." + type;
+    }
+
+    @Override
+    public String convertToJDBCTypeString(Column referenceColumn, Database database) {
+        String base = getJDBCBase(database, referenceColumn);
+        String qualifier = getJDBCQualifier(database, referenceColumn);
+        return base + qualifier;
     }
 
     @Override
