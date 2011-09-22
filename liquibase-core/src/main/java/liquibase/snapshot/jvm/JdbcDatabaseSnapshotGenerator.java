@@ -29,6 +29,8 @@ import liquibase.database.structure.Sequence;
 import liquibase.database.structure.Table;
 import liquibase.database.structure.UniqueConstraint;
 import liquibase.database.structure.View;
+import liquibase.database.structure.type.DataType;
+import liquibase.database.typeconversion.TypeConverter;
 import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
@@ -36,6 +38,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGenerator;
 import liquibase.snapshot.SnapshotContext;
@@ -224,37 +227,38 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
         configureColumnType(column, rs);
 
-        int nullable = rs.getInt("NULLABLE");
-        if (nullable == DatabaseMetaData.columnNoNulls) {
-            column.setNullable(false);
-        } else if (nullable == DatabaseMetaData.columnNullable) {
-            column.setNullable(true);
-        }
+        Boolean nullable = getNullable(rs.getInt("NULLABLE"));
+        column.setNullable(nullable);
 
         getColumnTypeAndDefValue(column, rs, database);
         column.setRemarks(remarks);
-
         return column;
+    }
+
+    protected Boolean getNullable(int nullable) {
+        if (nullable == DatabaseMetaData.columnNoNulls) {
+            return Boolean.FALSE;
+        } else if (nullable == DatabaseMetaData.columnNullable) {
+            return Boolean.TRUE;
+        } else {
+            return null;
+        }
     }
 
     /**
      * Configuration of column's type.
-     *
-     * @param column
-     *            Column to configure
-     * @param rs
-     *            Result set, used as a property resource.
-     * @throws java.sql.SQLException
-     *             wrong Result Set content
-     * */
+     */
     protected void configureColumnType(Column column, ResultSet rs) throws SQLException {
         column.setDataType(rs.getInt("DATA_TYPE"));
         column.setColumnSize(rs.getInt("COLUMN_SIZE"));
         column.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
 
-        // Set true, if precision should be initialize
-        column.setInitPrecision(!((column.getDataType() == Types.DECIMAL || column.getDataType() == Types.NUMERIC || column
-                .getDataType() == Types.REAL) && rs.getString("DECIMAL_DIGITS") == null));
+        int type = column.getDataType();
+        boolean isInitPrecisionType = type == Types.DECIMAL || type == Types.NUMERIC || type == Types.REAL;
+        boolean hasDecimalDigits = rs.getString("DECIMAL_DIGITS") != null;
+
+        // Set to true, if precision should be initialized
+        column.setInitPrecision(isInitPrecisionType && hasDecimalDigits);
     }
 
     @Override
@@ -509,15 +513,15 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
     protected void readColumns(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData)
             throws SQLException, DatabaseException {
+        Logger logger = LogFactory.getLogger();
         Database database = snapshot.getDatabase();
         updateListeners("Reading columns for " + database.toString() + " ...");
 
-        Statement selectStatement = null;
         ResultSet rs = null;
         try {
-            selectStatement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-            rs = databaseMetaData.getColumns(database.convertRequestedSchemaToCatalog(schema),
-                    database.convertRequestedSchemaToSchema(schema), null, null);
+            String catalog = database.convertRequestedSchemaToCatalog(schema);
+            String convertedSchema = database.convertRequestedSchemaToSchema(schema);
+            rs = databaseMetaData.getColumns(catalog, convertedSchema, null, null);
             while (rs.next()) {
                 Column column = readColumn(rs, database);
 
@@ -525,56 +529,50 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                     continue;
                 }
 
-                // replace temp table in column with real table
-                Table tempTable = column.getTable();
-                column.setTable(null);
-
-                Table table;
-                if (database.isLiquibaseTable(tempTable.getName())) {
-                    if (tempTable.getName().equalsIgnoreCase(database.getDatabaseChangeLogTableName())) {
-                        table = snapshot.getDatabaseChangeLogTable();
-                    } else if (tempTable.getName().equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
-                        table = snapshot.getDatabaseChangeLogLockTable();
-                    } else {
-                        throw new UnexpectedLiquibaseException("Unknown liquibase table: " + tempTable.getName());
-                    }
-                } else {
-                    table = snapshot.getTable(tempTable.getName());
+                // Lookup an existing Table object in our snapshot
+                String tableName = column.getTable().getName();
+                Table table = getTableForColumn(database, column, snapshot, tableName);
+                View view = snapshot.getView(tableName);
+                if (table == null && view == null) {
+                    logger.debug("Could not find table or view " + tableName + " for column " + column.getName());
+                    continue;
                 }
-                if (table == null) {
-                    View view = snapshot.getView(tempTable.getName());
-                    if (view == null) {
-                        LogFactory.getLogger().debug(
-                                "Could not find table or view " + tempTable.getName() + " for column "
-                                        + column.getName());
-                        continue;
-                    } else {
-                        column.setView(view);
-                        column.setAutoIncrement(false);
-                        view.getColumns().add(column);
-                    }
-                } else {
-                    column.setTable(table);
-                    column.setAutoIncrement(isColumnAutoIncrement(database, table.getSchema(), table.getName(),
-                            column.getName()));
-                    table.getColumns().add(column);
-                }
-
-                column.setPrimaryKey(snapshot.isPrimaryKey(column));
+                updateColumn(snapshot, column, database, table, view);
             }
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ignored) {
-                }
+            JdbcUtils.closeResultSet(rs);
+        }
+    }
+
+    protected void updateColumn(DatabaseSnapshot snapshot, Column column, Database database, Table table, View view)
+            throws SQLException, DatabaseException {
+        if (table != null) {
+            String tableName = table.getName();
+            String tableSchema = table.getSchema();
+            String columnName = column.getName();
+            boolean autoIncrement = isColumnAutoIncrement(database, tableSchema, tableName, columnName);
+            column.setTable(table);
+            column.setAutoIncrement(autoIncrement);
+            table.getColumns().add(column);
+        } else {
+            column.setView(view);
+            column.setAutoIncrement(false);
+            view.getColumns().add(column);
+        }
+        column.setPrimaryKey(snapshot.isPrimaryKey(column));
+    }
+
+    protected Table getTableForColumn(Database database, Column column, DatabaseSnapshot snapshot, String tableName) {
+        if (database.isLiquibaseTable(tableName)) {
+            if (tableName.equalsIgnoreCase(database.getDatabaseChangeLogTableName())) {
+                return snapshot.getDatabaseChangeLogTable();
+            } else if (tableName.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
+                return snapshot.getDatabaseChangeLogLockTable();
+            } else {
+                throw new UnexpectedLiquibaseException("Unknown liquibase table: " + tableName);
             }
-            if (selectStatement != null) {
-                try {
-                    selectStatement.close();
-                } catch (SQLException ignored) {
-                }
-            }
+        } else {
+            return snapshot.getTable(tableName);
         }
     }
 
@@ -582,25 +580,32 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
      * Method assigns correct column type and default value to Column object.
      * <p/>
      * This method should be database engine specific. JDBC implementation requires database engine vendors to convert
-     * native DB types to java objects. During conversion some metadata information are being lost or reported
+     * native DB types to java objects. During conversion some metadata information is being lost or reported
      * incorrectly via DatabaseMetaData objects. This method, if necessary, must be overridden. It must go below
-     * DatabaseMetaData implementation and talk directly to database to get correct metadata information.
+     * DatabaseMetaData implementation and talk directly to the database to get correct metadata information.
      */
-    protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs, Database database) throws SQLException,
+    protected void getColumnTypeAndDefValue(Column column, ResultSet rs, Database database) throws SQLException,
             DatabaseException {
         Object defaultValue = rs.getObject("COLUMN_DEF");
+        String typeName = rs.getString("TYPE_NAME");
+
+        TypeConverterFactory factory = TypeConverterFactory.getInstance();
+        TypeConverter converter = factory.findTypeConverter(database);
+        int type = column.getDataType();
+        int size = column.getColumnSize();
+        int digits = column.getDecimalDigits();
+
+        DataType dataType = converter.getDataType(typeName, column.isAutoIncrement());
+        String newTypeName = dataType.toString();
+        Object newDefaultValue = null;
         try {
-            columnInfo.setDefaultValue(TypeConverterFactory
-                    .getInstance()
-                    .findTypeConverter(database)
-                    .convertDatabaseValueToObject(defaultValue, columnInfo.getDataType(), columnInfo.getColumnSize(),
-                            columnInfo.getDecimalDigits(), database));
+            newDefaultValue = converter.convertDatabaseValueToObject(defaultValue, type, size, digits, database);
         } catch (ParseException e) {
             throw new DatabaseException(e);
         }
-        columnInfo.setTypeName(TypeConverterFactory.getInstance().findTypeConverter(database)
-                .getDataType(rs.getString("TYPE_NAME"), columnInfo.isAutoIncrement()).toString());
-    } // end of method getColumnTypeAndDefValue()
+        column.setDefaultValue(newDefaultValue);
+        column.setTypeName(newTypeName);
+    }
 
     protected String getForeignKeyPKWarning(ForeignKey fk, Table table) {
         StringBuilder sb = new StringBuilder();

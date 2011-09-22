@@ -10,8 +10,8 @@ public class GenerateChangeLogTest {
 
     @Test
     public void cycleRice() throws Exception {
-        cycleApp("rice", "mysql");
-        // cycleApp("rice", "oracle");
+        // cycleApp("rice", "mysql");
+        cycleApp("rice", "oracle");
     }
 
     // @Test

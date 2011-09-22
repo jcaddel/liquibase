@@ -49,6 +49,8 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtils;
 
 public abstract class AbstractTypeConverter implements TypeConverter {
+    public static final String NULL = "NULL";
+    public static final String JAVA_SQL_TYPES = "java.sql.Types";
 
     List<Integer> noParens = Arrays.asList(Types.ARRAY, Types.BIGINT, Types.BINARY, Types.BIT, Types.BLOB,
             Types.BOOLEAN, Types.CLOB, Types.DATALINK, Types.DATE, Types.DISTINCT, Types.INTEGER, Types.JAVA_OBJECT,
@@ -66,8 +68,10 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         if (value == null) {
             return null;
         } else if (value instanceof String) {
-            return convertToCorrectObjectType(((String) value).replaceFirst("^'", "").replaceFirst("'$", ""),
-                    databaseDataType, firstParameter, secondParameter, database);
+            String s = (String) value;
+            s = s.replaceFirst("^'", "");
+            s = s.replaceFirst("'$", "");
+            return convertToCorrectObjectType(s, databaseDataType, firstParameter, secondParameter, database);
         } else {
             return value;
         }
@@ -104,14 +108,25 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         }
     }
 
+    protected boolean isText(int type) {
+        switch (type) {
+        case Types.CLOB:
+        case Types.VARCHAR:
+        case Types.CHAR:
+        case Types.LONGVARCHAR:
+            return true;
+        default:
+            return false;
+        }
+    }
+
     protected Object convertToCorrectObjectType(String value, int dataType, int columnSize, int decimalDigits,
             Database database) throws ParseException {
         if (value == null) {
             return null;
         }
-        if (dataType == Types.CLOB || dataType == Types.VARCHAR || dataType == Types.CHAR
-                || dataType == Types.LONGVARCHAR) {
-            if (value.equalsIgnoreCase("NULL")) {
+        if (isText(dataType)) {
+            if (value.equalsIgnoreCase(NULL)) {
                 return null;
             } else {
                 return value;
@@ -182,38 +197,66 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         }
     }
 
+    protected String getPrecision(String s) {
+        boolean hasParenthesis = s.contains("(") && s.contains(")");
+        if (!hasParenthesis) {
+            return null;
+        }
+        int beginIndex = s.indexOf("(") + 1;
+        int endIndex = s.indexOf(")");
+        return s.substring(beginIndex, endIndex);
+    }
+
+    protected String getDataTypeName(String columnTypeString) {
+
+        boolean hasLeftParenthesis = columnTypeString.contains("(");
+        boolean javaSqlType = columnTypeString.startsWith(JAVA_SQL_TYPES);
+
+        int beginIndex = 0;
+        int endIndex = columnTypeString.length();
+        if (javaSqlType) {
+            beginIndex = columnTypeString.lastIndexOf(".") + 1;
+        }
+        if (hasLeftParenthesis) {
+            endIndex = columnTypeString.indexOf("(");
+        }
+        return columnTypeString.substring(beginIndex, endIndex);
+    }
+
+    protected String getAdditionalInformation(String columnTypeString) {
+        if (!columnTypeString.contains(")")) {
+            return null;
+        }
+        return StringUtils.trimToNull(columnTypeString.replaceFirst(".*\\)", ""));
+    }
+
+    protected DataTypeContext getDataTypeContext(String columnTypeString, Boolean autoIncrement) {
+        // Parse out data type and precision
+        // Example cases: "CLOB", "java.sql.Types.CLOB", "CLOB(10000)", "java.sql.Types.CLOB(10000)
+        String precision = getPrecision(columnTypeString);
+        String dataTypeName = getDataTypeName(columnTypeString);
+        String additionalInformation = getAdditionalInformation(columnTypeString);
+
+        DataTypeContext context = new DataTypeContext();
+        context.setAdditionalInformation(additionalInformation);
+        context.setPrecision(precision);
+        context.setDataTypeName(dataTypeName);
+        return context;
+    }
+
     /**
      * Returns the database-specific datatype for the given column configuration. This method will convert some generic
      * column types (e.g. boolean, currency) to the correct type for the current database.
      */
     @Override
     public DataType getDataType(String columnTypeString, Boolean autoIncrement) {
-        // Parse out data type and precision
-        // Example cases: "CLOB", "java.sql.Types.CLOB", "CLOB(10000)", "java.sql.Types.CLOB(10000)
-        String dataTypeName = null;
-        String precision = null;
-        String additionalInformation = null;
-        if (columnTypeString.startsWith("java.sql.Types") && columnTypeString.contains("(")) {
-            precision = columnTypeString.substring(columnTypeString.indexOf("(") + 1, columnTypeString.indexOf(")"));
-            dataTypeName = columnTypeString.substring(columnTypeString.lastIndexOf(".") + 1,
-                    columnTypeString.indexOf("("));
-        } else if (columnTypeString.startsWith("java.sql.Types")) {
-            dataTypeName = columnTypeString.substring(columnTypeString.lastIndexOf(".") + 1);
-        } else if (columnTypeString.contains("(")) {
-            precision = columnTypeString.substring(columnTypeString.indexOf("(") + 1, columnTypeString.indexOf(")"));
-            dataTypeName = columnTypeString.substring(0, columnTypeString.indexOf("("));
-        } else {
-            dataTypeName = columnTypeString;
-        }
-        if (columnTypeString.contains(")")) {
-            additionalInformation = StringUtils.trimToNull(columnTypeString.replaceFirst(".*\\)", ""));
-        }
+        DataTypeContext context = getDataTypeContext(columnTypeString, autoIncrement);
 
-        return getDataType(columnTypeString, autoIncrement, dataTypeName, precision, additionalInformation);
+        return getDataType(columnTypeString, autoIncrement, context);
     }
 
-    protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName,
-            String precision, String additionalInformation) {
+    protected DataType getDataType(String columnTypeString, Boolean autoIncrement, DataTypeContext context) {
+        String dataTypeName = context.getDataTypeName();
         // Translate type to database-specific type, if possible
         DataType returnTypeName = null;
         if (dataTypeName.equalsIgnoreCase("BIGINT")) {
@@ -275,8 +318,9 @@ public abstract class AbstractTypeConverter implements TypeConverter {
             throw new UnexpectedLiquibaseException("Could not determine " + dataTypeName + " for "
                     + this.getClass().getName());
         }
-        addPrecisionToType(precision, returnTypeName);
-        returnTypeName.setAdditionalInformation(additionalInformation);
+
+        addPrecisionToType(context.getPrecision(), returnTypeName);
+        returnTypeName.setAdditionalInformation(context.getAdditionalInformation());
 
         return returnTypeName;
     }

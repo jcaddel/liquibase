@@ -52,7 +52,7 @@ public class MSSQLTypeConverter extends AbstractTypeConverter {
 
     @Override
     public DataType getDataType(String columnTypeString, Boolean autoIncrement) {
-//        System.out.println("IN :columnTypeString=" +columnTypeString +", autoIncrement=" +autoIncrement);
+        // System.out.println("IN :columnTypeString=" +columnTypeString +", autoIncrement=" +autoIncrement);
         if (columnTypeString.toLowerCase().endsWith("() identity")) {
             columnTypeString = columnTypeString.replaceFirst("\\(\\) identity$", "");
             autoIncrement = true;
@@ -69,8 +69,8 @@ public class MSSQLTypeConverter extends AbstractTypeConverter {
     }
 
     @Override
-    protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName,
-            String precision, String additionalInformation) {
+    protected DataType getDataType(String columnTypeString, Boolean autoIncrement, DataTypeContext context) {
+        String precision = context.getPrecision();
         if (columnTypeString.endsWith(" identity")) {
             columnTypeString = columnTypeString.replaceFirst(" identity$", "");
             autoIncrement = true;
@@ -80,8 +80,7 @@ public class MSSQLTypeConverter extends AbstractTypeConverter {
         }
 
         // Try to define data type by searching of common standard types
-        DataType returnTypeName = super.getDataType(columnTypeString, autoIncrement, dataTypeName, precision,
-                additionalInformation);
+        DataType returnTypeName = super.getDataType(columnTypeString, autoIncrement, context);
         // If we found CustomType (it means - nothing compatible) then search for oracle types
         if (returnTypeName instanceof CustomType) {
             boolean returnTypeChanged = false;
