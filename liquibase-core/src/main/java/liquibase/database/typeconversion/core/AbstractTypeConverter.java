@@ -128,6 +128,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         if (value == null) {
             return null;
         }
+
         if (isText(dataType)) {
             if (value.equalsIgnoreCase(NULL)) {
                 return null;

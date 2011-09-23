@@ -10,7 +10,7 @@ public class GenerateSQLTest {
 
     @Test
     public void generateSQL() throws Exception {
-        String type = "mysql";
+        String type = "oracle";
         JDBC jdbc = mtu.getJDBC("liquibase", type);
         GAV gav = mtu.getRiceGAV();
         gav.setClassifier(type);

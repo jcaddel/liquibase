@@ -1008,13 +1008,11 @@ public class DiffResult {
     }
 
     protected ColumnConfig getColumnConfig(Database database, Table table, Column column, TypeConverter converter) {
-        String databaseType = converter.convertToDatabaseTypeString(column, database);
         String jdbcType = converter.convertToJDBCTypeString(column, database);
-        String type = jdbcType;
 
         ColumnConfig columnConfig = new ColumnConfig();
         columnConfig.setName(column.getName());
-        columnConfig.setType(type);
+        columnConfig.setType(jdbcType);
         columnConfig.setRemarks(column.getRemarks());
         columnConfig.setAutoIncrement(column.isAutoIncrement());
 
