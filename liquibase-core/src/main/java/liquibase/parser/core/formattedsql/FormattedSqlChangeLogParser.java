@@ -1,12 +1,5 @@
 package liquibase.parser.core.formattedsql;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeLogParameters;
@@ -19,9 +12,12 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
 
+import java.io.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
-    @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
         BufferedReader reader = null;
         try {
@@ -46,14 +42,11 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         }
     }
 
-    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT + 5;
     }
 
-    @Override
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters,
-            ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
 
         DatabaseChangeLog changeLog = new DatabaseChangeLog();
         changeLog.setPhysicalFilePath(physicalChangeLogLocation);
@@ -61,8 +54,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         BufferedReader reader = null;
 
         try {
-            reader = new BufferedReader(new InputStreamReader(openChangeLogFile(physicalChangeLogLocation,
-                    resourceAccessor)));
+            reader = new BufferedReader(new InputStreamReader(openChangeLogFile(physicalChangeLogLocation, resourceAccessor)));
             StringBuffer currentSql = new StringBuffer();
             StringBuffer currentRollbackSql = new StringBuffer();
 
@@ -85,7 +77,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             while ((line = reader.readLine()) != null) {
                 Matcher changeSetPatternMatcher = changeSetPattern.matcher(line);
                 if (changeSetPatternMatcher.matches()) {
-                    String finalCurrentSql = StringUtils.trimToNull(currentSql.toString());
+                    String finalCurrentSql = changeLogParameters.expandExpressions(StringUtils.trimToNull(currentSql.toString()));
                     if (changeSet != null) {
 
                         if (finalCurrentSql == null) {
@@ -95,14 +87,14 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         change.setSql(finalCurrentSql);
 
                         if (StringUtils.trimToNull(currentRollbackSql.toString()) != null) {
-                            try {
-                                if (currentRollbackSql.toString().trim().toLowerCase().matches("^not required.*")) {
-                                    changeSet.addRollbackChange(new EmptyChange());
-                                } else {
-                                    RawSQLChange rollbackChange = new RawSQLChange();
-                                    rollbackChange.setSql(currentRollbackSql.toString());
-                                    changeSet.addRollbackChange(rollbackChange);
-                                }
+                        	try {
+                        		if (currentRollbackSql.toString().trim().toLowerCase().matches("^not required.*")) {
+                        			changeSet.addRollbackChange(new EmptyChange());
+                        		} else {
+                        			RawSQLChange rollbackChange = new RawSQLChange();
+                        			rollbackChange.setSql(changeLogParameters.expandExpressions(currentRollbackSql.toString()));
+                        			changeSet.addRollbackChange(rollbackChange);
+                        		}
                             } catch (UnsupportedChangeException e) {
                                 throw new RuntimeException(e);
                             }
@@ -131,8 +123,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     String context = parseString(contextPatternMatcher);
                     String dbms = parseString(dbmsPatternMatcher);
 
-                    changeSet = new ChangeSet(changeSetPatternMatcher.group(2), changeSetPatternMatcher.group(1),
-                            runAlways, runOnChange, physicalChangeLogLocation, context, dbms, runInTransaction);
+                    changeSet = new ChangeSet(changeSetPatternMatcher.group(2), changeSetPatternMatcher.group(1), runAlways, runOnChange, physicalChangeLogLocation, context, dbms, runInTransaction);
                     changeSet.setFailOnError(failOnError);
                     changeLog.addChangeSet(changeSet);
 
@@ -161,7 +152,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             }
 
             if (changeSet != null) {
-                change.setSql(StringUtils.trimToNull(currentSql.toString()));
+                change.setSql(changeLogParameters.expandExpressions(StringUtils.trimToNull(currentSql.toString())));
 
                 if (StringUtils.trimToNull(currentRollbackSql.toString()) != null) {
                     try {
@@ -169,7 +160,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                             changeSet.addRollbackChange(new EmptyChange());
                         } else {
                             RawSQLChange rollbackChange = new RawSQLChange();
-                            rollbackChange.setSql(currentRollbackSql.toString());
+                            rollbackChange.setSql(changeLogParameters.expandExpressions(currentRollbackSql.toString()));
                             changeSet.addRollbackChange(rollbackChange);
                         }
                     } catch (UnsupportedChangeException e) {
@@ -184,8 +175,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             if (reader != null) {
                 try {
                     reader.close();
-                } catch (IOException ignore) {
-                }
+                } catch (IOException ignore) { }
             }
         }
 
@@ -200,22 +190,19 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         return endDelimiter;
     }
 
-    private boolean parseBoolean(Matcher matcher, ChangeSet changeSet, boolean defaultValue)
-            throws ChangeLogParseException {
+    private boolean parseBoolean(Matcher matcher, ChangeSet changeSet, boolean defaultValue) throws ChangeLogParseException {
         boolean stripComments = defaultValue;
         if (matcher.matches()) {
             try {
                 stripComments = Boolean.parseBoolean(matcher.group(1));
             } catch (Exception e) {
-                throw new ChangeLogParseException("Cannot parse " + changeSet + " "
-                        + matcher.toString().replaceAll("\\.*", "") + " as a boolean");
+                throw new ChangeLogParseException("Cannot parse "+changeSet+" "+matcher.toString().replaceAll("\\.*","")+" as a boolean");
             }
         }
         return stripComments;
     }
 
-    protected InputStream openChangeLogFile(String physicalChangeLogLocation, ResourceAccessor resourceAccessor)
-            throws IOException {
+    protected InputStream openChangeLogFile(String physicalChangeLogLocation, ResourceAccessor resourceAccessor) throws IOException {
         return resourceAccessor.getResourceAsStream(physicalChangeLogLocation);
     }
 }
