@@ -1,4 +1,6 @@
-/.project
-/target
-/release.properties
+.project
+.classpath
+.settings
+target
+release.properties
 *.releaseBackup
