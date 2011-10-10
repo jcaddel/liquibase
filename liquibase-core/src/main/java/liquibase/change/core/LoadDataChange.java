@@ -31,325 +31,395 @@ import liquibase.util.csv.CSVReader;
 
 public class LoadDataChange extends AbstractChange implements ChangeWithColumns<LoadDataColumnConfig> {
 
-    private String schemaName;
-    private String tableName;
-    private String file;
-    private String encoding = null;
-    private String separator = liquibase.util.csv.opencsv.CSVReader.DEFAULT_SEPARATOR + "";
-    private String quotchar = liquibase.util.csv.opencsv.CSVReader.DEFAULT_QUOTE_CHARACTER + "";
-    @ChangeProperty(includeInSerialization = false)
-    private NullValue nullValue = new NullValue();
-    private String flattened;
+	private String schemaName;
+	private String tableName;
+	private String file;
+	private String encoding = null;
+	private String separator = liquibase.util.csv.opencsv.CSVReader.DEFAULT_SEPARATOR + "";
+	private String quotchar = liquibase.util.csv.opencsv.CSVReader.DEFAULT_QUOTE_CHARACTER + "";
+	@ChangeProperty(includeInSerialization = false)
+	private NullValue nullValue = new NullValue();
+	private String flattened;
 
-    private List<LoadDataColumnConfig> columns = new ArrayList<LoadDataColumnConfig>();
+	private List<LoadDataColumnConfig> columns = new ArrayList<LoadDataColumnConfig>();
 
-    public LoadDataChange() {
-        super("loadData", "Load Data", ChangeMetaData.PRIORITY_DEFAULT);
-    }
+	public LoadDataChange() {
+		super("loadData", "Load Data", ChangeMetaData.PRIORITY_DEFAULT);
+	}
 
-    protected LoadDataChange(String changeName, String changeDescription) {
-        super(changeName, changeDescription, ChangeMetaData.PRIORITY_DEFAULT);
-    }
+	protected LoadDataChange(String changeName, String changeDescription) {
+		super(changeName, changeDescription, ChangeMetaData.PRIORITY_DEFAULT);
+	}
 
-    public String getSchemaName() {
-        return schemaName;
-    }
+	public String getSchemaName() {
+		return schemaName;
+	}
 
-    public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
-    }
+	public void setSchemaName(String schemaName) {
+		this.schemaName = StringUtils.trimToNull(schemaName);
+	}
 
-    public String getTableName() {
-        return tableName;
-    }
+	public String getTableName() {
+		return tableName;
+	}
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
 
-    public String getFile() {
-        return file;
-    }
+	public String getFile() {
+		return file;
+	}
 
-    public void setFile(String file) {
-        this.file = file;
-    }
+	public void setFile(String file) {
+		this.file = file;
+	}
 
-    public String getEncoding() {
-        return encoding;
-    }
+	public String getEncoding() {
+		return encoding;
+	}
 
-    public void setEncoding(String encoding) {
-        this.encoding = encoding;
-    }
+	public void setEncoding(String encoding) {
+		this.encoding = encoding;
+	}
 
-    public String getSeparator() {
-        return separator;
-    }
+	public String getSeparator() {
+		return separator;
+	}
 
-    public void setSeparator(String separator) {
-        this.separator = separator;
-    }
+	public void setSeparator(String separator) {
+		this.separator = separator;
+	}
 
-    public String getQuotchar() {
-        return quotchar;
-    }
+	public String getQuotchar() {
+		return quotchar;
+	}
 
-    public void setQuotchar(String quotchar) {
-        this.quotchar = quotchar;
-    }
+	public void setQuotchar(String quotchar) {
+		this.quotchar = quotchar;
+	}
 
-    @Override
-    public void addColumn(LoadDataColumnConfig column) {
-        columns.add(column);
-    }
+	@Override
+	public void addColumn(LoadDataColumnConfig column) {
+		columns.add(column);
+	}
 
-    @Override
-    public List<LoadDataColumnConfig> getColumns() {
-        return columns;
-    }
+	@Override
+	public List<LoadDataColumnConfig> getColumns() {
+		return columns;
+	}
 
-    protected Object convertValue(Object value, ColumnConfig columnConfig) {
-        if (nullValue.isNull(value.toString())) {
-            return nullValue.getValue();
-        }
-        if (columnConfig.getType() == null) {
-            return value;
-        }
-        ColumnConfig valueConfig = new ColumnConfig();
+	protected Object convertValue(Object value, ColumnConfig columnConfig) {
+		if (nullValue.isNull(value.toString())) {
+			return nullValue.getValue();
+		}
+		if (columnConfig.getType() == null) {
+			return value;
+		}
+		ColumnConfig valueConfig = new ColumnConfig();
 
-        String type = columnConfig.getType();
-        if (SqlType.isBoolean(type)) {
-            valueConfig.setValueBoolean(Boolean.parseBoolean(value.toString().toLowerCase()));
-        } else if (SqlType.isNumeric(type)) {
-            valueConfig.setValueNumeric(value.toString());
-        } else if (SqlType.isDate(type)) {
-            valueConfig.setValueDate(value.toString());
-        } else if (SqlType.isString(type)) {
-            if (Boolean.parseBoolean(flattened)) {
-                // If the CSV data was "flattened" before writing it to the CSV file, we need to unflatten it
-                valueConfig.setValue(StringUtils.unflatten(value.toString()));
-            } else {
-                // Otherwise just use it as is
-                valueConfig.setValue(value.toString());
-            }
-        } else if (columnConfig.getType().equalsIgnoreCase("COMPUTED")) {
-            valueConfig.setValue(value.toString());
-        } else {
-            throw new UnexpectedLiquibaseException("loadData type of " + columnConfig.getType()
-                    + " is not supported.  Please use BOOLEAN, NUMERIC, DATE, STRING, or COMPUTED");
-        }
-        return valueConfig.getValueObject();
-    }
+		String type = columnConfig.getType();
+		if (SqlType.isBoolean(type)) {
+			valueConfig.setValueBoolean(Boolean.parseBoolean(value.toString().toLowerCase()));
+		} else if (SqlType.isNumeric(type)) {
+			valueConfig.setValueNumeric(value.toString());
+		} else if (SqlType.isDate(type)) {
+			valueConfig.setValueDate(value.toString());
+		} else if (SqlType.isString(type)) {
+			if (Boolean.parseBoolean(flattened)) {
+				// If the CSV data was "flattened" before writing it to the CSV file, we need to unflatten it
+				valueConfig.setValue(StringUtils.unflatten(value.toString()));
+			} else {
+				// Otherwise just use it as is
+				valueConfig.setValue(value.toString());
+			}
+		} else if (columnConfig.getType().equalsIgnoreCase("COMPUTED")) {
+			valueConfig.setValue(value.toString());
+		} else {
+			throw new UnexpectedLiquibaseException("loadData type of " + columnConfig.getType()
+					+ " is not supported.  Please use BOOLEAN, NUMERIC, DATE, STRING, or COMPUTED");
+		}
+		return valueConfig.getValueObject();
+	}
 
-    protected String getColumnName(ColumnConfig columnConfig, String header) {
-        String columnName = null;
-        if (columnConfig != null) {
-            columnName = columnConfig.getName();
-        }
-        if (columnName == null) {
-            columnName = header;
-        }
-        return columnName;
-    }
+	protected String getColumnName(ColumnConfig columnConfig, String header) {
+		String columnName = null;
+		if (columnConfig != null) {
+			columnName = columnConfig.getName();
+		}
+		if (columnName == null) {
+			columnName = header;
+		}
+		return columnName;
+	}
 
-    protected SqlStatement getSqlStatement(String[] headers, String[] line, int lineNumber) {
+	protected SqlStatement getSqlStatement(String[] headers, String[] line, int lineNumber) {
 
-        // Make sure we have a token for each column
-        if (headers.length != line.length) {
-            throw new UnexpectedLiquibaseException("CSV Line " + lineNumber + " has  " + line.length
-                    + " columns, the header has " + headers.length);
-        }
+		// Make sure we have a token for each column
+		if (headers.length != line.length) {
+			throw new UnexpectedLiquibaseException("CSV Line " + lineNumber + " has  " + line.length
+					+ " columns, the header has " + headers.length);
+		}
 
-        // Create an insert statement from the data
-        InsertStatement insertStatement = createStatement(getSchemaName(), getTableName());
-        SortedMap<String, InsertStatementColumn> insertStatementColumns = new TreeMap<String, InsertStatementColumn>();
-        for (int i = 0; i < headers.length; i++) {
-            Object value = line[i];
-            ColumnConfig columnConfig = getColumnConfig(i, headers[i]);
-            String columnName = getColumnName(columnConfig, headers[i]);
-            Object newValue = convertValue(value, columnConfig);
-            InsertStatementColumn insertStatementColumn = getInsertStatementColumn(columnConfig, columnName, newValue);
-            insertStatementColumns.put(columnName, insertStatementColumn);
-            insertStatement.addColumnValue(columnName, newValue);
-        }
-        insertStatement.setColumns(insertStatementColumns);
-        return insertStatement;
-    }
+		// Create an insert statement from the data
+		InsertStatement insertStatement = createStatement(getSchemaName(), getTableName());
+		SortedMap<String, InsertStatementColumn> insertStatementColumns = new TreeMap<String, InsertStatementColumn>();
+		for (int i = 0; i < headers.length; i++) {
+			Object value = line[i];
+			ColumnConfig columnConfig = getColumnConfig(i, headers[i]);
+			String columnName = getColumnName(columnConfig, headers[i]);
+			Object newValue = convertValue(value, columnConfig);
+			InsertStatementColumn insertStatementColumn = getInsertStatementColumn(columnConfig, columnName, newValue);
+			insertStatementColumns.put(columnName, insertStatementColumn);
+			insertStatement.addColumnValue(columnName, newValue);
+		}
+		insertStatement.setColumns(insertStatementColumns);
+		return insertStatement;
+	}
 
-    protected InsertStatementColumn getInsertStatementColumn(ColumnConfig columnConfig, String columnName, Object value) {
-        InsertStatementColumn column = new InsertStatementColumn();
-        column.setName(columnName);
-        column.setValue(value);
-        column.setType(SqlType.valueOf(columnConfig.getType()));
-        ConstraintsConfig cc = columnConfig.getConstraints();
-        if (cc != null) {
-            column.setPrimaryKey(cc.isPrimaryKey());
-        }
-        return column;
-    }
+	protected InsertStatementColumn getInsertStatementColumn(ColumnConfig columnConfig, String columnName, Object value) {
+		InsertStatementColumn column = new InsertStatementColumn();
+		column.setName(columnName);
+		column.setValue(value);
+		column.setType(SqlType.valueOf(columnConfig.getType()));
+		ConstraintsConfig cc = columnConfig.getConstraints();
+		if (cc != null) {
+			column.setPrimaryKey(cc.isPrimaryKey());
+		}
+		return column;
+	}
 
-    protected Set<String> getPrimaryKeys(List<LoadDataColumnConfig> columnConfigs) {
-        Set<String> primaryKeys = new HashSet<String>();
-        for (LoadDataColumnConfig columnConfig : columnConfigs) {
-            ConstraintsConfig cc = columnConfig.getConstraints();
-            if (cc == null) {
-                continue;
-            }
-            if (cc.isPrimaryKey()) {
-                primaryKeys.add(columnConfig.getName());
-            }
-        }
-        return primaryKeys;
-    }
+	protected Set<String> getPrimaryKeys(List<LoadDataColumnConfig> columnConfigs) {
+		Set<String> primaryKeys = new HashSet<String>();
+		for (LoadDataColumnConfig columnConfig : columnConfigs) {
+			ConstraintsConfig cc = columnConfig.getConstraints();
+			if (cc == null) {
+				continue;
+			}
+			if (cc.isPrimaryKey()) {
+				primaryKeys.add(columnConfig.getName());
+			}
+		}
+		return primaryKeys;
+	}
 
-    @Override
-    public SqlStatement[] generateStatements(Database database) {
-        CSVReader reader = null;
-        try {
-            // Get a handle to the csv file
-            reader = getCSVReader();
+	protected void validateColumnConfiguration(String[] headers) {
+		if (columns == null || columns.size() == 0) {
+			throw new IllegalArgumentException("No column configuration was provided");
+		}
+		int size = columns.size();
+		int len = headers.length;
+		List<String> validHeaders = getValidHeaders(headers);
+		List<String> inValidHeaders = getInValidHeaders(headers, validHeaders);
+		List<String> names = getConfiguredColumnNames();
+		if (len != size) {
+			throw new IllegalArgumentException(len + " columns in the data file, but " + size
+					+ " columns were configured.  Configured columns:" + names + " Data file columns:" + headers);
+		}
+		if (inValidHeaders.size() > 0) {
+			throw new IllegalArgumentException("Invalid column(s) in the data file:" + inValidHeaders
+					+ " Valid columns are: " + names);
+		}
+	}
 
-            // Pull out the headers
-            String[] headers = reader.readNext();
-            if (headers == null) {
-                throw new UnexpectedLiquibaseException("Data file " + getFile() + " was empty");
-            }
+	protected List<String> getInValidHeaders(String[] headers, List<String> validHeaders) {
+		List<String> inValidHeaders = new ArrayList<String>();
+		for (String header : headers) {
+			if (!validHeaders.contains(header)) {
+				inValidHeaders.add(header);
+			}
+		}
+		return inValidHeaders;
+	}
 
-            // Setup some storage and loop control variables
-            List<SqlStatement> statements = new ArrayList<SqlStatement>();
-            String[] line = null;
-            int lineNumber = 0;
+	protected List<String> getConfiguredColumnNames() {
+		List<String> names = new ArrayList<String>();
+		for (LoadDataColumnConfig column : columns) {
+			String name = column.getName();
+			String header = column.getHeader();
+			if (StringUtils.trimToNull(name) != null) {
+				names.add(name);
+			} else if (StringUtils.trimToNull(header) != null) {
+				names.add(header);
+			} else {
+				names.add("?");
+			}
+		}
+		return names;
+	}
 
-            // Iterate through the csv file
-            while ((line = reader.readNext()) != null) {
-                // bump our line number
-                lineNumber++;
+	protected List<String> getValidHeaders(String[] headers) {
+		List<String> validHeaders = new ArrayList<String>();
+		for (String header : headers) {
+			for (LoadDataColumnConfig column : columns) {
+				if (isValidHeader(header, column)) {
+					validHeaders.add(header);
+					break;
+				}
+			}
+		}
+		return validHeaders;
+	}
 
-                // if it is a blank line, skip it
-                if (isSkipLine(line)) {
-                    continue;
-                }
+	protected boolean isValidHeader(String header, LoadDataColumnConfig column) {
+		if (header.equalsIgnoreCase(column.getHeader())) {
+			return true;
+		}
+		if (header.equalsIgnoreCase(column.getName())) {
+			return true;
+		}
+		return false;
+	}
 
-                // Generate an SQL insert statement from the data
-                SqlStatement sqlStatement = getSqlStatement(headers, line, lineNumber);
+	@Override
+	public SqlStatement[] generateStatements(Database database) {
+		CSVReader reader = null;
+		try {
+			// Get a handle to the csv file
+			reader = getCSVReader();
 
-                // Add this statement to our List
-                statements.add(sqlStatement);
-            }
+			// Pull out the headers
+			String[] headers = reader.readNext();
+			if (headers == null) {
+				throw new UnexpectedLiquibaseException("Data file " + getFile() + " was empty");
+			}
 
-            // Convert the List to an Array and return
-            return statements.toArray(new SqlStatement[statements.size()]);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            StreamUtil.closeQuietly(reader);
-        }
-    }
+			validateColumnConfiguration(headers);
 
-    /**
-     * Return true if it is an empty line
-     */
-    protected boolean isSkipLine(String[] line) {
-        if (line.length == 0) {
-            return true;
-        }
-        if (line.length == 1 && StringUtils.trimToNull(line[0]) == null) {
-            return true;
-        }
-        return false;
-    }
+			// Setup some storage and loop control variables
+			List<SqlStatement> statements = new ArrayList<SqlStatement>();
+			String[] line = null;
+			int lineNumber = 0;
 
-    protected CSVReader getCSVReader() throws IOException {
-        ResourceAccessor opener = getResourceAccessor();
-        if (opener == null) {
-            throw new UnexpectedLiquibaseException("No file opener specified for " + getFile());
-        }
-        InputStream stream = opener.getResourceAsStream(getFile());
-        if (stream == null) {
-            throw new UnexpectedLiquibaseException("Data file " + getFile() + " was not found");
-        }
+			// Iterate through the csv file
+			while ((line = reader.readNext()) != null) {
+				// bump our line number
+				lineNumber++;
 
-        InputStreamReader streamReader;
-        if (getEncoding() == null) {
-            streamReader = new InputStreamReader(stream);
-        } else {
-            streamReader = new InputStreamReader(stream, getEncoding());
-        }
+				// if it is a blank line, skip it
+				if (isSkipLine(line)) {
+					continue;
+				}
 
-        char quotchar;
-        if (0 == this.quotchar.length()) {
-            // hope this is impossible to have a field surrounded with non ascii char 0x01
-            quotchar = '\1';
-        } else {
-            quotchar = this.quotchar.charAt(0);
-        }
+				// Generate an SQL insert statement from the data
+				SqlStatement sqlStatement = getSqlStatement(headers, line, lineNumber);
 
-        CSVReader reader = new CSVReader(streamReader, separator.charAt(0), quotchar);
+				// Add this statement to our List
+				statements.add(sqlStatement);
+			}
 
-        return reader;
-    }
+			// Convert the List to an Array and return
+			return statements.toArray(new SqlStatement[statements.size()]);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} finally {
+			StreamUtil.closeQuietly(reader);
+		}
+	}
 
-    protected InsertStatement createStatement(String schemaName, String tableName) {
-        return new InsertStatement(schemaName, tableName);
-    }
+	/**
+	 * Return true if it is an empty line
+	 */
+	protected boolean isSkipLine(String[] line) {
+		if (line.length == 0) {
+			return true;
+		}
+		if (line.length == 1 && StringUtils.trimToNull(line[0]) == null) {
+			return true;
+		}
+		return false;
+	}
 
-    protected ColumnConfig getColumnConfig(int index, String header) {
-        for (LoadDataColumnConfig config : columns) {
-            if (config.getIndex() != null && config.getIndex().equals(index)) {
-                return config;
-            }
-            if (config.getHeader() != null && config.getHeader().equalsIgnoreCase(header)) {
-                return config;
-            }
+	protected CSVReader getCSVReader() throws IOException {
+		ResourceAccessor opener = getResourceAccessor();
+		if (opener == null) {
+			throw new UnexpectedLiquibaseException("No file opener specified for " + getFile());
+		}
+		InputStream stream = opener.getResourceAsStream(getFile());
+		if (stream == null) {
+			throw new UnexpectedLiquibaseException("Data file " + getFile() + " was not found");
+		}
 
-            if (config.getName() != null && config.getName().equalsIgnoreCase(header)) {
-                return config;
-            }
-        }
-        return null;
-    }
+		InputStreamReader streamReader;
+		if (getEncoding() == null) {
+			streamReader = new InputStreamReader(stream);
+		} else {
+			streamReader = new InputStreamReader(stream, getEncoding());
+		}
 
-    @Override
-    public String getConfirmationMessage() {
-        return "Data loaded from " + getFile() + " into " + getTableName();
-    }
+		char quotchar;
+		if (0 == this.quotchar.length()) {
+			// hope this is impossible to have a field surrounded with non ascii char 0x01
+			quotchar = '\1';
+		} else {
+			quotchar = this.quotchar.charAt(0);
+		}
 
-    @Override
-    public CheckSum generateCheckSum() {
-        InputStream stream = null;
-        try {
-            stream = getResourceAccessor().getResourceAsStream(getFile());
-            if (stream == null) {
-                throw new RuntimeException(getFile() + " could not be found");
-            }
-            return CheckSum.compute(stream);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (IOException e) {
-                    ;
-                }
-            }
-        }
-    }
+		CSVReader reader = new CSVReader(streamReader, separator.charAt(0), quotchar);
 
-    public NullValue getNullValue() {
-        return nullValue;
-    }
+		return reader;
+	}
 
-    public void setNullValue(NullValue nullValue) {
-        this.nullValue = nullValue;
-    }
+	protected InsertStatement createStatement(String schemaName, String tableName) {
+		return new InsertStatement(schemaName, tableName);
+	}
 
-    public String getFlattened() {
-        return flattened;
-    }
+	protected ColumnConfig getColumnConfig(int index, String header) {
+		for (LoadDataColumnConfig config : columns) {
+			if (config.getIndex() != null && config.getIndex().equals(index)) {
+				return config;
+			}
+			if (config.getHeader() != null && config.getHeader().equalsIgnoreCase(header)) {
+				return config;
+			}
 
-    public void setFlattened(String flattened) {
-        this.flattened = flattened;
-    }
+			if (config.getName() != null && config.getName().equalsIgnoreCase(header)) {
+				return config;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public String getConfirmationMessage() {
+		return "Data loaded from " + getFile() + " into " + getTableName();
+	}
+
+	@Override
+	public CheckSum generateCheckSum() {
+		InputStream stream = null;
+		try {
+			stream = getResourceAccessor().getResourceAsStream(getFile());
+			if (stream == null) {
+				throw new RuntimeException(getFile() + " could not be found");
+			}
+			return CheckSum.compute(stream);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} finally {
+			if (stream != null) {
+				try {
+					stream.close();
+				} catch (IOException e) {
+					;
+				}
+			}
+		}
+	}
+
+	public NullValue getNullValue() {
+		return nullValue;
+	}
+
+	public void setNullValue(NullValue nullValue) {
+		this.nullValue = nullValue;
+	}
+
+	public String getFlattened() {
+		return flattened;
+	}
+
+	public void setFlattened(String flattened) {
+		this.flattened = flattened;
+	}
 }

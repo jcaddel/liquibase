@@ -1,237 +1,243 @@
 package liquibase.change.core;
 
-import junit.framework.Assert;
 import static junit.framework.Assert.fail;
-import liquibase.change.AbstractChangeTest;
-import liquibase.database.core.MockDatabase;
-import liquibase.exception.RollbackImpossibleException;
-import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.LiquibaseException;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.DeleteStatement;
-import liquibase.statement.core.InsertOrUpdateStatement;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import junit.framework.Assert;
+import liquibase.change.AbstractChangeTest;
+import liquibase.database.core.MockDatabase;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.UnsupportedChangeException;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.DeleteStatement;
+import liquibase.statement.core.InsertOrUpdateStatement;
+
+import org.junit.Before;
+import org.junit.Test;
+
 /**
- * Created by IntelliJ IDEA.
- * User: bassettt
- * Date: Dec 1, 2009
- * Time: 9:29:52 PM
- * To change this template use File | Settings | File Templates.
+ * Created by IntelliJ IDEA. User: bassettt Date: Dec 1, 2009 Time: 9:29:52 PM To change this template use File |
+ * Settings | File Templates.
  */
 public class LoadUpdateDataChangeTest extends AbstractChangeTest {
 
-    LoadUpdateDataChange refactoring ;
+	LoadUpdateDataChange refactoring;
 
-    @Before
-    public void setUp() throws Exception {
-        refactoring = new LoadUpdateDataChange();
-    }
+	@Before
+	public void setUp() throws Exception {
+		refactoring = new LoadUpdateDataChange();
+	}
 
-    public void getRefactoringName() throws Exception {
-        assertEquals("Smart Load Data", refactoring.getChangeMetaData().getDescription());
-    }
+	@Override
+	public void getRefactoringName() throws Exception {
+		assertEquals("Smart Load Data", refactoring.getChangeMetaData().getDescription());
+	}
 
-    public void generateStatement() throws Exception {
+	@Override
+	public void generateStatement() throws Exception {
 
-        MockDatabase database = new MockDatabase();
+		MockDatabase database = new MockDatabase();
 
-        LoadUpdateDataChange change = new LoadUpdateDataChange();
+		LoadUpdateDataChange change = new LoadUpdateDataChange();
 
-        change.setSchemaName("SCHEMA_NAME");
-        change.setTableName("TABLE_NAME");
-        change.setPrimaryKey("name");
-        change.setFile("liquibase/change/core/sample.data1.csv");
-        change.setResourceAccessor(new ClassLoaderResourceAccessor());
+		change.setSchemaName("SCHEMA_NAME");
+		change.setTableName("TABLE_NAME");
+		change.setPrimaryKey("name");
+		change.setFile("liquibase/change/core/sample.data1.csv");
+		change.setResourceAccessor(new ClassLoaderResourceAccessor());
+		change.addColumn(LoadDataChangeTest.getNameColumn());
+		change.addColumn(LoadDataChangeTest.getUsernameColumn());
 
-        SqlStatement[] statements = change.generateStatements(database);
+		SqlStatement[] statements = change.generateStatements(database);
 
+		SqlStatement[] sqlStatements = change.generateStatements(new MockDatabase());
+		assertEquals(2, sqlStatements.length);
+		assertTrue(sqlStatements[0] instanceof InsertOrUpdateStatement);
+		assertEquals("SCHEMA_NAME", ((InsertOrUpdateStatement) sqlStatements[0]).getSchemaName());
+		assertEquals("TABLE_NAME", ((InsertOrUpdateStatement) sqlStatements[0]).getTableName());
+		assertEquals("name", ((InsertOrUpdateStatement) sqlStatements[0]).getPrimaryKey());
+	}
 
-        SqlStatement[] sqlStatements = change.generateStatements(new MockDatabase());
-        assertEquals(2, sqlStatements.length);
-        assertTrue(sqlStatements[0] instanceof InsertOrUpdateStatement);
-        assertEquals("SCHEMA_NAME", ((InsertOrUpdateStatement) sqlStatements[0]).getSchemaName());
-        assertEquals("TABLE_NAME", ((InsertOrUpdateStatement) sqlStatements[0]).getTableName());
-        assertEquals("name", ((InsertOrUpdateStatement) sqlStatements[0]).getPrimaryKey());
-    }
+	@Override
+	public void getConfirmationMessage() throws Exception {
+		LoadUpdateDataChange refactoring = new LoadUpdateDataChange();
+		refactoring.setTableName("TABLE_NAME");
+		refactoring.setFile("FILE_NAME");
 
-    public void getConfirmationMessage() throws Exception {
-        LoadUpdateDataChange refactoring = new LoadUpdateDataChange();
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("FILE_NAME");
+		assertEquals("Data loaded from FILE_NAME into TABLE_NAME", refactoring.getConfirmationMessage());
+	}
 
-        assertEquals("Data loaded from FILE_NAME into TABLE_NAME", refactoring.getConfirmationMessage());
-    }
+	// Proves that LoadUpdateDataChange creates InsertOrUpdateStatements
+	@Test
+	public void getStatements() throws Exception {
+		MockDatabase database = new MockDatabase();
 
+		LoadUpdateDataChange change = new LoadUpdateDataChange();
 
-//    Proves that LoadUpdateDataChange creates InsertOrUpdateStatements
-    @Test
-    public void getStatements() throws Exception {
-        MockDatabase database = new MockDatabase();
+		change.setSchemaName("SCHEMA_NAME");
+		change.setTableName("TABLE_NAME");
+		change.setFile("liquibase/change/core/sample.data1.csv");
+		change.setResourceAccessor(new ClassLoaderResourceAccessor());
+		change.addColumn(LoadDataChangeTest.getNameColumn());
+		change.addColumn(LoadDataChangeTest.getUsernameColumn());
 
-        LoadUpdateDataChange change = new LoadUpdateDataChange();
+		SqlStatement[] statements = change.generateStatements(database);
 
-        change.setSchemaName("SCHEMA_NAME");
-        change.setTableName("TABLE_NAME");
-        change.setFile("liquibase/change/core/sample.data1.csv");
-        change.setResourceAccessor(new ClassLoaderResourceAccessor());
+		assertNotNull(statements);
+		assertEquals(InsertOrUpdateStatement.class, statements[0].getClass());
+	}
 
-        SqlStatement[] statements = change.generateStatements(database);
+	@Test
+	public void generateSql() {
+		MockDatabase database = new MockDatabase();
 
-        assertNotNull(statements);
-        assertEquals(InsertOrUpdateStatement.class,statements[0].getClass());
-    }
+		LoadUpdateDataChange change = new LoadUpdateDataChange();
 
-    @Test
-    public void generateSql(){
-        MockDatabase database = new MockDatabase();
+		change.setSchemaName("SCHEMA_NAME");
+		change.setTableName("TABLE_NAME");
+		change.setFile("liquibase/change/core/sample.data1.csv");
+		change.setResourceAccessor(new ClassLoaderResourceAccessor());
+		change.addColumn(LoadDataChangeTest.getNameColumn());
+		change.addColumn(LoadDataChangeTest.getUsernameColumn());
 
-        LoadUpdateDataChange change = new LoadUpdateDataChange();
+		SqlStatement[] statements = change.generateStatements(database);
 
-        change.setSchemaName("SCHEMA_NAME");
-        change.setTableName("TABLE_NAME");
-        change.setFile("liquibase/change/core/sample.data1.csv");
-        change.setResourceAccessor(new ClassLoaderResourceAccessor());
+		assertNotNull(statements);
+		assertEquals(InsertOrUpdateStatement.class, statements[0].getClass());
 
-        SqlStatement[] statements = change.generateStatements(database);
+	}
 
-        assertNotNull(statements);
-        assertEquals(InsertOrUpdateStatement.class,statements[0].getClass());
+	@Test
+	public void primaryKey() throws LiquibaseException {
+		LoadUpdateDataChange change = new LoadUpdateDataChange();
+		String primaryKey = "myPrimaryKey";
+		change.setPrimaryKey(primaryKey);
+		assertEquals(primaryKey, change.getPrimaryKey());
+	}
 
-    }
+	@Test
+	public void primaryKeyNullThrowsException() {
+		LoadUpdateDataChange change = new LoadUpdateDataChange();
 
-    @Test
-    public void primaryKey() throws LiquibaseException {
-        LoadUpdateDataChange change = new LoadUpdateDataChange();
-        String primaryKey = "myPrimaryKey";
-        change.setPrimaryKey(primaryKey);
-        assertEquals(primaryKey, change.getPrimaryKey());
-    }
+		try {
+			change.setPrimaryKey(null);
+			fail("setPrimaryKey did not throw InvalidArgumentException as expected.");
+		} catch (LiquibaseException e) {
+		}
+	}
 
-    @Test
-    public void primaryKeyNullThrowsException() {
-        LoadUpdateDataChange change = new LoadUpdateDataChange();
+	@Test
+	public void getWhereClause() throws LiquibaseException {
+		MockDatabase database = new MockDatabase();
+		LoadUpdateDataChange change = new LoadUpdateDataChange();
 
-        try
-        {
-            change.setPrimaryKey(null);
-            fail("setPrimaryKey did not throw InvalidArgumentException as expected.");
-        }
-        catch(LiquibaseException e)
-        {
-        }
-    }
+		change.setSchemaName("SCHEMA_NAME");
+		change.setTableName("TABLE_NAME");
+		change.setFile("liquibase/change/core/sample.data1.csv");
+		change.setResourceAccessor(new ClassLoaderResourceAccessor());
+		change.setPrimaryKey("name");
+		change.addColumn(LoadDataChangeTest.getNameColumn());
+		change.addColumn(LoadDataChangeTest.getUsernameColumn());
+		SqlStatement[] statements = change.generateStatements(database);
 
+		// private String getWhereClause(InsertOrUpdateStatement insertOrUpdateStatement, Database database)
 
-    @Test
-    public void getWhereClause() throws LiquibaseException {
-        MockDatabase database = new MockDatabase();
-        LoadUpdateDataChange change = new LoadUpdateDataChange();
+		Object[] args;
+		String result;
+		args = new Object[] { statements[0], database };
+		result = (String) invokePrivateMethod(change, "getWhereClause", args);
+		assertEquals("name = 'Bob Johnson'", result.trim());
+		args = new Object[] { statements[1], database };
+		result = (String) invokePrivateMethod(change, "getWhereClause", args);
+		assertEquals("name = 'John Doe'", result.trim());
 
-        change.setSchemaName("SCHEMA_NAME");
-        change.setTableName("TABLE_NAME");
-        change.setFile("liquibase/change/core/sample.data1.csv");
-        change.setResourceAccessor(new ClassLoaderResourceAccessor());
-        change.setPrimaryKey("name");
-        SqlStatement[] statements = change.generateStatements(database);
+	}
 
-//        private String getWhereClause(InsertOrUpdateStatement insertOrUpdateStatement, Database database)
+	@Test
+	public void generateRollbacksForData1CSV() throws UnsupportedChangeException, RollbackImpossibleException,
+	LiquibaseException {
+		MockDatabase database = new MockDatabase();
 
-        Object[] args ;
-        String result ;
-        args = new Object[] { statements[0], database };
-        result = (String)invokePrivateMethod(change,"getWhereClause",args);
-        assertEquals("name = 'Bob Johnson'",result.trim());
-        args = new Object[] { statements[1], database };
-        result = (String)invokePrivateMethod(change,"getWhereClause",args);
-        assertEquals("name = 'John Doe'",result.trim());
+		LoadUpdateDataChange change = new LoadUpdateDataChange();
 
-    }
+		change.setSchemaName("SCHEMA_NAME");
+		change.setTableName("TABLE_NAME");
+		change.setFile("liquibase/change/core/sample.data1.csv");
+		change.setResourceAccessor(new ClassLoaderResourceAccessor());
+		change.setPrimaryKey("name");
+		change.addColumn(LoadDataChangeTest.getNameColumn());
+		change.addColumn(LoadDataChangeTest.getUsernameColumn());
 
-    @Test
-    public void generateRollbacksForData1CSV() throws UnsupportedChangeException, RollbackImpossibleException, LiquibaseException {
-        MockDatabase database = new MockDatabase();
+		SqlStatement[] statements = change.generateRollbackStatements(database);
 
-        LoadUpdateDataChange change = new LoadUpdateDataChange();
+		assertNotNull(statements);
+		assertEquals(DeleteStatement.class, statements[0].getClass());
 
-        change.setSchemaName("SCHEMA_NAME");
-        change.setTableName("TABLE_NAME");
-        change.setFile("liquibase/change/core/sample.data1.csv");
-        change.setResourceAccessor(new ClassLoaderResourceAccessor());
-        change.setPrimaryKey("name");
+		DeleteStatement delete;
 
-        SqlStatement[] statements = change.generateRollbackStatements(database);
+		delete = (DeleteStatement) statements[0];
+		assertEquals("name = 'Bob Johnson'", delete.getWhereClause().trim());
+		delete = (DeleteStatement) statements[1];
+		assertEquals("name = 'John Doe'", delete.getWhereClause().trim());
 
+	}
 
-        assertNotNull(statements);
-        assertEquals(DeleteStatement.class,statements[0].getClass());
+	@Override
+	public void generateCheckSum() throws Exception {
+		LoadUpdateDataChange refactoring = new LoadUpdateDataChange();
+		refactoring.setSchemaName("SCHEMA_NAME");
+		refactoring.setTableName("TABLE_NAME");
+		refactoring.setFile("liquibase/change/core/sample.data1.csv");
+		refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
 
-        DeleteStatement delete ;
+		String md5sum1 = refactoring.generateCheckSum().toString();
 
-        delete = (DeleteStatement)statements[0];
-        assertEquals( "name = 'Bob Johnson'", delete.getWhereClause().trim());
-        delete = (DeleteStatement)statements[1];
-        assertEquals( "name = 'John Doe'", delete.getWhereClause().trim());
+		refactoring.setFile("liquibase/change/core/sample.data2.csv");
+		String md5sum2 = refactoring.generateCheckSum().toString();
 
-    }
+		assertTrue(!md5sum1.equals(md5sum2));
+		assertEquals(md5sum2, refactoring.generateCheckSum().toString());
 
-    @Override
-    public void generateCheckSum() throws Exception {
-        LoadUpdateDataChange refactoring = new LoadUpdateDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("liquibase/change/core/sample.data1.csv");
-        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
+	}
 
-        String md5sum1 = refactoring.generateCheckSum().toString();
+	@Override
+	public void isSupported() throws Exception {
+		// TODO: To change body of overridden methods use File | Settings | File Templates.
+	}
 
-        refactoring.setFile("liquibase/change/core/sample.data2.csv");
-        String md5sum2 = refactoring.generateCheckSum().toString();
+	@Override
+	public void validate() throws Exception {
+		// TODO: To change body of overridden methods use File | Settings | File Templates.
+	}
 
-        assertTrue(!md5sum1.equals(md5sum2));
-        assertEquals(md5sum2, refactoring.generateCheckSum().toString());
+	public static Object invokePrivateMethod(Object o, String methodName, Object[] params) {
+		// Check we have valid arguments...
+		Assert.assertNotNull(o);
+		Assert.assertNotNull(methodName);
+		Assert.assertNotNull(params);
 
-    }
-
-    @Override
-    public void isSupported() throws Exception {
-        //TODO: To change body of overridden methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void validate() throws Exception {
-        //TODO: To change body of overridden methods use File | Settings | File Templates.
-    }
-
-    public static Object invokePrivateMethod (Object o, String methodName, Object[] params) {
-             // Check we have valid arguments...
-            Assert.assertNotNull(o);
-            Assert.assertNotNull(methodName);
-            Assert.assertNotNull(params);
-
-            // Go and find the private method...
-            final Method methods[] = o.getClass().getDeclaredMethods();
-            for (int i = 0; i < methods.length; ++i) {
-              if (methodName.equals(methods[i].getName())) {
-                try {
-                  methods[i].setAccessible(true);
-                  return methods[i].invoke(o, params);
-                }
-                catch (IllegalAccessException ex) {
-                  Assert.fail ("IllegalAccessException accessing " + methodName);
-                }
-                catch (InvocationTargetException ite) {
-                    Assert.fail ("InvocationTargetException accessing " + methodName);
-                }
-              }
-            }
-            Assert.fail ("Method '" + methodName +"' not found");
-            return null;
-          }
+		// Go and find the private method...
+		final Method methods[] = o.getClass().getDeclaredMethods();
+		for (int i = 0; i < methods.length; ++i) {
+			if (methodName.equals(methods[i].getName())) {
+				try {
+					methods[i].setAccessible(true);
+					return methods[i].invoke(o, params);
+				} catch (IllegalAccessException ex) {
+					Assert.fail("IllegalAccessException accessing " + methodName);
+				} catch (InvocationTargetException ite) {
+					Assert.fail("InvocationTargetException accessing " + methodName);
+				}
+			}
+		}
+		Assert.fail("Method '" + methodName + "' not found");
+		return null;
+	}
 }
