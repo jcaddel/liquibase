@@ -123,6 +123,24 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 		}
 	}
 
+	protected Boolean getBooleanFromBit(String value) throws ParseException {
+		value = value.replaceFirst("b'", ""); // mysql puts wierd chars in bit field
+		if (value.equalsIgnoreCase("true")) {
+			return Boolean.TRUE;
+		} else if (value.equalsIgnoreCase("false")) {
+			return Boolean.FALSE;
+		} else if (value.equals("1")) {
+			return Boolean.TRUE;
+		} else if (value.equals("0")) {
+			return Boolean.FALSE;
+		} else if (value.equals("(1)")) {
+			return Boolean.TRUE;
+		} else if (value.equals("(0)")) {
+			return Boolean.FALSE;
+		}
+		throw new ParseException("Unknown bit value: " + value, 0);
+	}
+
 	protected Object convertToCorrectObjectType(String value, int dataType, int columnSize, int decimalDigits,
 			Database database) throws ParseException {
 		if (value == null) {
@@ -143,61 +161,68 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 		}
 
 		try {
-			if (dataType == Types.DATE) {
-				return new java.sql.Date(database.parseDate(value).getTime());
-			} else if (dataType == Types.TIMESTAMP) {
-				return new java.sql.Timestamp(database.parseDate(value).getTime());
-			} else if (dataType == Types.TIME) {
-				return new java.sql.Time(database.parseDate(value).getTime());
-			} else if (dataType == Types.BIGINT) {
-				return new BigInteger(value);
-			} else if (dataType == Types.BIT) {
-				value = value.replaceFirst("b'", ""); // mysql puts wierd chars in bit field
-				if (value.equalsIgnoreCase("true")) {
-					return Boolean.TRUE;
-				} else if (value.equalsIgnoreCase("false")) {
-					return Boolean.FALSE;
-				} else if (value.equals("1")) {
-					return Boolean.TRUE;
-				} else if (value.equals("0")) {
-					return Boolean.FALSE;
-				} else if (value.equals("(1)")) {
-					return Boolean.TRUE;
-				} else if (value.equals("(0)")) {
-					return Boolean.FALSE;
-				}
-				throw new ParseException("Unknown bit value: " + value, 0);
-			} else if (dataType == Types.BOOLEAN) {
-				return Boolean.valueOf(value);
-			} else if (dataType == Types.DECIMAL) {
-				if (decimalDigits == 0) {
-					return new Integer(value);
-				}
-				return new BigDecimal(value);
-			} else if (dataType == Types.DOUBLE || dataType == Types.NUMERIC) {
-				return new BigDecimal(value);
-			} else if (dataType == Types.FLOAT) {
-				return new Float(value);
-			} else if (dataType == Types.INTEGER) {
-				return new Integer(value);
-			} else if (dataType == Types.NULL) {
-				return null;
-			} else if (dataType == Types.REAL) {
-				return new Float(value);
-			} else if (dataType == Types.SMALLINT) {
-				return new Integer(value);
-			} else if (dataType == Types.TINYINT) {
-				return new Integer(value);
-			} else if (dataType == Types.BLOB) {
-				return "!!!!!! LIQUIBASE CANNOT OUTPUT BLOB VALUES !!!!!!";
-			} else {
-				LogFactory.getLogger().warning("Do not know how to convert type " + dataType);
-				return value;
-			}
+			return getConvertedValue(database, value, dataType, decimalDigits);
 		} catch (DateParseException e) {
 			return new DatabaseFunction(value);
 		} catch (NumberFormatException e) {
 			return new DatabaseFunction(value);
+		}
+	}
+
+	protected Object getConvertedValue(Database database, String value, int dataType, int decimalDigits)
+			throws ParseException {
+		if (dataType == Types.DATE) {
+			return new java.sql.Date(database.parseDate(value).getTime());
+		} else if (dataType == Types.TIMESTAMP) {
+			return new java.sql.Timestamp(database.parseDate(value).getTime());
+		} else if (dataType == Types.TIME) {
+			return new java.sql.Time(database.parseDate(value).getTime());
+		} else if (dataType == Types.BIT) {
+			return getBooleanFromBit(value);
+		} else if (dataType == Types.BOOLEAN) {
+			return Boolean.valueOf(value);
+		} else if (dataType == Types.BIGINT) {
+			return new BigInteger(value);
+		} else if (isBigDecimal(dataType, decimalDigits)) {
+			return new BigDecimal(value);
+		} else if (isInteger(dataType, decimalDigits)) {
+			return new Integer(value);
+		} else if (dataType == Types.FLOAT || dataType == Types.REAL) {
+			return new Float(value);
+		} else if (dataType == Types.NULL) {
+			return null;
+		} else if (dataType == Types.BLOB) {
+			return "!!!!!! LIQUIBASE CANNOT OUTPUT BLOB VALUES !!!!!!";
+		} else {
+			LogFactory.getLogger().warning("Do not know how to convert type " + dataType);
+			return value;
+		}
+	}
+
+	protected boolean isDecimalWithNoDecimalDigits(int type, int decimalDigits) {
+		return type == Types.DECIMAL && decimalDigits == 0;
+	}
+
+	protected boolean isBigDecimal(int type, int decimalDigits) {
+		switch (type) {
+		case Types.DOUBLE:
+		case Types.NUMERIC:
+			return true;
+		case Types.DECIMAL:
+			return !isDecimalWithNoDecimalDigits(type, decimalDigits);
+		default:
+			return false;
+		}
+	}
+
+	protected boolean isInteger(int type, int decimalDigits) {
+		switch (type) {
+		case Types.INTEGER:
+		case Types.SMALLINT:
+		case Types.TINYINT:
+			return true;
+		default:
+			return isDecimalWithNoDecimalDigits(type, decimalDigits);
 		}
 	}
 
@@ -395,7 +420,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 
 	/**
 	 * Returns the actual database-specific data type to use for a "float" column.
-	 *
+	 * 
 	 * @return database-specific type for float
 	 */
 	@Override
@@ -405,7 +430,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 
 	/**
 	 * Returns the actual database-specific data type to use for a "double" column.
-	 *
+	 * 
 	 * @return database-specific type for double
 	 */
 	@Override
@@ -415,7 +440,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 
 	/**
 	 * Returns the actual database-specific data type to use for a "int" column.
-	 *
+	 * 
 	 * @return database-specific type for int
 	 */
 	@Override
@@ -425,7 +450,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 
 	/**
 	 * Returns the actual database-specific data type to use for a "tinyint" column.
-	 *
+	 * 
 	 * @return database-specific type for tinyint
 	 */
 	@Override
