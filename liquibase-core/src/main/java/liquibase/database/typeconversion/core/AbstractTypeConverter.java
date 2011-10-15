@@ -141,23 +141,31 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 		throw new ParseException("Unknown bit value: " + value, 0);
 	}
 
+	protected boolean isNullOrNullText(String value, int dataType) {
+		if (value == null) {
+			return true;
+		}
+		if (!isText(dataType)) {
+			return false;
+		}
+		if (value.equalsIgnoreCase(NULL)) {
+			return true;
+		}
+		if (StringUtils.trimToNull(value) == null) {
+			return true;
+		}
+		return false;
+	}
+
 	protected Object convertToCorrectObjectType(String value, int dataType, int columnSize, int decimalDigits,
 			Database database) throws ParseException {
-		if (value == null) {
+
+		if (isNullOrNullText(value, dataType)) {
 			return null;
 		}
 
 		if (isText(dataType)) {
-			if (value.equalsIgnoreCase(NULL)) {
-				return null;
-			} else {
-				return value;
-			}
-		}
-
-		value = StringUtils.trimToNull(value);
-		if (value == null) {
-			return null;
+			return value;
 		}
 
 		try {
@@ -256,7 +264,8 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 		if (!columnTypeString.contains(")")) {
 			return null;
 		}
-		return StringUtils.trimToNull(columnTypeString.replaceFirst(".*\\)", ""));
+		String s = columnTypeString.replaceFirst(".*\\)", "");
+		return StringUtils.trimToNull(s);
 	}
 
 	protected DataTypeContext getDataTypeContext(String columnTypeString, Boolean autoIncrement) {
