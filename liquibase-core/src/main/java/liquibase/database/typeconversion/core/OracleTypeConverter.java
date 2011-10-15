@@ -82,35 +82,66 @@ public class OracleTypeConverter extends AbstractTypeConverter {
 		return translatedTypeName;
 	}
 
+	protected boolean isNonNullString(Object defaultValue) {
+		return defaultValue != null && defaultValue instanceof String;
+	}
+
+	protected boolean isDateOrTime(int type) {
+		return type == Types.DATE || type == Types.TIME || type == Types.TIMESTAMP;
+	}
+
+	protected boolean isNumeric(int type) {
+		switch (type) {
+		case Types.BIGINT:
+		case Types.NUMERIC:
+		case Types.BIT:
+		case Types.SMALLINT:
+		case Types.DECIMAL:
+		case Types.INTEGER:
+		case Types.TINYINT:
+		case Types.FLOAT:
+		case Types.REAL:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	protected String getDateOrTimeConversion(String defaultValue) {
+		if (defaultValue.indexOf("YYYY-MM-DD HH") > 0) {
+			return defaultValue.replaceFirst("^to_date\\('", "").replaceFirst("', 'YYYY-MM-DD HH24:MI:SS'\\)$", "");
+		} else if ((defaultValue).indexOf("YYYY-MM-DD") > 0) {
+			return defaultValue.replaceFirst("^to_date\\('", "").replaceFirst("', 'YYYY-MM-DD'\\)$", "");
+		} else {
+			return defaultValue.replaceFirst("^to_date\\('", "").replaceFirst("', 'HH24:MI:SS'\\)$", "");
+		}
+	}
+
+	protected String getNumericConversion(String defaultValue) {
+		/*
+		 * if dataType is numeric-type then cut "(" , ")" symbols Cause: Column's default value option may be set by
+		 * both ways: DEFAULT 0 DEFAULT (0)
+		 */
+		return defaultValue.replaceFirst("\\(", "").replaceFirst("\\)", "");
+	}
+
+	protected String getOracleString(String defaultValue, int dataType) {
+		if (isDateOrTime(dataType)) {
+			defaultValue = getDateOrTimeConversion(defaultValue);
+		} else if (isNumeric(dataType)) {
+			defaultValue = getNumericConversion(defaultValue);
+		}
+		// sometimes oracle adds an extra
+		// space after the trailing ' (see
+		// http://sourceforge.net/tracker/index.php?func=detail&aid=1824663&group_id=187970&atid=923443).
+		return defaultValue.replaceFirst("'\\s*$", "'");
+	}
+
 	@Override
 	public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits,
 			Database database) throws ParseException {
-		if (defaultValue != null) {
-			if (defaultValue instanceof String) {
-				if (dataType == Types.DATE || dataType == Types.TIME || dataType == Types.TIMESTAMP) {
-					if (((String) defaultValue).indexOf("YYYY-MM-DD HH") > 0) {
-						defaultValue = ((String) defaultValue).replaceFirst("^to_date\\('", "").replaceFirst(
-								"', 'YYYY-MM-DD HH24:MI:SS'\\)$", "");
-					} else if (((String) defaultValue).indexOf("YYYY-MM-DD") > 0) {
-						defaultValue = ((String) defaultValue).replaceFirst("^to_date\\('", "").replaceFirst(
-								"', 'YYYY-MM-DD'\\)$", "");
-					} else {
-						defaultValue = ((String) defaultValue).replaceFirst("^to_date\\('", "").replaceFirst(
-								"', 'HH24:MI:SS'\\)$", "");
-					}
-				} else if (dataType == Types.BIGINT || dataType == Types.NUMERIC || dataType == Types.BIT
-						|| dataType == Types.SMALLINT || dataType == Types.DECIMAL || dataType == Types.INTEGER
-						|| dataType == Types.TINYINT || dataType == Types.FLOAT || dataType == Types.REAL) {
-					/*
-					 * if dataType is numeric-type then cut "(" , ")" symbols Cause: Column's default value option may
-					 * be set by both ways: DEFAULT 0 DEFAULT (0)
-					 */
-					defaultValue = ((String) defaultValue).replaceFirst("\\(", "").replaceFirst("\\)", "");
-				}
-				defaultValue = ((String) defaultValue).replaceFirst("'\\s*$", "'"); // sometimes oracle adds an extra
-				// space after the trailing ' (see
-				// http://sourceforge.net/tracker/index.php?func=detail&aid=1824663&group_id=187970&atid=923443).
-			}
+		if (isNonNullString(defaultValue)) {
+			defaultValue = getOracleString((String) defaultValue, dataType);
 		}
 		return super.convertDatabaseValueToObject(defaultValue, dataType, columnSize, decimalDigits, database);
 	}
