@@ -157,11 +157,45 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 		return false;
 	}
 
+	/**
+	 * Return true if the case insensitive trim of the default value exactly matches the case insensitive trim of the
+	 * database function.
+	 */
+	protected boolean isMatch(String defaultValue, DatabaseFunction function) {
+		String lowerCaseDefaultValue = defaultValue.toLowerCase().trim();
+		String lowerCaseFunctionValue = function.getValue().toLowerCase().trim();
+		return lowerCaseDefaultValue.equals(lowerCaseFunctionValue);
+	}
+
+	protected boolean isDatabaseFunction(Database database, String defaultValue) {
+		if (defaultValue == null) {
+			return false;
+		}
+		List<DatabaseFunction> functions = database.getDatabaseFunctions();
+		if (functions == null) {
+			return false;
+		}
+		for (DatabaseFunction function : functions) {
+			if (isMatch(defaultValue, function)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	protected DatabaseFunction getLiquibaseFunction(Database database, String defaultValue) {
+		return new DatabaseFunction(defaultValue.trim());
+	}
+
 	protected Object convertToCorrectObjectType(String value, int dataType, int columnSize, int decimalDigits,
 			Database database) throws ParseException {
 
 		if (isNullOrNullText(value, dataType)) {
 			return null;
+		}
+
+		if (isDatabaseFunction(database, value)) {
+			return getLiquibaseFunction(database, value);
 		}
 
 		if (isText(dataType)) {
