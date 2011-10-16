@@ -192,8 +192,9 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 				if (liquibaseFunction != null) {
 					return liquibaseFunction;
 				} else {
-					logger.warning("No Liquibase equivalent for '" + nativeFunction.getValue() + "' on "
-							+ database.getTypeName());
+					String function = nativeFunction.getValue();
+					String db = database.getTypeName();
+					logger.warning("No Liquibase equivalent for '" + function + "' on " + db);
 					return nativeFunction;
 				}
 			}
