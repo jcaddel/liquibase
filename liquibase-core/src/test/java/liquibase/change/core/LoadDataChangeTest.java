@@ -2,8 +2,11 @@ package liquibase.change.core;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import junit.framework.Assert;
 import liquibase.change.AbstractChangeTest;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.core.MockDatabase;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
@@ -186,6 +189,32 @@ public class LoadDataChangeTest extends AbstractChangeTest {
 
 		assertTrue(!md5sum1.equals(md5sum2));
 		assertEquals(md5sum2, refactoring.generateCheckSum().toString());
+	}
+
+	@Test
+	public void loadDataEmpty() throws Exception {
+		ChangeSet changeSet = new ChangeSet("emptyDataFileTest", "UnitTest", false, false, "UnitTest", null, null);
+		changeSet.setFailOnError(false);
+		LoadDataChange refactoring = new LoadDataChange();
+		refactoring.setChangeSet(changeSet);
+		refactoring.setSchemaName("SCHEMA_NAME");
+		refactoring.setTableName("TABLE_NAME");
+		refactoring.setFile("liquibase/change/core/empty.data.csv");
+		refactoring.setSeparator(",");
+		refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
+
+		// Make sure we get a return value if failOnError is false
+		SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
+		assertEquals(0, sqlStatements.length);
+
+		// Make sure we fail if failOnError is true
+		changeSet.setFailOnError(true);
+		try {
+			refactoring.generateStatements(new MockDatabase());
+			Assert.fail("changeSet.failOnError was true, but no exception was generated");
+		} catch (UnexpectedLiquibaseException e) {
+			; // This is what we expect
+		}
 	}
 
 	@Override

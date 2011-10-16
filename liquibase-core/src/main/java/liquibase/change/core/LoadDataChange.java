@@ -17,8 +17,11 @@ import liquibase.change.ChangeWithColumns;
 import liquibase.change.CheckSum;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
@@ -31,6 +34,7 @@ import liquibase.util.csv.CSVReader;
 
 public class LoadDataChange extends AbstractChange implements ChangeWithColumns<LoadDataColumnConfig> {
 
+	private final Logger logger = LogFactory.getLogger();
 	private String schemaName;
 	private String tableName;
 	private String file;
@@ -284,6 +288,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 				throw new UnexpectedLiquibaseException("Data file " + getFile() + " was empty");
 			}
 
+			// Make sure the XML metadata agrees with the CSV metadata
 			validateColumnConfiguration(headers);
 
 			// Setup some storage and loop control variables
@@ -312,9 +317,24 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 			return statements.toArray(new SqlStatement[statements.size()]);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		} catch (UnexpectedLiquibaseException ule) {
+			handleULE(ule);
+			return new SqlStatement[0];
 		} finally {
 			StreamUtil.closeQuietly(reader);
 		}
+	}
+
+	protected void handleULE(UnexpectedLiquibaseException e) throws UnexpectedLiquibaseException {
+		ChangeSet changeSet = getChangeSet();
+		if (changeSet == null) {
+			throw e;
+		}
+		if (Boolean.TRUE.equals(changeSet.getFailOnError())) {
+			throw e;
+		}
+		String toString = changeSet.toString(false);
+		logger.warning("Change set " + toString + " failed, but failOnError was false.  Error: " + e.getMessage());
 	}
 
 	/**

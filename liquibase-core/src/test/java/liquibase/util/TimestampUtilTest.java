@@ -295,7 +295,7 @@ public class TimestampUtilTest {
 	}
 
 	protected void showDST(String value, TimeZone timeZone) throws ParseException {
-		System.out.println(timeZone.getID());
+		// System.out.println(timeZone.getID());
 		Timestamp timestamp = tsu.getTimestampNoOffset(value, timeZone);
 		long millis = timestamp.getTime();
 		for (int i = 0; i < 8; i++) {
@@ -303,9 +303,9 @@ public class TimestampUtilTest {
 			String local = tsu.getString(timestamp, timeZone);
 			String utc = tsu.getUTCString(timestamp);
 			millis += millisPerHour / 2;
-			System.out.println(local + " " + utc);
+			// System.out.println(local + " " + utc);
 		}
-		System.out.println();
+		// System.out.println();
 	}
 
 }
