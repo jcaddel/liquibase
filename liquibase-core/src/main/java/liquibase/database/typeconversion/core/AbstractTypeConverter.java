@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.sql.Types;
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -217,6 +218,8 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 		}
 
 		// If the value is a known database function return a DatabaseFunction object
+		// NOTE: This only works if the value is a single db function with no other text
+		// ie "SYS_GUID()" will convert correctly, but "SYS_GUID() || CURRENT_TIMESTAMP", will not
 		if (isDatabaseFunction(database, value)) {
 			return getDatabaseFunction(database, value);
 		}
@@ -236,14 +239,36 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 		}
 	}
 
+	protected boolean isDate(int type) {
+		switch (type) {
+		case Types.TIME:
+		case Types.DATE:
+		case Types.TIMESTAMP:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	protected Date getDate(Database database, String value, int type) throws ParseException {
+		Date date = database.parseDate(value);
+		long millis = date.getTime();
+		switch (type) {
+		case Types.TIME:
+			return new java.sql.Time(millis);
+		case Types.DATE:
+			return new java.sql.Date(millis);
+		case Types.TIMESTAMP:
+			return new java.sql.Timestamp(millis);
+		default:
+			throw new ParseException("Data type " + type + " is not a date", 0);
+		}
+	}
+
 	protected Object getConvertedValue(Database database, String value, int dataType, int decimalDigits)
 			throws ParseException {
-		if (dataType == Types.DATE) {
-			return new java.sql.Date(database.parseDate(value).getTime());
-		} else if (dataType == Types.TIMESTAMP) {
-			return new java.sql.Timestamp(database.parseDate(value).getTime());
-		} else if (dataType == Types.TIME) {
-			return new java.sql.Time(database.parseDate(value).getTime());
+		if (isDate(dataType)) {
+			return getDate(database, value, dataType);
 		} else if (dataType == Types.BIT) {
 			return getBooleanFromBit(value);
 		} else if (dataType == Types.BOOLEAN) {
@@ -276,6 +301,8 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 		case Types.NUMERIC:
 			return true;
 		case Types.DECIMAL:
+			// Returning false here if the type is DECIMAL but there are no decimal digits is a carry over from the
+			// original Liquibase logic. This seems like it is a *bad idea*
 			return !isDecimalWithNoDecimalDigits(type, decimalDigits);
 		default:
 			return false;
@@ -289,6 +316,8 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 		case Types.TINYINT:
 			return true;
 		default:
+			// Returning true here if the type is DECIMAL but there are no decimal digits is a carry over from the
+			// original Liquibase logic. This seems like it is a *bad idea*
 			return isDecimalWithNoDecimalDigits(type, decimalDigits);
 		}
 	}
