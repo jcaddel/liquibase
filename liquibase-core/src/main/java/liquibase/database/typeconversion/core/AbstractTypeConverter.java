@@ -159,24 +159,21 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 	}
 
 	/**
-	 * Return true if the case insensitive trim of the default value exactly matches the case insensitive trim of the
-	 * database function.
+	 * Return true if the case insensitive trim of the value exactly matches the case insensitive trim of the database
+	 * function.
 	 */
-	protected boolean isMatch(String defaultValue, DatabaseFunction function) {
-		String lowerCaseDefaultValue = defaultValue.toLowerCase().trim();
-		String lowerCaseFunctionValue = function.getValue().toLowerCase().trim();
-		return lowerCaseDefaultValue.equals(lowerCaseFunctionValue);
+	protected boolean isMatch(String value, DatabaseFunction function) {
+		String comparisonValue1 = value.toLowerCase().trim();
+		String comparisonValue2 = function.getValue().toLowerCase().trim();
+		return comparisonValue1.equals(comparisonValue2);
 	}
 
 	/**
-	 * Return true if the value exactly matches a known database function, false otherwise
+	 * Return true if the value matches a known database function, false otherwise
 	 */
 	protected boolean isDatabaseFunction(Database database, String value) {
-		if (value == null) {
-			return false;
-		}
 		List<DatabaseFunction> functions = database.getDatabaseFunctions();
-		if (functions == null) {
+		if (value == null || functions == null) {
 			return false;
 		}
 		for (DatabaseFunction function : functions) {
@@ -188,14 +185,16 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 	}
 
 	protected DatabaseFunction getDatabaseFunction(Database database, String value) throws ParseException {
-		List<DatabaseFunction> functions = database.getDatabaseFunctions();
-		for (DatabaseFunction function : functions) {
-			if (isMatch(value, function)) {
-				DatabaseFunction liquibaseEquivalent = getLiquibaseEquivalent(database, function);
-				if (liquibaseEquivalent != null) {
-					return liquibaseEquivalent;
+		List<DatabaseFunction> nativeFunctions = database.getDatabaseFunctions();
+		for (DatabaseFunction nativeFunction : nativeFunctions) {
+			if (isMatch(value, nativeFunction)) {
+				DatabaseFunction liquibaseFunction = getLiquibaseEquivalent(database, nativeFunction);
+				if (liquibaseFunction != null) {
+					return liquibaseFunction;
 				} else {
-					return function;
+					logger.warning("No Liquibase equivalent for '" + nativeFunction.getValue() + "' on "
+							+ database.getTypeName());
+					return nativeFunction;
 				}
 			}
 		}
@@ -211,19 +210,23 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 	protected Object convertToCorrectObjectType(String value, int dataType, int columnSize, int decimalDigits,
 			Database database) throws ParseException {
 
+		// If the value is null or the string "NULL" return null
 		if (isNullOrNullText(value, dataType)) {
 			return null;
 		}
 
+		// If the value is a known database function return a DatabaseFunction object
 		if (isDatabaseFunction(database, value)) {
 			return getDatabaseFunction(database, value);
 		}
 
+		// Just return the String "as is" if it is text
 		if (isText(dataType)) {
 			return value;
 		}
 
 		try {
+			// Convert non-text values into their equivalent Java object
 			return getConvertedValue(database, value, dataType, decimalDigits);
 		} catch (DateParseException e) {
 			return new DatabaseFunction(value);
@@ -257,7 +260,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 		} else if (dataType == Types.BLOB) {
 			return "!!!!!! LIQUIBASE CANNOT OUTPUT BLOB VALUES !!!!!!";
 		} else {
-			LogFactory.getLogger().warning("Do not know how to convert type " + dataType);
+			logger.warning("Do not know how to convert type " + dataType);
 			return value;
 		}
 	}
