@@ -1,5 +1,8 @@
 package liquibase.database.ext;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import liquibase.Constants;
 import liquibase.database.DelimiterStyle;
 import liquibase.database.structure.ForeignKeyConstraintType;
@@ -15,6 +18,16 @@ public class OracleDatabase extends liquibase.database.core.OracleDatabase {
 		setDelimiter(DEFAULT_DELIMITER);
 		setDelimiterStyle(DEFAULT_DELIMITER_STYLE);
 		databaseFunctions.add(new DatabaseFunction("SYS_GUID()"));
+		liquibaseFunctionMappings.putAll(getFunctionMappings());
+	}
+
+	protected Map<String, DatabaseFunction> getFunctionMappings() {
+		Map<String, DatabaseFunction> map = new HashMap<String, DatabaseFunction>();
+		map.put("SYSDATE", new DatabaseFunction(LiquibaseFunction.CURRENT_DATE.getValue()));
+		map.put("SYSTIMESTAMP", new DatabaseFunction(LiquibaseFunction.CURRENT_TIMESTAMP.getValue()));
+		map.put("CURRENT_TIMESTAMP", new DatabaseFunction(LiquibaseFunction.CURRENT_TIMESTAMP.getValue()));
+		map.put("SYS_GUID()", new DatabaseFunction(LiquibaseFunction.GUID.getValue()));
+		return map;
 	}
 
 	@Override

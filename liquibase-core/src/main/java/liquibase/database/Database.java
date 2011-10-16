@@ -5,6 +5,7 @@ import java.io.Writer;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
@@ -26,292 +27,294 @@ import liquibase.statement.SqlStatement;
 
 public interface Database extends DatabaseObject, PrioritizedService {
 
-    String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase();
-    String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase();
+	String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase();
+	String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase();
 
-    /**
-     * Return true if omitting this rule from the SQL describing a foreign key constraint results in the same database
-     * behavior as explicitly supplying it. eg for Oracle + MySQL not specifying an update rule results in the rule
-     * being "ON UPDATE NO ACTION" which is functionally equivalent to "ON UPDATE RESTRICT"
-     */
-    boolean isDefaultUpdateRule(ForeignKeyConstraintType rule);
+	/**
+	 * Return true if omitting this rule from the SQL describing a foreign key constraint results in the same database
+	 * behavior as explicitly supplying it. eg for Oracle + MySQL not specifying an update rule results in the rule
+	 * being "ON UPDATE NO ACTION" which is functionally equivalent to "ON UPDATE RESTRICT"
+	 */
+	boolean isDefaultUpdateRule(ForeignKeyConstraintType rule);
 
-    ForeignKeyConstraintType getDefaultUpdateRule();
+	ForeignKeyConstraintType getDefaultUpdateRule();
 
-    /**
-     * Return true if omitting this rule from the SQL describing a foreign key constraint results in the same database
-     * behavior as explicitly supplying it. eg for Oracle + MySQL not specifying a delete rule results in the rule being
-     * "ON DELETE NO ACTION" which is functionally equivalent to "ON DELETE RESTRICT"
-     */
-    boolean isDefaultDeleteRule(ForeignKeyConstraintType rule);
+	/**
+	 * Return true if omitting this rule from the SQL describing a foreign key constraint results in the same database
+	 * behavior as explicitly supplying it. eg for Oracle + MySQL not specifying a delete rule results in the rule being
+	 * "ON DELETE NO ACTION" which is functionally equivalent to "ON DELETE RESTRICT"
+	 */
+	boolean isDefaultDeleteRule(ForeignKeyConstraintType rule);
 
-    ForeignKeyConstraintType getDefaultDeleteRule();
+	ForeignKeyConstraintType getDefaultDeleteRule();
 
-    /**
-     * Controls how the delimiter is printed when generating SQL statements
-     */
-    DelimiterStyle getDelimiterStyle();
+	/**
+	 * Controls how the delimiter is printed when generating SQL statements
+	 */
+	DelimiterStyle getDelimiterStyle();
 
-    /**
-     * This is the delimiter used to separate SQL statements
-     */
-    String getDelimiter();
+	/**
+	 * This is the delimiter used to separate SQL statements
+	 */
+	String getDelimiter();
 
-    /**
-     * Is this AbstractDatabase subclass the correct one to use for the given connection.
-     */
-    boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException;
+	/**
+	 * Is this AbstractDatabase subclass the correct one to use for the given connection.
+	 */
+	boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException;
 
-    /**
-     * If this database understands the given url, return the default driver class name. Otherwise return null.
-     */
-    String getDefaultDriver(String url);
+	/**
+	 * If this database understands the given url, return the default driver class name. Otherwise return null.
+	 */
+	String getDefaultDriver(String url);
 
-    DatabaseConnection getConnection();
+	DatabaseConnection getConnection();
 
-    void setConnection(DatabaseConnection conn);
+	void setConnection(DatabaseConnection conn);
 
-    boolean requiresUsername();
+	boolean requiresUsername();
 
-    boolean requiresPassword();
+	boolean requiresPassword();
 
-    /**
-     * Auto-commit mode to run in
-     */
-    public boolean getAutoCommitMode();
+	/**
+	 * Auto-commit mode to run in
+	 */
+	public boolean getAutoCommitMode();
 
-    /**
-     * Determines if the database supports DDL within a transaction or not.
-     *
-     * @return True if the database supports DDL within a transaction, otherwise false.
-     */
-    boolean supportsDDLInTransaction();
+	/**
+	 * Determines if the database supports DDL within a transaction or not.
+	 * 
+	 * @return True if the database supports DDL within a transaction, otherwise false.
+	 */
+	boolean supportsDDLInTransaction();
 
-    String getDatabaseProductName();
+	String getDatabaseProductName();
 
-    String getDatabaseProductVersion() throws DatabaseException;
+	String getDatabaseProductVersion() throws DatabaseException;
 
-    int getDatabaseMajorVersion() throws DatabaseException;
+	int getDatabaseMajorVersion() throws DatabaseException;
 
-    int getDatabaseMinorVersion() throws DatabaseException;
+	int getDatabaseMinorVersion() throws DatabaseException;
 
-    /**
-     * Returns an all-lower-case short name of the product. Used for end-user selecting of database type such as the
-     * DBMS precondition.
-     */
-    String getTypeName();
+	/**
+	 * Returns an all-lower-case short name of the product. Used for end-user selecting of database type such as the
+	 * DBMS precondition.
+	 */
+	String getTypeName();
 
-    String getDefaultCatalogName() throws DatabaseException;
+	String getDefaultCatalogName() throws DatabaseException;
 
-    String getDefaultSchemaName();
+	String getDefaultSchemaName();
 
-    String getLiquibaseSchemaName();
+	String getLiquibaseSchemaName();
 
-    void setDefaultSchemaName(String schemaName) throws DatabaseException;
+	void setDefaultSchemaName(String schemaName) throws DatabaseException;
 
-    /**
-     * Returns whether this database support initially deferrable columns.
-     */
-    boolean supportsInitiallyDeferrableColumns();
+	/**
+	 * Returns whether this database support initially deferrable columns.
+	 */
+	boolean supportsInitiallyDeferrableColumns();
 
-    public boolean supportsSequences();
+	public boolean supportsSequences();
 
-    public boolean supportsDropTableCascadeConstraints();
+	public boolean supportsDropTableCascadeConstraints();
 
-    public boolean supportsAutoIncrement();
+	public boolean supportsAutoIncrement();
 
-    String getDateLiteral(String isoDate);
+	String getDateLiteral(String isoDate);
 
-    /**
-     * Returns database-specific function for generating the current date/time.
-     */
-    String getCurrentDateTimeFunction();
+	/**
+	 * Returns database-specific function for generating the current date/time.
+	 */
+	String getCurrentDateTimeFunction();
 
-    void setCurrentDateTimeFunction(String function);
+	void setCurrentDateTimeFunction(String function);
 
-    String getLineComment();
+	String getLineComment();
 
-    String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy);
+	String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy);
 
-    String getDatabaseChangeLogTableName();
+	String getDatabaseChangeLogTableName();
 
-    String getDatabaseChangeLogLockTableName();
+	String getDatabaseChangeLogLockTableName();
 
-    /**
-     * Set the table name of the change log to the given table name
-     *
-     * @param tableName
-     */
-    public void setDatabaseChangeLogTableName(String tableName);
+	/**
+	 * Set the table name of the change log to the given table name
+	 * 
+	 * @param tableName
+	 */
+	public void setDatabaseChangeLogTableName(String tableName);
 
-    /**
-     * Set the table name of the change log lock to the given table name
-     *
-     * @param tableName
-     */
-    public void setDatabaseChangeLogLockTableName(String tableName);
+	/**
+	 * Set the table name of the change log lock to the given table name
+	 * 
+	 * @param tableName
+	 */
+	public void setDatabaseChangeLogLockTableName(String tableName);
 
-    /**
-     * Returns SQL to concat the passed values.
-     */
-    String getConcatSql(String... values);
+	/**
+	 * Returns SQL to concat the passed values.
+	 */
+	String getConcatSql(String... values);
 
-    boolean hasDatabaseChangeLogTable() throws DatabaseException;
+	boolean hasDatabaseChangeLogTable() throws DatabaseException;
 
-    public void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo);
+	public void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo);
 
-    boolean hasDatabaseChangeLogLockTable() throws DatabaseException;
+	boolean hasDatabaseChangeLogLockTable() throws DatabaseException;
 
-    void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog,
-            String[] contexts) throws DatabaseException;
+	void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog,
+			String[] contexts) throws DatabaseException;
 
-    void checkDatabaseChangeLogLockTable() throws DatabaseException;
+	void checkDatabaseChangeLogLockTable() throws DatabaseException;
 
-    void dropDatabaseObjects(String schema) throws DatabaseException;
+	void dropDatabaseObjects(String schema) throws DatabaseException;
 
-    void tag(String tagString) throws DatabaseException;
+	void tag(String tagString) throws DatabaseException;
 
-    boolean doesTagExist(String tag) throws DatabaseException;
+	boolean doesTagExist(String tag) throws DatabaseException;
 
-    boolean isSystemTable(String catalogName, String schemaName, String tableName);
+	boolean isSystemTable(String catalogName, String schemaName, String tableName);
 
-    boolean isLiquibaseTable(String tableName);
+	boolean isLiquibaseTable(String tableName);
 
-    boolean shouldQuoteValue(String value);
+	Map<String, DatabaseFunction> getLiquibaseFunctionMappings();
 
-    boolean supportsTablespaces();
+	boolean shouldQuoteValue(String value);
 
-    String getViewDefinition(String schemaName, String name) throws DatabaseException;
+	boolean supportsTablespaces();
 
-    boolean isSystemView(String catalogName, String schemaName, String name);
+	String getViewDefinition(String schemaName, String name) throws DatabaseException;
 
-    String getDateLiteral(java.sql.Date date);
+	boolean isSystemView(String catalogName, String schemaName, String name);
 
-    String getTimeLiteral(java.sql.Time time);
+	String getDateLiteral(java.sql.Date date);
 
-    String getDateTimeLiteral(java.sql.Timestamp timeStamp);
+	String getTimeLiteral(java.sql.Time time);
 
-    String getDateLiteral(Date defaultDateValue);
+	String getDateTimeLiteral(java.sql.Timestamp timeStamp);
 
-    /**
-     * Escapes the table name in a database-dependent manner so reserved words can be used as a table name (i.e.
-     * "order"). Currently only escapes MS-SQL because other DBMSs store table names case-sensitively when escaping is
-     * used which could confuse end-users. Pass null to schemaName to use the default schema
-     */
-    String escapeTableName(String schemaName, String tableName);
+	String getDateLiteral(Date defaultDateValue);
 
-    String escapeIndexName(String schemaName, String indexName);
+	/**
+	 * Escapes the table name in a database-dependent manner so reserved words can be used as a table name (i.e.
+	 * "order"). Currently only escapes MS-SQL because other DBMSs store table names case-sensitively when escaping is
+	 * used which could confuse end-users. Pass null to schemaName to use the default schema
+	 */
+	String escapeTableName(String schemaName, String tableName);
 
-    String escapeDatabaseObject(String objectName);
+	String escapeIndexName(String schemaName, String indexName);
 
-    /**
-     * Escapes a single column name in a database-dependent manner so reserved words can be used as a column name (i.e.
-     * "return").
-     *
-     * @param schemaName
-     * @param tableName
-     * @param columnName
-     *            column name
-     *
-     * @return escaped column name
-     */
-    String escapeColumnName(String schemaName, String tableName, String columnName);
+	String escapeDatabaseObject(String objectName);
 
-    /**
-     * Escapes a list of column names in a database-dependent manner so reserved words can be used as a column name
-     * (i.e. "return").
-     *
-     * @param columnNames
-     *            list of column names
-     * @return escaped column name list
-     */
-    String escapeColumnNameList(String columnNames);
+	/**
+	 * Escapes a single column name in a database-dependent manner so reserved words can be used as a column name (i.e.
+	 * "return").
+	 * 
+	 * @param schemaName
+	 * @param tableName
+	 * @param columnName
+	 *            column name
+	 * 
+	 * @return escaped column name
+	 */
+	String escapeColumnName(String schemaName, String tableName, String columnName);
 
-    // Set<UniqueConstraint> findUniqueConstraints(String schema) throws DatabaseException;
+	/**
+	 * Escapes a list of column names in a database-dependent manner so reserved words can be used as a column name
+	 * (i.e. "return").
+	 * 
+	 * @param columnNames
+	 *            list of column names
+	 * @return escaped column name list
+	 */
+	String escapeColumnNameList(String columnNames);
 
-    String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException;
+	// Set<UniqueConstraint> findUniqueConstraints(String schema) throws DatabaseException;
 
-    String convertRequestedSchemaToCatalog(String requestedSchema) throws DatabaseException;
+	String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException;
 
-    boolean supportsSchemas();
+	String convertRequestedSchemaToCatalog(String requestedSchema) throws DatabaseException;
 
-    String generatePrimaryKeyName(String tableName);
+	boolean supportsSchemas();
 
-    String escapeSequenceName(String schemaName, String sequenceName);
+	String generatePrimaryKeyName(String tableName);
 
-    String escapeViewName(String schemaName, String viewName);
+	String escapeSequenceName(String schemaName, String sequenceName);
 
-    ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
+	String escapeViewName(String schemaName, String viewName);
 
-    RanChangeSet getRanChangeSet(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
+	ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
-    void markChangeSetExecStatus(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException;
+	RanChangeSet getRanChangeSet(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
-    List<RanChangeSet> getRanChangeSetList() throws DatabaseException;
+	void markChangeSetExecStatus(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException;
 
-    Date getRanDate(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
+	List<RanChangeSet> getRanChangeSetList() throws DatabaseException;
 
-    void removeRanStatus(ChangeSet changeSet) throws DatabaseException;
+	Date getRanDate(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
-    void commit() throws DatabaseException;
+	void removeRanStatus(ChangeSet changeSet) throws DatabaseException;
 
-    void rollback() throws DatabaseException;
+	void commit() throws DatabaseException;
 
-    String escapeStringForDatabase(String string);
+	void rollback() throws DatabaseException;
 
-    void close() throws DatabaseException;
+	String escapeStringForDatabase(String string);
 
-    boolean supportsRestrictForeignKeys();
+	void close() throws DatabaseException;
 
-    String escapeConstraintName(String constraintName);
+	boolean supportsRestrictForeignKeys();
 
-    boolean isAutoCommit() throws DatabaseException;
+	String escapeConstraintName(String constraintName);
 
-    void setAutoCommit(boolean b) throws DatabaseException;
+	boolean isAutoCommit() throws DatabaseException;
 
-    boolean isLocalDatabase() throws DatabaseException;
+	void setAutoCommit(boolean b) throws DatabaseException;
 
-    void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors)
-            throws LiquibaseException, UnsupportedChangeException;
+	boolean isLocalDatabase() throws DatabaseException;
 
-    /*
-     * Executes the statements passed as argument to a target {@link Database}
-     *
-     * @param statements an array containing the SQL statements to be issued
-     *
-     * @param database the target {@link Database}
-     *
-     * @throws DatabaseException if there were problems issuing the statements
-     */
+	void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors)
+			throws LiquibaseException, UnsupportedChangeException;
 
-    void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException;
+	/*
+	 * Executes the statements passed as argument to a target {@link Database}
+	 * 
+	 * @param statements an array containing the SQL statements to be issued
+	 * 
+	 * @param database the target {@link Database}
+	 * 
+	 * @throws DatabaseException if there were problems issuing the statements
+	 */
 
-    void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException,
-            UnsupportedChangeException, StatementNotSupportedOnDatabaseException, LiquibaseException;
+	void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException;
 
-    void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException,
-            UnsupportedChangeException, RollbackImpossibleException;
+	void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException,
+	UnsupportedChangeException, StatementNotSupportedOnDatabaseException, LiquibaseException;
 
-    void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException,
-            UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException,
-            LiquibaseException;
+	void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException,
+	UnsupportedChangeException, RollbackImpossibleException;
 
-    int getNextChangeSetSequenceValue() throws LiquibaseException;
+	void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException,
+	UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException,
+	LiquibaseException;
 
-    public Date parseDate(String dateAsString) throws DateParseException;
+	int getNextChangeSetSequenceValue() throws LiquibaseException;
 
-    /**
-     * Returns list of database native functions
-     * */
-    public List<DatabaseFunction> getDatabaseFunctions();
+	public Date parseDate(String dateAsString) throws DateParseException;
 
-    void reset();
+	/**
+	 * Returns list of database native functions
+	 * */
+	public List<DatabaseFunction> getDatabaseFunctions();
 
-    boolean supportsForeignKeyDisable();
+	void reset();
 
-    boolean disableForeignKeyChecks() throws DatabaseException;
+	boolean supportsForeignKeyDisable();
 
-    void enableForeignKeyChecks() throws DatabaseException;
+	boolean disableForeignKeyChecks() throws DatabaseException;
 
-    public boolean isReservedWord(String string);
+	void enableForeignKeyChecks() throws DatabaseException;
+
+	public boolean isReservedWord(String string);
 }

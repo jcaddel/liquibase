@@ -6,6 +6,7 @@ import java.sql.Types;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
@@ -167,8 +168,11 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 		return lowerCaseDefaultValue.equals(lowerCaseFunctionValue);
 	}
 
-	protected boolean isDatabaseFunction(Database database, String defaultValue) {
-		if (defaultValue == null) {
+	/**
+	 * Return true if the value exactly matches a known database function, false otherwise
+	 */
+	protected boolean isDatabaseFunction(Database database, String value) {
+		if (value == null) {
 			return false;
 		}
 		List<DatabaseFunction> functions = database.getDatabaseFunctions();
@@ -176,15 +180,32 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 			return false;
 		}
 		for (DatabaseFunction function : functions) {
-			if (isMatch(defaultValue, function)) {
+			if (isMatch(value, function)) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	protected DatabaseFunction getLiquibaseFunction(Database database, String defaultValue) {
-		return new DatabaseFunction(defaultValue.trim());
+	protected DatabaseFunction getDatabaseFunction(Database database, String value) throws ParseException {
+		List<DatabaseFunction> functions = database.getDatabaseFunctions();
+		for (DatabaseFunction function : functions) {
+			if (isMatch(value, function)) {
+				DatabaseFunction liquibaseEquivalent = getLiquibaseEquivalent(database, function);
+				if (liquibaseEquivalent != null) {
+					return liquibaseEquivalent;
+				} else {
+					return function;
+				}
+			}
+		}
+		throw new ParseException("Unable to handle function " + value, 0);
+	}
+
+	protected DatabaseFunction getLiquibaseEquivalent(Database database, DatabaseFunction function) {
+		String name = function.getValue();
+		Map<String, DatabaseFunction> functionMappings = database.getLiquibaseFunctionMappings();
+		return functionMappings.get(name);
 	}
 
 	protected Object convertToCorrectObjectType(String value, int dataType, int columnSize, int decimalDigits,
@@ -195,7 +216,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 		}
 
 		if (isDatabaseFunction(database, value)) {
-			return getLiquibaseFunction(database, value);
+			return getDatabaseFunction(database, value);
 		}
 
 		if (isText(dataType)) {
