@@ -291,19 +291,12 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 		}
 	}
 
-	protected boolean isDecimalWithNoDecimalDigits(int type, int decimalDigits) {
-		return type == Types.DECIMAL && decimalDigits == 0;
-	}
-
 	protected boolean isBigDecimal(int type, int decimalDigits) {
 		switch (type) {
 		case Types.DOUBLE:
 		case Types.NUMERIC:
-			return true;
 		case Types.DECIMAL:
-			// Returning false here if the type is DECIMAL but there are no decimal digits is a carry over from the
-			// original Liquibase logic. This seems like it is a *bad idea*
-			return !isDecimalWithNoDecimalDigits(type, decimalDigits);
+			return true;
 		default:
 			return false;
 		}
@@ -316,9 +309,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 		case Types.TINYINT:
 			return true;
 		default:
-			// Returning true here if the type is DECIMAL but there are no decimal digits is a carry over from the
-			// original Liquibase logic. This seems like it is a *bad idea*
-			return isDecimalWithNoDecimalDigits(type, decimalDigits);
+			return false;
 		}
 	}
 
