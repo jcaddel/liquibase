@@ -216,7 +216,8 @@ public class StringChangeLogSerializerTest {
 			setFields(change);
 			ChangeLogSerializer serializer = new StringChangeLogSerializer();
 			String string = serializer.serialize(change);
-			assertTrue("@ in string.  Probably poorly serialized object reference." + string, string.indexOf("@") < 0);
+			int pos = string.indexOf("@");
+			assertTrue("@ in string.  Probably poorly serialized object reference." + string, pos < 0);
 		}
 	}
 

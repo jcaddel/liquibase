@@ -34,15 +34,18 @@ import liquibase.util.csv.CSVReader;
 
 public class LoadDataChange extends AbstractChange implements ChangeWithColumns<LoadDataColumnConfig> {
 
-	private final Logger logger = LogFactory.getLogger();
+	@ChangeProperty(includeInSerialization = false)
+	private static final Logger logger = LogFactory.getLogger();
+
+	@ChangeProperty(includeInSerialization = false)
+	private NullValue nullValue = new NullValue();
+
 	private String schemaName;
 	private String tableName;
 	private String file;
 	private String encoding = null;
 	private String separator = liquibase.util.csv.opencsv.CSVReader.DEFAULT_SEPARATOR + "";
 	private String quotchar = liquibase.util.csv.opencsv.CSVReader.DEFAULT_QUOTE_CHARACTER + "";
-	@ChangeProperty(includeInSerialization = false)
-	private NullValue nullValue = new NullValue();
 	private String flattened;
 
 	private List<LoadDataColumnConfig> columns = new ArrayList<LoadDataColumnConfig>();
