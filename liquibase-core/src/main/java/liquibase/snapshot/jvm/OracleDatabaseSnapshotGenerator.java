@@ -40,8 +40,8 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
      * Oracle specific implementation
      */
     @Override
-    protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs, Database database) throws SQLException, DatabaseException {
-        super.getColumnTypeAndDefValue(columnInfo, rs, database);
+    protected void updateTypeAndDefaultValue(Column columnInfo, ResultSet rs, Database database) throws SQLException, DatabaseException {
+        super.updateTypeAndDefaultValue(columnInfo, rs, database);
 
         // Exclusive setting for oracle INTEGER type
         // Details:

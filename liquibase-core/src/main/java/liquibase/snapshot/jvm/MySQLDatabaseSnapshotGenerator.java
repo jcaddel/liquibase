@@ -40,7 +40,7 @@ public class MySQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
      * MySQL specific implementation
      */
     @Override
-    protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs, Database database) throws SQLException,
+    protected void updateTypeAndDefaultValue(Column columnInfo, ResultSet rs, Database database) throws SQLException,
             DatabaseException {
 
         String columnTypeName = rs.getString("TYPE_NAME");
@@ -118,7 +118,7 @@ public class MySQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
             columnInfo.setTypeName(columnTypeName);
             columnInfo.setDefaultValue(tableSchema.get(columnName).get(1));
         } else {
-            super.getColumnTypeAndDefValue(columnInfo, rs, database);
+            super.updateTypeAndDefaultValue(columnInfo, rs, database);
         }
     }
 

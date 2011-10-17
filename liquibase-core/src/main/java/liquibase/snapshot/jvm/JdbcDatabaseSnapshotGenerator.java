@@ -230,7 +230,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 		Boolean nullable = getNullable(rs.getInt("NULLABLE"));
 		column.setNullable(nullable);
 
-		getColumnTypeAndDefValue(column, rs, database);
+		updateTypeAndDefaultValue(column, rs, database);
 		column.setRemarks(remarks);
 		return column;
 	}
@@ -584,8 +584,8 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 	 * incorrectly via DatabaseMetaData objects. This method, if necessary, must be overridden. It must go below
 	 * DatabaseMetaData implementation and talk directly to the database to get correct metadata information.
 	 */
-	protected void getColumnTypeAndDefValue(Column column, ResultSet rs, Database database) throws SQLException,
-	DatabaseException {
+	protected void updateTypeAndDefaultValue(Column column, ResultSet rs, Database database) throws SQLException,
+			DatabaseException {
 		Object defaultValue = rs.getObject("COLUMN_DEF");
 		String typeName = rs.getString("TYPE_NAME");
 
@@ -693,7 +693,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
 	/**
 	 * Generation of Foreign Key based on information about it.
-	 * 
+	 *
 	 * @param fkInfo
 	 *            contains all needed properties of FK
 	 * @param database
@@ -764,7 +764,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
 	/**
 	 * It finds <u>only</u> all database-specific Foreign Keys. By default it returns an empty ArrayList.
-	 * 
+	 *
 	 * @param schemaName
 	 *            current shemaName
 	 * @param database
@@ -806,7 +806,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
 	/**
 	 * Fill foreign key information from the current register of a getImportedKeys resultset
-	 * 
+	 *
 	 * @param rs
 	 *            The resultset returned by getImportedKeys
 	 * @return Foreign key information

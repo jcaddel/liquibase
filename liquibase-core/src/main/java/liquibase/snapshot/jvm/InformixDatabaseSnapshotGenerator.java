@@ -41,7 +41,7 @@ public class InformixDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
     }
 
     @Override
-    protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs, Database database) throws SQLException,
+    protected void updateTypeAndDefaultValue(Column columnInfo, ResultSet rs, Database database) throws SQLException,
             DatabaseException {
         // See http://publib.boulder.ibm.com/infocenter/idshelp/v115/topic/com.ibm.sqlr.doc/sqlr07.htm
         String typeName = rs.getString("TYPE_NAME").toUpperCase();
@@ -56,7 +56,7 @@ public class InformixDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
             columnInfo.setTypeName(type + " " + firstQualifier + " TO " + lastQualifier);
             columnInfo.setLengthSemantics(Column.LengthSemantics.BYTE);
         } else {
-            super.getColumnTypeAndDefValue(columnInfo, rs, database);
+            super.updateTypeAndDefaultValue(columnInfo, rs, database);
         }
     }
 
