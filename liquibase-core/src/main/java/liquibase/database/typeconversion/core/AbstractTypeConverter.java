@@ -267,20 +267,28 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 
 	protected Object getConvertedValue(Database database, String value, int dataType, int decimalDigits)
 			throws ParseException {
+
+		/**
+		 * If we get here, we are not attempting to convert a text value. Removing whitespace has no negative effect on
+		 * attempting to convert number, date, or NULL values and for some default values the JDBC drivers are returning
+		 * padded values
+		 */
+		String trimValue = value.trim();
+
 		if (isDate(dataType)) {
-			return getDate(database, value, dataType);
+			return getDate(database, trimValue, dataType);
 		} else if (dataType == Types.BIT) {
-			return getBooleanFromBit(value);
+			return getBooleanFromBit(trimValue);
 		} else if (dataType == Types.BOOLEAN) {
-			return Boolean.valueOf(value);
+			return Boolean.valueOf(trimValue);
 		} else if (dataType == Types.BIGINT) {
-			return new BigInteger(value);
+			return new BigInteger(trimValue);
 		} else if (isBigDecimal(dataType, decimalDigits)) {
-			return new BigDecimal(value);
+			return new BigDecimal(trimValue);
 		} else if (isInteger(dataType, decimalDigits)) {
-			return new Integer(value);
+			return new Integer(trimValue);
 		} else if (dataType == Types.FLOAT || dataType == Types.REAL) {
-			return new Float(value);
+			return new Float(trimValue);
 		} else if (dataType == Types.NULL) {
 			return null;
 		} else if (dataType == Types.BLOB) {
