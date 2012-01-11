@@ -1,12 +1,13 @@
 Liquibase
 -------
 This fork of Liquibase is oriented towards requirements [The Kuali Foundation](http://www.kuali.org) has for database migration tooling.
+This version is also a "superset" of the functionality from the original Liquibase source.  That is to say, as of today (01/12/2011) this version contains every commit from the parent GitHub repository in addition to the functionality that has been layered on top. 
 
 Requirements
 -------
 One requirement for Kuali is that applications need to be database agnostic.  Towards this end, Kuali applications adhere to a subset of database functionality that is present across Oracle, MySQL, and embedded databases (H2, Derby, etc).  
 
-[This page](https://wiki.kuali.org/display/KULRICE/Liquibase) documents the desired workflow for Kuali database tooling.
+[This page](https://wiki.kuali.org/display/KULRICE/Liquibase) documents the desired workflow for Kuali database tooling along with features/extensions/modifications that have gone in.
 
 
 Maven Mod's
