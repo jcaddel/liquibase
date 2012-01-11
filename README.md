@@ -1,7 +1,7 @@
 Liquibase
 -------
 This fork of Liquibase is oriented towards requirements [The Kuali Foundation](http://www.kuali.org) has for database migration tooling.
-This version is a superset of the original Liqubase functionality.  This version contains every commit from the parent GitHub repository (since the time of the fork) in addition to the functionality that has been layered on top. 
+This version is a superset of the original Liqubase functionality.  It contains every commit from the parent GitHub repository (since the time of the fork) in addition to the functionality that has been layered on top. 
 
 Requirements
 -------
