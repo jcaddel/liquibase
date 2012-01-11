@@ -1,13 +1,9 @@
 package liquibase.precondition.core;
 
-import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.PreconditionErrorException;
-import liquibase.exception.PreconditionFailedException;
-import liquibase.exception.ValidationErrors;
-import liquibase.exception.Warnings;
+import liquibase.exception.*;
 import liquibase.precondition.Precondition;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.util.StringUtils;
@@ -41,32 +37,26 @@ public class ColumnExistsPrecondition implements Precondition {
         this.columnName = columnName;
     }
 
-    @Override
     public Warnings warn(Database database) {
         return new Warnings();
     }
 
-    @Override
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
-
-    @Override
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
-            throws PreconditionFailedException, PreconditionErrorException {
-        try {
-            if (DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database)
-                    .getColumn(getSchemaName(), getTableName(), getColumnName(), database) == null) {
-                throw new PreconditionFailedException("Column '"
-                        + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName())
-                        + "' does not exist", changeLog, this);
+    
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+        String currentSchemaName;
+    	try {
+            currentSchemaName = getSchemaName() == null ? (database == null ? null: database.getDefaultSchemaName()) : getSchemaName();
+            if (DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).getColumn(currentSchemaName, getTableName(), getColumnName(), database) == null) {
+                throw new PreconditionFailedException("Column '"+database.escapeColumnName(currentSchemaName, getTableName(), getColumnName())+"' does not exist", changeLog, this);
             }
         } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
     }
 
-    @Override
     public String getName() {
         return "columnExists";
     }

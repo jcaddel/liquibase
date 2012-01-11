@@ -34,8 +34,8 @@ public class SequenceExistsPrecondition implements Precondition {
         this.sequenceName = sequenceName;
     }
 
-    @Override
-    public Warnings warn(Database database) {
+        @Override
+        public Warnings warn(Database database) {
         return new Warnings();
     }
 
@@ -45,19 +45,17 @@ public class SequenceExistsPrecondition implements Precondition {
     }
 
     @Override
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
-            throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         DatabaseSnapshot snapshot;
+        String currentSchemaName;
         try {
-            snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(
-                    new SnapshotContext(database, getSchemaName()));
+            currentSchemaName = getSchemaName() == null ? (database == null ? null: database.getDefaultSchemaName()) : getSchemaName();
+            snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(new SnapshotContext(database,currentSchemaName));
         } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
         if (snapshot.getSequence(getSequenceName()) == null) {
-            throw new PreconditionFailedException("Sequence "
-                    + database.escapeSequenceName(getSchemaName(), getSequenceName()) + " does not exist", changeLog,
-                    this);
+            throw new PreconditionFailedException("Sequence "+database.escapeSequenceName(currentSchemaName, getSequenceName())+" does not exist", changeLog, this);
         }
     }
 

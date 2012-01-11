@@ -57,9 +57,12 @@ public class PrimaryKeyExistsPrecondition implements Precondition {
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
             throws PreconditionFailedException, PreconditionErrorException {
         DatabaseSnapshot snapshot;
+        String currentSchemaName;
         try {
+            currentSchemaName = getSchemaName() == null ? (database == null ? null : database.getDefaultSchemaName())
+                    : getSchemaName();
             snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(
-                    new SnapshotContext(database, getSchemaName()));
+                    new SnapshotContext(database, currentSchemaName));
         } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }

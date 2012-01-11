@@ -1,13 +1,9 @@
 package liquibase.precondition.core;
 
-import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.PreconditionErrorException;
-import liquibase.exception.PreconditionFailedException;
-import liquibase.exception.ValidationErrors;
-import liquibase.exception.Warnings;
+import liquibase.exception.*;
 import liquibase.precondition.Precondition;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.util.StringUtils;
@@ -50,12 +46,10 @@ public class IndexExistsPrecondition implements Precondition {
         this.columnNames = columnNames;
     }
 
-    @Override
     public Warnings warn(Database database) {
         return new Warnings();
     }
 
-    @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
         if (getIndexName() == null && getTableName() == null && getColumnNames() == null) {
@@ -64,12 +58,11 @@ public class IndexExistsPrecondition implements Precondition {
         return validationErrors;
     }
 
-    @Override
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
-            throws PreconditionFailedException, PreconditionErrorException {
-        try {
-            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database)
-                    .hasIndex(getSchemaName(), getTableName(), getIndexName(), database, getColumnNames())) {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    	String currentSchemaName;
+    	try {
+            currentSchemaName = getSchemaName() == null ? (database == null ? null: database.getDefaultSchemaName()) : getSchemaName();
+            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasIndex(currentSchemaName, getTableName(), getIndexName(), database, getColumnNames())) {
                 String name = "";
 
                 if (getIndexName() != null) {
@@ -77,20 +70,19 @@ public class IndexExistsPrecondition implements Precondition {
                 }
 
                 if (StringUtils.trimToNull(getTableName()) != null) {
-                    name += " on " + database.escapeStringForDatabase(getTableName());
+                    name += " on "+database.escapeStringForDatabase(getTableName());
 
                     if (StringUtils.trimToNull(getColumnNames()) != null) {
-                        name += " columns " + getColumnNames();
+                        name += " columns "+getColumnNames();
                     }
                 }
-                throw new PreconditionFailedException("Index " + name + " does not exist", changeLog, this);
+                throw new PreconditionFailedException("Index "+ name +" does not exist", changeLog, this);
             }
         } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
     }
 
-    @Override
     public String getName() {
         return "indexExists";
     }
