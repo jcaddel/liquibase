@@ -4,7 +4,7 @@ This fork of Liquibase is oriented towards requirements [The Kuali Foundation](h
 
 Requirements
 -------
-One requirement for Kuali is that applications should be database agnostic.  Towards this end, Kuali applications adhere to a subset of database functionality that is present across Oracle, MySQL, and embedded databases (H2, Derby, etc).  
+One requirement for Kuali is that applications need to be database agnostic.  Towards this end, Kuali applications adhere to a subset of database functionality that is present across Oracle, MySQL, and embedded databases (H2, Derby, etc).  
 
 [This page](https://wiki.kuali.org/display/KULRICE/Liquibase) documents the desired workflow for Kuali database tooling.
 
