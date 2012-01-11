@@ -1,10 +1,11 @@
 Liquibase
 -------
-
-This fork of Liquibase has been Maven'ized and oriented towards requirements The Kuali Foundation has for database migration tooling.
+This fork of Liquibase is oriented towards requirements [The Kuali Foundation](http://www.kuali.org) has for database migration tooling.
 
 Requirements
 -------
+The main requirement for Kuali is that applications should be database agnostic.  Towards this end, Kuali applications adhere to a subset of database functionality that is present across Oracle, MySQL, and embedded databases (H2, Derby, etc).  
+
 https://wiki.kuali.org/display/KULRICE/Liquibase
 
 Maven Mod's
