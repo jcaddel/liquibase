@@ -13,7 +13,7 @@ Altered POM's:
 - Top level pom inherits from the Kuali pom
 - groupId's changed to org.kuali.*
 - Stripped out quite a bit of configuration that was redundant or otherwise not needed
-- Changed the <scm> section to reflect the location of the source on GitHub
+- Changed the &lt;scm&gt; section to reflect the location of the source on GitHub
 - All of the java based artifacts get deployed, including the example code
 
 The built in Maven lifecyles (clean, site, and default) work
