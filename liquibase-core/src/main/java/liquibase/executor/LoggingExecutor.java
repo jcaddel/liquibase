@@ -56,6 +56,10 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
         return 0;
     }
 
+    public Map call(CallableSqlStatement csc, List declaredParameters, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+        throw new DatabaseException("Do not know how to output callable statement");
+    }
+
     public void comment(String message) throws DatabaseException {
         try {
             output.write(database.getLineComment());

@@ -1,16 +1,20 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.TagDatabaseStatement;
 
-@ChangeClass(name="tagDatabase", description = "Tag Database", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class TagDatabaseChange extends AbstractChange {
 
     private String tag;
 
-    @ChangeProperty(requiredForDatabase = "all")
+    public TagDatabaseChange() {
+        super("tagDatabase", "Tag Database", ChangeMetaData.PRIORITY_DEFAULT);
+    }
+
     public String getTag() {
         return tag;
     }

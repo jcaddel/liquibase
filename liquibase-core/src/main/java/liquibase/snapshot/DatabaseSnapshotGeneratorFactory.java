@@ -1,7 +1,7 @@
 package liquibase.snapshot;
 
 import liquibase.database.Database;
-import liquibase.diff.DiffControl;
+import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.ServiceLocator;
 
@@ -62,14 +62,11 @@ public class DatabaseSnapshotGeneratorFactory {
         return generators;
     }
 
-    public DatabaseSnapshot createSnapshot(Database database, DiffControl diffControl) throws DatabaseException {
-        return createSnapshot(database, diffControl, DiffControl.DatabaseRole.REFERENCE);
-    }
     /**
      * Get generator for database with highest priority.
      */
-    public DatabaseSnapshot createSnapshot(Database database, DiffControl diffControl, DiffControl.DatabaseRole role) throws DatabaseException {
-        return getGenerator(database).createSnapshot(database, diffControl, role);
+    public DatabaseSnapshot createSnapshot(Database database, String schema, Set<DiffStatusListener> listeners) throws DatabaseException {
+        return getGenerator(database).createSnapshot(database, schema, listeners);
     }
 
     /**

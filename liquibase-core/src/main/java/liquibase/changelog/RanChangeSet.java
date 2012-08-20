@@ -15,7 +15,6 @@ public class RanChangeSet {
     private final Date dateExecuted;
     private String tag;
     private ChangeSet.ExecType execType;
-    private String description;
 
     public RanChangeSet(ChangeSet changeSet) {
         this(changeSet, null);
@@ -28,11 +27,10 @@ public class RanChangeSet {
              changeSet.generateCheckSum(),
              new Date(),
              null,
-             execType,
-            changeSet.getDescription());
+             execType);
     }
 
-    public RanChangeSet(String changeLog, String id, String author, CheckSum lastCheckSum, Date dateExecuted, String tag, ChangeSet.ExecType execType, String description) {
+    public RanChangeSet(String changeLog, String id, String author, CheckSum lastCheckSum, Date dateExecuted, String tag, ChangeSet.ExecType execType) {
         this.changeLog = changeLog;
         this.id = id;
         this.author = author;
@@ -44,7 +42,6 @@ public class RanChangeSet {
         }
         this.tag = tag;
         this.execType = execType;
-        this.description = description;
     }
 
     public String getChangeLog() {
@@ -80,14 +77,6 @@ public class RanChangeSet {
 
     public ChangeSet.ExecType getExecType() {
         return execType;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     @Override

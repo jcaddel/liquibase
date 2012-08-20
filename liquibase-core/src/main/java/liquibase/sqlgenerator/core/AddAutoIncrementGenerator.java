@@ -6,9 +6,8 @@ import liquibase.database.core.H2Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.structure.Column;
-import liquibase.database.structure.Schema;
 import liquibase.database.structure.Table;
-import liquibase.datatype.DataTypeFactory;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -48,17 +47,19 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
     		Database database,
     		SqlGeneratorChain sqlGeneratorChain) {
         String sql = "ALTER TABLE "
-            + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
+            + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
             + " MODIFY "
-            + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName())
+            + database.escapeColumnName(
+            	statement.getSchemaName(), statement.getTableName(), statement.getColumnName())
             + " "
-            + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType() + "{autoIncrement:true}")
+            + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(
+            	statement.getColumnDataType(), true)
             + " " 
             + database.getAutoIncrementClause(statement.getStartWith(), statement.getIncrementBy());
 
         return new Sql[]{
             new UnparsedSql(sql, new Column()
-                .setRelation(new Table(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
+                .setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
                 .setName(statement.getColumnName()))
         };
     }

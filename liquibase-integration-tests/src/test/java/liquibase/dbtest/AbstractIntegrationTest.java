@@ -2,20 +2,8 @@ package liquibase.dbtest;
 
 import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.database.structure.Catalog;
-import liquibase.database.structure.Schema;
-import liquibase.database.structure.Table;
-import liquibase.database.structure.View;
-import liquibase.datatype.DataTypeFactory;
-import liquibase.diff.DiffControl;
-import liquibase.diff.DiffGeneratorFactory;
-import liquibase.diff.output.DiffOutputConfig;
-import liquibase.diff.output.DiffToChangeLog;
-import liquibase.diff.output.DiffToPrintStream;
-import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
-import liquibase.snapshot.DatabaseSnapshotGenerator;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.executor.ExecutorService;
@@ -24,6 +12,8 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
@@ -44,6 +34,7 @@ import java.sql.Statement;
 import java.sql.SQLException;
 import liquibase.assertions.DiffResultAssert;
 import liquibase.util.RegexMatcher;
+import liquibase.util.StreamUtil;
 
 import org.junit.Before;
 import org.junit.After;
@@ -65,7 +56,6 @@ public abstract class AbstractIntegrationTest {
     private String externalfkInitChangeLog;
     private String externalEntityChangeLog;
     private String externalEntityChangeLog2;
-    private String invalidReferenceChangeLog;
 
     protected String contexts = "test, context-b";
     private Database database;
@@ -81,7 +71,6 @@ public abstract class AbstractIntegrationTest {
         this.externalfkInitChangeLog= "changelogs/common/externalfk.init.changelog.xml";
         this.externalEntityChangeLog= "changelogs/common/externalEntity.changelog.xml";
         this.externalEntityChangeLog2= "com/example/nonIncluded/externalEntity.changelog.xml";
-        this.invalidReferenceChangeLog= "changelogs/common/invalid.reference.changelog.xml";
 
         this.url = url;
 
@@ -119,11 +108,9 @@ public abstract class AbstractIntegrationTest {
 
             DatabaseSnapshotGeneratorFactory.resetAll();
             LockService.getInstance(database).forceReleaseLock();
-            database.dropDatabaseObjects(Schema.DEFAULT);
+            database.dropDatabaseObjects(null);
             if (database.supportsSchemas()) {
-                database.dropDatabaseObjects(new Schema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
-            } else if (database.supportsCatalogs()) {
-                database.dropDatabaseObjects(new Schema(DatabaseTestContext.ALT_SCHEMA, null));
+                database.dropDatabaseObjects(DatabaseTestContext.ALT_SCHEMA);
             }
             database.commit();
             DatabaseSnapshotGeneratorFactory.resetAll();
@@ -174,7 +161,7 @@ public abstract class AbstractIntegrationTest {
         runCompleteChangeLog();
     }
 
-    protected void runCompleteChangeLog() throws Exception {
+    private void runCompleteChangeLog() throws Exception {
         Liquibase liquibase = createLiquibase(completeChangeLog);
         clearDatabase(liquibase);
 
@@ -188,10 +175,10 @@ public abstract class AbstractIntegrationTest {
         }
     }
 
-    protected Schema[] getSchemasToDrop() throws DatabaseException {
-        return new Schema[]{
-                new Schema(new Catalog(null), "liquibaseb".toUpperCase()),
-                new Schema(new Catalog(null), database.getDefaultSchemaName())
+    protected String[] getSchemasToDrop() throws DatabaseException {
+        return new String[]{
+                "liquibaseb".toUpperCase(),
+                database.getDefaultSchemaName(),
         };
     }
 
@@ -207,7 +194,7 @@ public abstract class AbstractIntegrationTest {
         ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute("CREATE TABLE DATABASECHANGELOG (id varchar(150) NOT NULL, " +
                 "author varchar(150) NOT NULL, " +
                 "filename varchar(255) NOT NULL, " +
-                "dateExecuted "+ DataTypeFactory.getInstance().fromDescription("datetime").toDatabaseDataType(database) +" NOT NULL, " +
+                "dateExecuted "+ TypeConverterFactory.getInstance().findTypeConverter(database).getDateTimeType() +" NOT NULL, " +
                 "md5sum varchar(32), " +
                 "description varchar(255), " +
                 "comments varchar(255), " +
@@ -237,11 +224,11 @@ public abstract class AbstractIntegrationTest {
         assertNotNull(outputResult);
         assertTrue(outputResult.length() > 100); //should be pretty big
         System.out.println(outputResult);
-        assertTrue("create databasechangelog command not found in: \n" + outputResult, outputResult.contains("CREATE TABLE "+database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())));
-        assertTrue("create databasechangeloglock command not found in: \n" + outputResult, outputResult.contains("CREATE TABLE "+database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())));
+        assertTrue("create databasechangelog command not found in: \n" + outputResult, outputResult.contains("CREATE TABLE "+database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())));
+        assertTrue("create databasechangeloglock command not found in: \n" + outputResult, outputResult.contains("CREATE TABLE "+database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())));
 
-        DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new DiffControl());
-        assertEquals(0, snapshot.getDatabaseObjects(Schema.DEFAULT, Table.class).size());
+        DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
+        assertEquals(0, snapshot.getTables().size());
     }
 
     protected void clearDatabase(Liquibase liquibase) throws DatabaseException {
@@ -250,12 +237,12 @@ public abstract class AbstractIntegrationTest {
         try {
             statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
             try {
-                statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
+                statement.execute("drop table " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
             } catch (Exception e) {
                 //ok
             }
             try {
-                statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+                statement.execute("drop table " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
             } catch (Exception e) {
                 //ok
             }
@@ -365,14 +352,10 @@ public abstract class AbstractIntegrationTest {
 
         runCompleteChangeLog();
 
-        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, database, new DiffControl());
+        Diff diff = new Diff(database, database);
+        DiffResult diffResult = diff.compare();
 
-        try {
-            assertTrue(diffResult.areEqual());
-        } catch (AssertionError e) {
-            new DiffToPrintStream(diffResult, System.out).print();
-            throw e;
-        }
+        assertFalse(diffResult.differencesFound());
     }
 
     @Test
@@ -385,21 +368,20 @@ public abstract class AbstractIntegrationTest {
             boolean outputCsv = run == 1;
             runCompleteChangeLog();
 
-            DatabaseSnapshot originalSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new DiffControl());
+            DatabaseSnapshot originalSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
 
-            DiffControl diffControl = new DiffControl();
-            diffControl.setDiffData(true);
+            Diff diff = new Diff(database, (String) null);
+            diff.setDiffData(true);
+            DiffResult diffResult = diff.compare();
+
             File tempFile = File.createTempFile("liquibase-test", ".xml");
-            if (outputCsv) {
-                diffControl.setDataDir(new File(tempFile.getParentFile(), "liquibase-data").getCanonicalPath().replaceFirst("\\w:",""));
-            }
-
-            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, null, diffControl);
-
 
             FileOutputStream output = new FileOutputStream(tempFile);
             try {
-                new DiffToChangeLog(diffResult, new DiffOutputConfig()).print(new PrintStream(output));
+                if (outputCsv) {
+                    diffResult.setDataDir(new File(tempFile.getParentFile(), "liquibase-data").getCanonicalPath().replaceFirst("\\w:",""));
+                }
+                diffResult.printChangeLog(new PrintStream(output), database);
                 output.flush();
             } finally {
                 output.close();
@@ -408,7 +390,7 @@ public abstract class AbstractIntegrationTest {
             Liquibase liquibase = createLiquibase(tempFile.getName());
             clearDatabase(liquibase);
 
-            DatabaseSnapshot emptySnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new DiffControl());
+            DatabaseSnapshot emptySnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
 
             //run again to test changelog testing logic
             liquibase = createLiquibase(tempFile.getName());
@@ -419,23 +401,24 @@ public abstract class AbstractIntegrationTest {
                 throw e;
             }
 
-//            tempFile.deleteOnExit();
+            tempFile.deleteOnExit();
 
-            DatabaseSnapshot migratedSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new DiffControl());
+            DatabaseSnapshot migratedSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
 
-            DiffResult finalDiffResult = DiffGeneratorFactory.getInstance().compare(originalSnapshot, migratedSnapshot, new DiffControl());
+            DiffResult finalDiffResult = new Diff(originalSnapshot, migratedSnapshot).compare();
             try {
-                assertTrue(finalDiffResult.areEqual());
+                assertFalse(finalDiffResult.differencesFound());
             } catch (AssertionError e) {
-                new DiffToPrintStream(finalDiffResult, System.out).print();
+                finalDiffResult.printResult(System.out);
                 throw e;
             }
 
             //diff to empty and drop all
-            DiffResult emptyDiffResult = DiffGeneratorFactory.getInstance().compare(emptySnapshot, migratedSnapshot, new DiffControl());
+            Diff emptyDiff = new Diff(emptySnapshot, migratedSnapshot);
+            DiffResult emptyDiffResult = emptyDiff.compare();
             output = new FileOutputStream(tempFile);
             try {
-                new DiffToChangeLog(emptyDiffResult, new DiffOutputConfig(true, true, true)).print(new PrintStream(output));
+                emptyDiffResult.printChangeLog(new PrintStream(output), database);
                 output.flush();
             } finally {
                 output.close();
@@ -449,9 +432,9 @@ public abstract class AbstractIntegrationTest {
                 throw e;
             }
 
-            DatabaseSnapshot emptyAgainSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new DiffControl());
-            assertEquals(1, emptyAgainSnapshot.getDatabaseObjects(migratedSnapshot.getSchemas().iterator().next(), Table.class).size());
-            assertEquals(0, emptyAgainSnapshot.getDatabaseObjects(migratedSnapshot.getSchemas().iterator().next(), View.class).size());
+            DatabaseSnapshot emptyAgainSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
+            assertEquals(0, emptyAgainSnapshot.getTables().size());
+            assertEquals(0, emptyAgainSnapshot.getViews().size());
         }
     }
 
@@ -473,16 +456,16 @@ public abstract class AbstractIntegrationTest {
 
         liquibase.update(includedChangeLog);
 
-        DatabaseSnapshot originalSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new DiffControl());
+        DatabaseSnapshot originalSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
 
-        DiffControl diffControl = new DiffControl(new DiffControl.SchemaComparison[]{new DiffControl.SchemaComparison(Schema.DEFAULT, new Schema(Catalog.DEFAULT, "liquibaseb"))});
-        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, database, diffControl);
+        Diff diff = new Diff(database, "liquibaseb");
+        DiffResult diffResult = diff.compare();
 
         File tempFile = File.createTempFile("liquibase-test", ".xml");
 
         FileOutputStream output = new FileOutputStream(tempFile);
         try {
-            new DiffToChangeLog(diffResult, new DiffOutputConfig()).print(new PrintStream(output));
+            diffResult.printChangeLog(new PrintStream(output), database);
             output.flush();
         } finally {
             output.close();
@@ -494,12 +477,12 @@ public abstract class AbstractIntegrationTest {
         //run again to test changelog testing logic
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         try {
-            executor.execute(new DropTableStatement("liquibaseb", "liquibaseb", database.getDatabaseChangeLogTableName(), false));
+            executor.execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogTableName(), false));
         } catch (DatabaseException e) {
             //ok
         }
         try {
-            executor.execute(new DropTableStatement("liquibaseb", "liquibaseb", database.getDatabaseChangeLogLockTableName(), false));
+            executor.execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogLockTableName(), false));
         } catch (DatabaseException e) {
             //ok
         }
@@ -518,11 +501,10 @@ public abstract class AbstractIntegrationTest {
 
         tempFile.deleteOnExit();
 
-        DatabaseSnapshot finalSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new DiffControl());
+        DatabaseSnapshot finalSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
 
-        DiffResult finalDiffResult = DiffGeneratorFactory.getInstance().compare(originalSnapshot, finalSnapshot, new DiffControl());
-        new DiffToPrintStream(finalDiffResult, System.out).print();
-        assertTrue(finalDiffResult.areEqual());
+        DiffResult finalDiffResult = new Diff(originalSnapshot, finalSnapshot).compare();
+        assertFalse(finalDiffResult.differencesFound());
     }
 
     @Test
@@ -652,9 +634,9 @@ public abstract class AbstractIntegrationTest {
 //        liquibase.update(this.contexts);
 //    }
 
-    private void dropDatabaseChangeLogTable(String catalog, String schema, Database database) {
+    private void dropDatabaseChangeLogTable(String schema, Database database) {
         try {
-            ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(catalog, schema, database.getDatabaseChangeLogTableName(), false));
+            ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(schema, database.getDatabaseChangeLogTableName(), false));
         } catch (DatabaseException e) {
             ; //ok
         }
@@ -751,54 +733,54 @@ public abstract class AbstractIntegrationTest {
             }).allMatchedInSequentialOrder());
     }
 
-//    @Test
-//    public void testEncondingUpdatingDatabase() throws Exception {
-//        if (database == null) {
-//            return;
-//        }
-//        
-//        // First import some data from utf8 encoded csv
-//        // and create a snapshot
-//        Liquibase liquibase = createLiquibase("changelogs/common/encoding.utf8.changelog.xml");
-//        liquibase.update(this.contexts);
-//        DatabaseSnapshot utf8Snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
-//
-//        clearDatabase(liquibase);
-//
-//        // Second import some data from latin1 encoded csv
-//        // and create a snapshot
-//        liquibase = createLiquibase("changelogs/common/encoding.latin1.changelog.xml");
-//        liquibase.update(this.contexts);
-//        DatabaseSnapshot iso88951Snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
-//
-//        //TODO: We need better data diff support to be able to do that
-//        //Diff diff = new Diff(utf8Snapshot,iso88951Snapshot);
-//        //diff.setDiffData(true);
-//        //assertFalse("There are no differences setting the same data in utf-8 and iso-8895-1 "
-//        //        ,diff.compare().areEqual());
-//
-//        //For now we do an approach reading diff data
-//        DiffResult[] diffGenerators =new DiffResult[2];
-//        diffGenerators[0]= DiffGeneratorFactory(utf8Snapshot,iso88951Snapshot);
-//        diffGenerators[0].setDiffData(true);
-//        diffGenerators[1]= new DiffGeneratorFactory(iso88951Snapshot,utf8Snapshot);
-//        diffGenerators[1].setDiffData(true);
-//        for(DiffGeneratorFactory diffGenerator : diffGenerators) {
-//            File tempFile = File.createTempFile("liquibase-test", ".xml");
-//            tempFile.deleteOnExit();
-//            FileOutputStream output=new FileOutputStream(tempFile);
-//            diffGenerator.compare().print(new PrintStream(output,false,"UTF-8"),database);
-//            output.close();
-//            String diffOutput=StreamUtil.getStreamContents(new FileInputStream(tempFile),"UTF-8");
-//            assertTrue("Update to SQL preserves encoding",
-//                new RegexMatcher(diffOutput, new String[] {
-//                    //For the UTF-8 encoded cvs
-//                    "value=\"àèìòùáéíóúÀÈÌÒÙÁÉÍÓÚâêîôûäëïöü\"",
-//                    "value=\"çñ®\""
-//                }).allMatchedInSequentialOrder());
-//        }
-//
-//    }
+    @Test
+    public void testEncondingUpdatingDatabase() throws Exception {
+        if (database == null) {
+            return;
+        }
+        
+        // First import some data from utf8 encoded csv
+        // and create a snapshot
+        Liquibase liquibase = createLiquibase("changelogs/common/encoding.utf8.changelog.xml");
+        liquibase.update(this.contexts);
+        DatabaseSnapshot utf8Snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
+
+        clearDatabase(liquibase);
+
+        // Second import some data from latin1 encoded csv
+        // and create a snapshot
+        liquibase = createLiquibase("changelogs/common/encoding.latin1.changelog.xml");
+        liquibase.update(this.contexts);
+        DatabaseSnapshot iso88951Snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
+
+        //TODO: We need better data diff support to be able to do that
+        //Diff diff = new Diff(utf8Snapshot,iso88951Snapshot);
+        //diff.setDiffData(true);
+        //assertFalse("There are no differences setting the same data in utf-8 and iso-8895-1 "
+        //        ,diff.compare().differencesFound());
+
+        //For now we do an approach reading diff data
+        Diff[] diffs=new Diff[2];
+        diffs[0]= new Diff(utf8Snapshot,iso88951Snapshot);
+        diffs[0].setDiffData(true);
+        diffs[1]= new Diff(iso88951Snapshot,utf8Snapshot);
+        diffs[1].setDiffData(true);
+        for(Diff diff:diffs) {
+            File tempFile = File.createTempFile("liquibase-test", ".xml");
+            tempFile.deleteOnExit();
+            FileOutputStream output=new FileOutputStream(tempFile);
+            diff.compare().printChangeLog(new PrintStream(output,false,"UTF-8"),database);
+            output.close();
+            String diffOutput=StreamUtil.getStreamContents(new FileInputStream(tempFile),"UTF-8");
+            assertTrue("Update to SQL preserves encoding",
+                new RegexMatcher(diffOutput, new String[] {
+                    //For the UTF-8 encoded cvs
+                    "value=\"àèìòùáéíóúÀÈÌÒÙÁÉÍÓÚâêîôûäëïöü\"",
+                    "value=\"çñ®\""
+                }).allMatchedInSequentialOrder());
+        }
+
+    }
 
     /**
      * Test that diff is capable to detect foreign keys to external schemas that doesn't appear in the changelog
@@ -811,35 +793,12 @@ public abstract class AbstractIntegrationTest {
        Liquibase liquibase = createLiquibase(externalfkInitChangeLog);
        liquibase.update(contexts);
 
-       DiffResult diffResult = liquibase.diff(database, null, new DiffControl());
+       Diff diff=new Diff(database,(String)null);
+       DiffResult diffResult=diff.compare();
        DiffResultAssert.assertThat(diffResult).containsMissingForeignKeyWithName("fk_person_country");
    }
 
-    @Test
-    public void invalidIncludeDoesntBreakLiquibase() throws Exception{
-        Liquibase liquibase = createLiquibase(invalidReferenceChangeLog);
-        try {
-            liquibase.update(null);
-            fail("Did not fail with invalid include");
-        } catch (ChangeLogParseException ignored) {
-            //expected
-        }
-
-        assertFalse(LockService.getInstance(database).hasChangeLogLock());
-    }
-
-    @Test
-    public void contextsWithHyphensWorkInFormattedSql() throws Exception {
-        Liquibase liquibase = createLiquibase("changelogs/common/sqlstyle/formatted.changelog.sql");
-        liquibase.update("hyphen-context-using-sql,camelCaseContextUsingSql");
-
-        DatabaseSnapshotGenerator snapshot = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database);
-        assertNotNull(snapshot.hasTable(null, "hyphen_context", database));
-        assertNotNull(snapshot.hasTable(null, "camel_context", database));
-        assertNotNull(snapshot.hasTable(null, "bar_id", database));
-        assertNotNull(snapshot.hasTable(null, "foo_id", database));
-    }
-
+  
 //   @Test
 //   public void testXMLInclude() throws Exception{
 //       if (database == null) {

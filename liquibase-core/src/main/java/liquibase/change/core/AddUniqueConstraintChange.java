@@ -1,6 +1,9 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
@@ -15,10 +18,8 @@ import java.util.List;
 /**
  * Adds a unique constraint to an existing column.
  */
-@ChangeClass(name="addUniqueConstraint", description = "Add Unique Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddUniqueConstraintChange extends AbstractChange {
 
-    private String catalogName;
     private String schemaName;
     private String tableName;
     private String columnNames;
@@ -29,25 +30,18 @@ public class AddUniqueConstraintChange extends AbstractChange {
     private Boolean initiallyDeferred;
     private Boolean disabled;
 
-    @ChangeProperty(mustApplyTo ="column.relation.catalog")
-    public String getCatalogName() {
-        return catalogName;
+    public AddUniqueConstraintChange() {
+        super("addUniqueConstraint", "Add Unique Constraint", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
-    @ChangeProperty(mustApplyTo ="column.relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
+        this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all",mustApplyTo = "column.relation")
     public String getTableName() {
         return tableName;
     }
@@ -56,7 +50,6 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
     public String getColumnNames() {
         return columnNames;
     }
@@ -65,7 +58,6 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.columnNames = columnNames;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
     public String getConstraintName() {
         return constraintName;
     }
@@ -128,7 +120,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
             disabled = getDisabled();
         }
 
-    	AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
+    	AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
         statement.setTablespace(getTablespace())
                         .setDeferrable(deferrable)
                         .setInitiallyDeferred(initiallyDeferred)
@@ -171,7 +163,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
     		// alter table
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
 					rename_alter_visitor,
-					database,getCatalogName(), getSchemaName(),getTableName()));
+					database,getSchemaName(),getTableName()));
     	} catch (Exception e) {
 			e.printStackTrace();
 		}

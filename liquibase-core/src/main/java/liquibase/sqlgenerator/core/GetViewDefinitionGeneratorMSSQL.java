@@ -2,7 +2,6 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sql.Sql;
@@ -23,9 +22,11 @@ public class GetViewDefinitionGeneratorMSSQL extends GetViewDefinitionGenerator 
 
     @Override
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        Schema schema = database.correctSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
-
-        String sql = "exec sp_helptext '" + schema.getName() + "."
+        try {
+            String sql = "exec sp_helptext '" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "."
                     + statement.getViewName().toUpperCase() + "'";
             return new Sql[]{new UnparsedSql(sql) };
+        } catch (DatabaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
     }}

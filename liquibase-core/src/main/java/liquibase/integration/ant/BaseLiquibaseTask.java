@@ -44,7 +44,6 @@ public class BaseLiquibaseTask extends Task {
     private String currentDateTimeFunction;
     private String contexts;
     private String outputFile;
-    private String defaultCatalogName;
     private String defaultSchemaName;
     private String databaseClass;
     private String databaseChangeLogTableName;
@@ -155,14 +154,6 @@ public class BaseLiquibaseTask extends Task {
             return null;
         }
         return new PrintStream(new File(getOutputFile()));
-    }
-
-    public String getDefaultCatalogName() {
-        return defaultCatalogName;
-    }
-
-    public void setDefaultCatalogName(String defaultCatalogName) {
-        this.defaultCatalogName = defaultCatalogName;
     }
 
     public String getDefaultSchemaName() {

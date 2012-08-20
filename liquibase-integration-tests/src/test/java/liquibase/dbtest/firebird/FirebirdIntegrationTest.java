@@ -1,7 +1,5 @@
 package liquibase.dbtest.firebird;
 
-import liquibase.database.structure.Catalog;
-import liquibase.database.structure.Schema;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.DatabaseException;
 
@@ -25,9 +23,9 @@ public class FirebirdIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Override
-    protected Schema[] getSchemasToDrop() throws DatabaseException {
-        return new Schema[] {
-                new Schema(new Catalog(null), null),
+    protected String[] getSchemasToDrop() throws DatabaseException {
+        return new String[] {
+                null,
         };
     }
 

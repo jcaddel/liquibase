@@ -1,6 +1,8 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import liquibase.change.AbstractChange;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
@@ -17,15 +19,16 @@ import java.util.List;
 /**
  * Drops an existing column from a table.
  */
-@ChangeClass(name="dropColumn", description = "Drop Column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class DropColumnChange extends AbstractChange {
 
-    private String catalogName;
     private String schemaName;
     private String tableName;
     private String columnName;
 
-    @ChangeProperty(requiredForDatabase = "all",mustApplyTo = "column")
+    public DropColumnChange() {
+        super("dropColumn", "Drop Column", ChangeMetaData.PRIORITY_DEFAULT);
+    }
+
     public String getColumnName() {
         return columnName;
     }
@@ -35,25 +38,14 @@ public class DropColumnChange extends AbstractChange {
     }
 
 
-    @ChangeProperty(mustApplyTo ="column.relation.schema.catalog")
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
-    @ChangeProperty(mustApplyTo ="column.relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
+        this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation")
     public String getTableName() {
         return tableName;
     }
@@ -70,10 +62,11 @@ public class DropColumnChange extends AbstractChange {
 //		}
 			
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
-
-        statements.add(new DropColumnStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName()));
+        String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
+        
+        statements.add(new DropColumnStatement(schemaName, getTableName(), getColumnName()));
         if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
+            statements.add(new ReorganizeTableStatement(schemaName, getTableName()));
         }
         
         return statements.toArray(new SqlStatement[statements.size()]);
@@ -107,7 +100,7 @@ public class DropColumnChange extends AbstractChange {
     		// alter table
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
 					rename_alter_visitor,
-					database,getCatalogName(), getSchemaName(),getTableName()));
+					database,getSchemaName(),getTableName()));
 			
 		}  catch (Exception e) {
 			e.printStackTrace();

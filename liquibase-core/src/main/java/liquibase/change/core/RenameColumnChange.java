@@ -1,6 +1,9 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
@@ -15,35 +18,27 @@ import java.util.List;
 /**
  * Renames an existing column.
  */
-@ChangeClass(name="renameColumn", description = "Rename Column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class RenameColumnChange extends AbstractChange {
 
-    private String catalogName;
     private String schemaName;
     private String tableName;
     private String oldColumnName;
     private String newColumnName;
     private String columnDataType;
 
-    @ChangeProperty(mustApplyTo ="column.relation.catalog")
-    public String getCatalogName() {
-        return catalogName;
+    public RenameColumnChange() {
+        super("renameColumn", "Rename Column", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
 
-    @ChangeProperty(mustApplyTo ="column.relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
+        this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation")
     public String getTableName() {
         return tableName;
     }
@@ -52,7 +47,6 @@ public class RenameColumnChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
     public String getOldColumnName() {
         return oldColumnName;
     }
@@ -61,7 +55,6 @@ public class RenameColumnChange extends AbstractChange {
         this.oldColumnName = oldColumnName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
     public String getNewColumnName() {
         return newColumnName;
     }
@@ -85,8 +78,7 @@ public class RenameColumnChange extends AbstractChange {
 //        }
 
     	return new SqlStatement[] { new RenameColumnStatement(
-                getCatalogName(),
-    			getSchemaName(),
+    			getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), 
     			getTableName(), getOldColumnName(), getNewColumnName(), 
     			getColumnDataType())
         };
@@ -128,7 +120,7 @@ public class RenameColumnChange extends AbstractChange {
     		// alter table
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
 					rename_alter_visitor,
-					database,getCatalogName(), getSchemaName(),getTableName()));
+					database,getSchemaName(),getTableName()));
 		} catch (Exception e) {
 			System.err.println(e);
 			e.printStackTrace();

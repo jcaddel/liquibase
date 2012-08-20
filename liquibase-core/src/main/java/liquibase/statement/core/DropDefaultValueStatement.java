@@ -4,22 +4,16 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class DropDefaultValueStatement extends AbstractSqlStatement {
 
-    private String catalogName;
     private String schemaName;
     private String tableName;
     private String columnName;
     private String columnDataType;
 
-    public DropDefaultValueStatement(String catalogName, String schemaName, String tableName, String columnName, String columnDataType) {
-        this.catalogName = catalogName;
+    public DropDefaultValueStatement(String schemaName, String tableName, String columnName, String columnDataType) {
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.columnName = columnName;
         this.columnDataType = columnDataType;
-    }
-
-    public String getCatalogName() {
-        return catalogName;
     }
 
     public String getSchemaName() {

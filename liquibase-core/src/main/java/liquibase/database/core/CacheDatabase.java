@@ -2,7 +2,6 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 
 public class CacheDatabase extends AbstractDatabase {
@@ -23,15 +22,6 @@ public class CacheDatabase extends AbstractDatabase {
             return "com.intersys.jdbc.CacheDriver";
         }
         return null;
-    }
-
-    @Override
-    protected String getDefaultDatabaseProductName() {
-        return "Cache";
-    }
-
-    public Integer getDefaultPort() {
-        return 1972;
     }
 
     public int getPriority() {
@@ -59,6 +49,11 @@ public class CacheDatabase extends AbstractDatabase {
 
 
     @Override
+    protected String getDefaultDatabaseSchemaName() throws DatabaseException {
+        return "";
+    }
+
+    @Override
     public boolean supportsSequences() {
         return false;
     }
@@ -74,7 +69,7 @@ public class CacheDatabase extends AbstractDatabase {
 
 
     @Override
-    public String getViewDefinition(Schema schema, String viewName) throws DatabaseException {
+    public String getViewDefinition(String schemaName, String viewName) throws DatabaseException {
         return null;
     }
 }

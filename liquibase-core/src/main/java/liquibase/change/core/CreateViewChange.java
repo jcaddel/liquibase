@@ -1,6 +1,8 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.SQLiteDatabase;
@@ -15,33 +17,25 @@ import java.util.List;
 /**
  * Creates a new view.
  */
-@ChangeClass(name="createView", description = "Create View", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class CreateViewChange extends AbstractChange {
 
-    private String catalogName;
 	private String schemaName;
 	private String viewName;
 	private String selectQuery;
 	private Boolean replaceIfExists;
 
+	public CreateViewChange() {
+		super("createView", "Create View", ChangeMetaData.PRIORITY_DEFAULT);
+	}
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
-    public String getSchemaName() {
+	public String getSchemaName() {
 		return schemaName;
 	}
 
 	public void setSchemaName(String schemaName) {
-		this.schemaName = schemaName;
+		this.schemaName = StringUtils.trimToNull(schemaName);
 	}
 
-    @ChangeProperty(requiredForDatabase = "all")
 	public String getViewName() {
 		return viewName;
 	}
@@ -50,7 +44,6 @@ public class CreateViewChange extends AbstractChange {
 		this.viewName = viewName;
 	}
 
-    @ChangeProperty(requiredForDatabase = "all")
 	public String getSelectQuery() {
 		return selectQuery;
 	}
@@ -76,12 +69,18 @@ public class CreateViewChange extends AbstractChange {
 		}
 
 		if (!supportsReplaceIfExistsOption(database) && replaceIfExists) {
-			statements.add(new DropViewStatement(getCatalogName(), getSchemaName(), getViewName()));
-			statements.add(new CreateViewStatement(getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(),
+			statements.add(new DropViewStatement(
+					getSchemaName() == null ? database.getDefaultSchemaName()
+							: getSchemaName(), getViewName()));
+			statements.add(new CreateViewStatement(
+					getSchemaName() == null ? database.getDefaultSchemaName()
+							: getSchemaName(), getViewName(), getSelectQuery(),
 					false));
 		} else {
 			statements.add(new CreateViewStatement(
-					getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(), replaceIfExists));
+					getSchemaName() == null ? database.getDefaultSchemaName()
+							: getSchemaName(), getViewName(), getSelectQuery(),
+					replaceIfExists));
 		}
 
 		return statements.toArray(new SqlStatement[statements.size()]);
@@ -101,7 +100,8 @@ public class CreateViewChange extends AbstractChange {
 	}
 
 	private boolean supportsReplaceIfExistsOption(Database database) {
-		return !(database instanceof SQLiteDatabase);
+		return !(database instanceof SQLiteDatabase
+		    || database instanceof MSSQLDatabase);
 	}
 
 }

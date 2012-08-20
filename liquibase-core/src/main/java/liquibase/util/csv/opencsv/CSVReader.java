@@ -168,7 +168,7 @@ public class CSVReader {
         if (nextLine == null) {
             hasNext = false;
         }
-        return hasNext ? nextLine.trim().replaceAll("\ufeff", "") : null;
+        return hasNext ? nextLine : null;
     }
 
     /**

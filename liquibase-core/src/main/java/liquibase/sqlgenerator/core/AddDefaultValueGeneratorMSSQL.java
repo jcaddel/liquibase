@@ -1,8 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.structure.Schema;
-import liquibase.datatype.DataTypeFactory;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;
@@ -26,9 +25,9 @@ public class AddDefaultValueGeneratorMSSQL extends AddDefaultValueGenerator {
     public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         Object defaultValue = statement.getDefaultValue();
         return new Sql[] {
-                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD CONSTRAINT " + ((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), statement.getColumnName()) + " DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToString(defaultValue, database) + " FOR " + statement.getColumnName(),
+                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ADD CONSTRAINT " + ((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), statement.getColumnName()) + " DEFAULT " + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue).convertObjectToString(defaultValue, database) + " FOR " + statement.getColumnName(),
                         new Column()
-                        .setRelation(new Table(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
+                        .setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
                         .setName(statement.getColumnName()))
         };
     }

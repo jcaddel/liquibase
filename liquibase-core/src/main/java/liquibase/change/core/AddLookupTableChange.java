@@ -1,6 +1,8 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.InformixDatabase;
@@ -19,30 +21,22 @@ import java.util.List;
  * Extracts data from an existing column to create a lookup table.
  * A foreign key is created between the old column and the new lookup table.
  */
-@ChangeClass(name="addLookupTable", description = "Add Lookup Table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddLookupTableChange extends AbstractChange {
 
-    private String existingTableCatalogName;
     private String existingTableSchemaName;
     private String existingTableName;
     private String existingColumnName;
 
-    private String newTableCatalogName;
     private String newTableSchemaName;
     private String newTableName;
     private String newColumnName;
     private String newColumnDataType;
     private String constraintName;
 
-    public String getExistingTableCatalogName() {
-        return existingTableCatalogName;
+    public AddLookupTableChange() {
+        super("addLookupTable", "Add Lookup Table", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
-    public void setExistingTableCatalogName(String existingTableCatalogName) {
-        this.existingTableCatalogName = existingTableCatalogName;
-    }
-
-    @ChangeProperty(mustApplyTo ="column.relation.schema")
     public String getExistingTableSchemaName() {
         return existingTableSchemaName;
     }
@@ -51,7 +45,6 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingTableSchemaName = existingTableSchemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation")
     public String getExistingTableName() {
         return existingTableName;
     }
@@ -60,7 +53,6 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingTableName = existingTableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
     public String getExistingColumnName() {
         return existingColumnName;
     }
@@ -70,14 +62,6 @@ public class AddLookupTableChange extends AbstractChange {
     }
 
 
-    public String getNewTableCatalogName() {
-        return newTableCatalogName;
-    }
-
-    public void setNewTableCatalogName(String newTableCatalogName) {
-        this.newTableCatalogName = newTableCatalogName;
-    }
-
     public String getNewTableSchemaName() {
         return newTableSchemaName;
     }
@@ -86,7 +70,6 @@ public class AddLookupTableChange extends AbstractChange {
         this.newTableSchemaName = newTableSchemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
     public String getNewTableName() {
         return newTableName;
     }
@@ -95,7 +78,6 @@ public class AddLookupTableChange extends AbstractChange {
         this.newTableName = newTableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
     public String getNewColumnName() {
         return newColumnName;
     }
@@ -104,7 +86,6 @@ public class AddLookupTableChange extends AbstractChange {
         this.newColumnName = newColumnName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
     public String getNewColumnDataType() {
         return newColumnDataType;
     }
@@ -149,26 +130,23 @@ public class AddLookupTableChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
-        String newTableCatalogName = getNewTableCatalogName();
-        String newTableSchemaName = getNewTableSchemaName();
-
-        String existingTableCatalogName = getExistingTableCatalogName() == null?database.getDefaultCatalogName():getExistingTableCatalogName();
+        String newTableSchemaName = getNewTableSchemaName() == null?database.getDefaultSchemaName():getNewTableSchemaName();
         String existingTableSchemaName = getExistingTableSchemaName() == null?database.getDefaultSchemaName():getExistingTableSchemaName();
 
-        SqlStatement[] createTablesSQL = {new RawSqlStatement("CREATE TABLE " + database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName()) + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL")};
+        SqlStatement[] createTablesSQL = {new RawSqlStatement("CREATE TABLE " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL")};
         if (database instanceof MSSQLDatabase) {
-            createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName()) + " FROM " + database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),};
+            createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " FROM " + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),};
         } else if (database instanceof SybaseASADatabase) {
-            createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName()) + " FROM " + database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),};
+            createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " FROM " + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),};
         } else if (database instanceof DB2Database) {
             createTablesSQL = new SqlStatement[]{
-                    new RawSqlStatement("CREATE TABLE " + database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName()) + " AS (SELECT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()) + ") WITH NO DATA"),
-                    new RawSqlStatement("INSERT INTO " + database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName()) + " SELECT DISTINCT " + getExistingColumnName() + " FROM " + database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),
+                    new RawSqlStatement("CREATE TABLE " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " AS (SELECT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + ") WITH NO DATA"),
+                    new RawSqlStatement("INSERT INTO " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " SELECT DISTINCT " + getExistingColumnName() + " FROM " + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),
             };
         } else if (database instanceof InformixDatabase) {
             createTablesSQL = new SqlStatement[] {
-                    new RawSqlStatement("CREATE TABLE " + database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName()) + " ( "  + getNewColumnName() + " " + getNewColumnDataType() + " )"),
-                    new RawSqlStatement("INSERT INTO " + database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName()) + " ( "  + getNewColumnName() + " ) SELECT DISTINCT "  + getExistingColumnName() + " FROM " + database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),
+                    new RawSqlStatement("CREATE TABLE " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " ( "  + getNewColumnName() + " " + getNewColumnDataType() + " )"),
+                    new RawSqlStatement("INSERT INTO " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " ( "  + getNewColumnName() + " ) SELECT DISTINCT "  + getExistingColumnName() + " FROM " + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),
             };
         }
 
@@ -184,7 +162,7 @@ public class AddLookupTableChange extends AbstractChange {
         }
 
         if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(newTableCatalogName, newTableSchemaName, getNewTableName()));
+            statements.add(new ReorganizeTableStatement(newTableSchemaName, getNewTableName()));
         }
 
         AddPrimaryKeyChange addPKChange = new AddPrimaryKeyChange();
@@ -194,7 +172,7 @@ public class AddLookupTableChange extends AbstractChange {
         statements.addAll(Arrays.asList(addPKChange.generateStatements(database)));
 
         if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(newTableCatalogName,newTableSchemaName, getNewTableName()));
+            statements.add(new ReorganizeTableStatement(newTableSchemaName, getNewTableName()));
         }
 
         AddForeignKeyConstraintChange addFKChange = new AddForeignKeyConstraintChange();

@@ -4,20 +4,14 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class SetTableRemarksStatement extends AbstractSqlStatement {
 
-    private String catalogName;
     private String schemaName;
     private String tableName;
     private String remarks;
 
-    public SetTableRemarksStatement(String catalogName, String schemaName, String tableName, String remarks) {
-        this.catalogName = catalogName;
+    public SetTableRemarksStatement(String schemaName, String tableName, String remarks) {
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.remarks = remarks;
-    }
-
-    public String getCatalogName() {
-        return catalogName;
     }
 
     public String getSchemaName() {

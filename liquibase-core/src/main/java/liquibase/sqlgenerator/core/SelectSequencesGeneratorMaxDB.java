@@ -2,7 +2,6 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.MaxDBDatabase;
-import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -28,10 +27,12 @@ public class SelectSequencesGeneratorMaxDB extends AbstractSqlGenerator<SelectSe
     }
 
     public Sql[] generateSql(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        Schema schema = database.correctSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
-
-        return new Sql[]{
-                new UnparsedSql("SELECT SEQUENCE_NAME FROM DOMAIN.SEQUENCES WHERE OWNER = '" + schema.getName() + "'")
-        };
+        try {
+            return new Sql[] {
+                    new UnparsedSql("SELECT SEQUENCE_NAME FROM DOMAIN.SEQUENCES WHERE OWNER = '" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'")
+            };
+        } catch (DatabaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
     }
 }

@@ -13,13 +13,13 @@ public class UniqueConstraint implements DatabaseObject, Comparable<UniqueConstr
 	private boolean deferrable;
 	private boolean initiallyDeferred;
 	private boolean disabled;
-	
-    private Index backingIndex;
+	// Setting tablespace attribute for UC's index.
+	private String tablespace;
 
 	public DatabaseObject[] getContainingObjects() {
 		List<DatabaseObject> columns = new ArrayList<DatabaseObject>();
 		for (String column : this.columns) {
-			columns.add(new Column().setName(column).setRelation(table));
+			columns.add(new Column().setName(column).setTable(table));
 		}
 
 		return columns.toArray(new DatabaseObject[columns.size()]);
@@ -32,14 +32,6 @@ public class UniqueConstraint implements DatabaseObject, Comparable<UniqueConstr
 	public void setName(String constraintName) {
 		this.name = constraintName;
 	}
-
-    public Schema getSchema() {
-        if (table == null) {
-            return null;
-        }
-
-        return table.getSchema();
-    }
 
 	public Table getTable() {
 		return table;
@@ -81,15 +73,15 @@ public class UniqueConstraint implements DatabaseObject, Comparable<UniqueConstr
 		return disabled;
 	}
 
-    public Index getBackingIndex() {
-        return backingIndex;
-    }
+	public String getTablespace() {
+		return tablespace;
+	}
 
-    public void setBackingIndex(Index backingIndex) {
-        this.backingIndex = backingIndex;
-    }
+	public void setTablespace(String tablespace) {
+		this.tablespace = tablespace;
+	}
 
-    @Override
+	@Override
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;

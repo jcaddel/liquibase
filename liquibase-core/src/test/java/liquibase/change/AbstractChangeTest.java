@@ -1,27 +1,18 @@
 package liquibase.change;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import liquibase.database.Database;
+import liquibase.exception.ValidationErrors;
+import liquibase.serializer.core.string.StringChangeLogSerializer;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.DatabaseFunction;
+import liquibase.test.TestContext;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import liquibase.database.Database;
-import liquibase.exception.ValidationErrors;
-import liquibase.serializer.core.string.StringChangeLogSerializer;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SqlStatement;
-import liquibase.test.TestContext;
-
-import org.junit.Test;
+import java.util.*;
 
 /**
  * Base test class for changes
@@ -96,9 +87,6 @@ public abstract class AbstractChangeTest {
 
                 column2.setName("87682346asgasdg");
                 checkThatChecksumIsNew(change, seenCheckSums, field);
-            } else if (field.getName().equalsIgnoreCase("changeLogParameters"))
-            {
-               // ignore, doesn't have something to do with generateCheckSum
 
             } else {
                 throw new RuntimeException("Unknown field type: "+field.getType()+" for "+field.getName());

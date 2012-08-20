@@ -1,6 +1,9 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
@@ -17,17 +20,18 @@ import java.util.List;
 /**
  * Creates a primary key out of an existing column or set of columns.
  */
-@ChangeClass(name="addPrimaryKey", description = "Add Primary Key", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddPrimaryKeyChange extends AbstractChange {
 
-    private String catalogName;
     private String schemaName;
     private String tableName;
     private String tablespace;
     private String columnNames;
     private String constraintName;
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation")
+    public AddPrimaryKeyChange() {
+        super("addPrimaryKey", "Add Primary Key", ChangeMetaData.PRIORITY_DEFAULT);
+    }
+
     public String getTableName() {
         return tableName;
     }
@@ -36,25 +40,14 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @ChangeProperty(mustApplyTo ="column.relation.catalog")
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
-    @ChangeProperty(mustApplyTo ="column.relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
+        this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
     public String getColumnNames() {
         return columnNames;
     }
@@ -83,13 +76,15 @@ public class AddPrimaryKeyChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
 
 
-        AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
+        String schemaName = getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName();
+
+        AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(schemaName, getTableName(), getColumnNames(), getConstraintName());
         statement.setTablespace(getTablespace());
 
         if (database instanceof DB2Database) {
             return new SqlStatement[]{
                     statement,
-                    new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName())
+                    new ReorganizeTableStatement(schemaName, getTableName())
             };
 //todo        } else if (database instanceof SQLiteDatabase) {
 //            // return special statements for SQLite databases
@@ -137,7 +132,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
             // alter table
             statements.addAll(SQLiteDatabase.getAlterTableStatements(
                     rename_alter_visitor,
-                    database, getCatalogName(),  getSchemaName(), getTableName()));
+                    database, getSchemaName(), getTableName()));
         } catch (Exception e) {
             e.printStackTrace();
         }

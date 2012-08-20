@@ -2,7 +2,6 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
-import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -30,8 +29,6 @@ public class FindForeignKeyConstraintsGeneratorOracle extends AbstractSqlGenerat
     }
 
     public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        Schema baseTableSchema = database.correctSchema(new Schema(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName()));
-
         StringBuilder sb = new StringBuilder();
 
         sb.append("SELECT ");
@@ -52,7 +49,11 @@ public class FindForeignKeyConstraintsGeneratorOracle extends AbstractSqlGenerat
         sb.append("AND FRGN.CONSTRAINT_NAME = FCOLS.CONSTRAINT_NAME ");
         sb.append("AND BASE.TABLE_NAME =  '").append(statement.getBaseTableName().toUpperCase()).append("' ");
         sb.append("AND BASE.CONSTRAINT_TYPE = 'R' ");
-        sb.append("AND BASE.OWNER = '").append(baseTableSchema.getName()).append("'");
+        try {
+            sb.append("AND BASE.OWNER = '").append(database.convertRequestedSchemaToSchema(statement.getBaseTableSchemaName())).append("'");
+        } catch (DatabaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
 
         return new Sql[]{
                 new UnparsedSql(sb.toString())

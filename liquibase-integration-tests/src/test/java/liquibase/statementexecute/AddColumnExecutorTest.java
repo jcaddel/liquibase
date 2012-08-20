@@ -10,11 +10,14 @@ import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.database.core.CacheDatabase;
 import liquibase.database.core.*;
-import liquibase.datatype.DataTypeFactory;
+import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.test.TestContext;
 import liquibase.test.DatabaseTestContext;
 import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.CreateTableStatement;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.sql.Sql;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -28,13 +31,13 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
     @Override
     protected List<? extends SqlStatement> setupStatements(Database database) {
         ArrayList<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
-        CreateTableStatement table = new CreateTableStatement(null, null, TABLE_NAME);
-        table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new NotNullConstraint());
+        CreateTableStatement table = new CreateTableStatement(null, TABLE_NAME);
+        table.addColumn("id", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, new NotNullConstraint());
         statements.add(table);
 
         if (database.supportsSchemas()) {
-            table = new CreateTableStatement(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
-            table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new NotNullConstraint());
+            table = new CreateTableStatement(DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
+            table.addColumn("id", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, new NotNullConstraint());
             statements.add(table);
         }
         return statements;
@@ -57,7 +60,7 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
     @SuppressWarnings("unchecked")
 	@Test
     public void generateSql_notNull() throws Exception {
-        this.statementUnderTest = new AddColumnStatement(null, null, "table_name", "column_name", "int", 42, new NotNullConstraint());
+        this.statementUnderTest = new AddColumnStatement(null, "table_name", "column_name", "int", 42, new NotNullConstraint());
         assertCorrect("alter table [table_name] add [column_name] int not null default 42", CacheDatabase.class, MaxDBDatabase.class);
         assertCorrect("alter table [table_name] add [column_name] int default 42 not null", SybaseASADatabase.class, SybaseDatabase.class);
         assertCorrect("alter table table_name add column_name int not null default 42", PostgresDatabase.class);

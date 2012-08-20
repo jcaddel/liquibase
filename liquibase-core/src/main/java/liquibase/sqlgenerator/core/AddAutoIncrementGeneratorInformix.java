@@ -1,8 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.structure.Schema;
-import liquibase.datatype.DataTypeFactory;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;
@@ -45,18 +44,18 @@ public class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator
         return new Sql[]{
             new UnparsedSql(
             	"ALTER TABLE "
-            		+ database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
+            		+ database.escapeTableName(statement.getSchemaName(), statement.getTableName())
             		+ " MODIFY "
             		+ database.escapeColumnName(
-                        statement.getCatalogName(),
             			statement.getSchemaName(),
             			statement.getTableName(),
             			statement.getColumnName())
             		+ " "
-            		+ DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType() + "{autoIncrement:true}"),
+            		+ TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(
+            			statement.getColumnDataType(), true),
                 new Column()
-                    .setRelation(
-                            new Table(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
+                    .setTable(
+                    	new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
                     .setName(statement.getColumnName()))
         };
     }

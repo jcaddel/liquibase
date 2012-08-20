@@ -26,14 +26,6 @@ public abstract class AbstractDatabaseTest {
     public abstract void getCurrentDateTimeFunction();
 
 
-    @Test
-    public void defaultsWorkWithoutAConnection() {
-        database.getDatabaseProductName();
-        database.getDefaultCatalogName();
-        database.getDefaultSchemaName();
-        database.getDefaultPort();
-    }
-
 
     @Test
     public void isCorrectDatabaseImplementation() throws Exception {
@@ -56,13 +48,13 @@ public abstract class AbstractDatabaseTest {
     @Test
     public void escapeTableName_noSchema() {
         Database database = getDatabase();
-        assertEquals("tableName", database.escapeTableName(null, null, "tableName"));
+        assertEquals("tableName", database.escapeTableName(null, "tableName"));
     }
 
     @Test
     public void escapeTableName_withSchema() {
         Database database = getDatabase();
-        assertEquals("schemaName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
+        assertEquals("schemaName.tableName", database.escapeTableName("schemaName", "tableName"));
     }
 
 //    @Test

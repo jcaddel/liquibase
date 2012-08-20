@@ -5,9 +5,7 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.math.BigInteger;
 import java.util.HashSet;
@@ -149,18 +147,9 @@ public class SybaseASADatabase extends AbstractDatabase {
         }
 	}
 
-    public Integer getDefaultPort() {
-        return 2638;
-    }
-
-    @Override
-    protected String getDefaultDatabaseProductName() {
-        return "Sybase Anywhere";
-    }
-
-    /* (non-Javadoc)
-    * @see liquibase.database.Database#getTypeName()
-    */
+	/* (non-Javadoc)
+	 * @see liquibase.database.Database#getTypeName()
+	 */
 	public String getTypeName() {
 		
 		return "asany";
@@ -175,28 +164,39 @@ public class SybaseASADatabase extends AbstractDatabase {
 	}
 
 	@Override
-	public String getDefaultCatalogName() {
-        try {
-            DatabaseConnection connection = getConnection();
-            if (connection == null) {
-                return null;
-            }
-            return connection.getCatalog();
-        } catch (DatabaseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-    }
-
-	@Override
-	public String getDefaultSchemaName() {
-		return "DBA";
+	public String getDefaultCatalogName() throws DatabaseException {
+            return getConnection().getCatalog();
 	}
 
 	@Override
-	public String getViewDefinition(Schema schema, String viewName)
+	protected String getDefaultDatabaseSchemaName() throws DatabaseException {
+		return null;
+	}
+
+	@Override
+	public String convertRequestedSchemaToSchema(String requestedSchema)
+			throws DatabaseException {
+        if (requestedSchema == null) {
+            requestedSchema = getDefaultDatabaseSchemaName();
+        }
+
+        if (requestedSchema == null) {
+            return "DBA";
+        }
+        return requestedSchema;
+	}
+
+	@Override
+	public String getDefaultSchemaName() {
+		// TODO Auto-generated method stub
+		return super.getDefaultSchemaName();
+	}
+
+	@Override
+	public String getViewDefinition(String schemaName, String viewName)
 			throws DatabaseException {
 		// TODO Auto-generated method stub
-		return super.getViewDefinition(schema, viewName);
+		return super.getViewDefinition(schemaName, viewName);
 	}
 
 	/* (non-Javadoc)
@@ -211,6 +211,14 @@ public class SybaseASADatabase extends AbstractDatabase {
 	 */
 	public boolean supportsTablespaces() {
 		return true;
+	}
+
+	@Override
+	public String convertRequestedSchemaToCatalog(String requestedSchema)
+			throws DatabaseException {
+		// like in MS SQL
+        return getDefaultCatalogName();
+        
 	}
 
 	@Override

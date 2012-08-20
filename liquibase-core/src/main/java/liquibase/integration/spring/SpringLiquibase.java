@@ -22,7 +22,6 @@ import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 
-import liquibase.util.StringUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
@@ -137,7 +136,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     private boolean dropFirst = false;
 
-    private boolean shouldRun = true;
 
     public SpringLiquibase() {
         super();
@@ -151,9 +149,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         this.dropFirst = dropFirst;
     }
 
-    public void setShouldRun(boolean shouldRun) {
-        this.shouldRun = shouldRun;
-    }
 
     public String getDatabaseProductName() throws DatabaseException {
         Connection connection = null;
@@ -240,18 +235,13 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             LogFactory.getLogger().info("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
             return;
         }
-        if (!shouldRun) {
-            LogFactory.getLogger().info("Liquibase did not run because 'shouldRun' " +
-                    "property was set to false on " + getBeanName() + " Liquibase Spring bean.");
-            return;
-        }
 
         Connection c = null;
         Liquibase liquibase = null;
         try {
             c = getDataSource().getConnection();
             liquibase = createLiquibase(c);
-            performUpdate(liquibase);
+            liquibase.update(getContexts());
         } catch (SQLException e) {
             throw new DatabaseException(e);
         } finally {
@@ -265,10 +255,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             }
         }
 
-    }
-
-    protected void performUpdate(Liquibase liquibase) throws LiquibaseException {
-        liquibase.update(getContexts());
     }
 
     protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
@@ -295,7 +281,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
      */
     protected Database createDatabase(Connection c) throws DatabaseException {
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(c));
-        if (StringUtils.trimToNull(this.defaultSchema) != null) {
+        if (this.defaultSchema != null) {
             database.setDefaultSchemaName(this.defaultSchema);
         }
         return database;

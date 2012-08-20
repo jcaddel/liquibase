@@ -3,19 +3,12 @@ package liquibase.statement.core;
 import liquibase.statement.AbstractSqlStatement;
 
 public class ReorganizeTableStatement extends AbstractSqlStatement {
-
-    private String catalogName;
     private String schemaName;
     private String tableName;
 
-    public ReorganizeTableStatement(String catalogName, String schemaName, String tableName) {
-        this.catalogName = catalogName;
+    public ReorganizeTableStatement(String schemaName, String tableName) {
         this.schemaName = schemaName;
         this.tableName = tableName;
-    }
-
-    public String getCatalogName() {
-        return catalogName;
     }
 
     public String getSchemaName() {

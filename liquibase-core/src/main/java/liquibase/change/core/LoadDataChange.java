@@ -18,10 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@ChangeClass(name="loadData", description = "Load Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class LoadDataChange extends AbstractChange implements ChangeWithColumns<LoadDataColumnConfig> {
 
-    private String catalogName;
     private String schemaName;
     private String tableName;
     private String file;
@@ -32,25 +30,24 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
     private List<LoadDataColumnConfig> columns = new ArrayList<LoadDataColumnConfig>();
 
-    @ChangeProperty(mustApplyTo ="table.catalog")
-    public String getCatalogName() {
-        return catalogName;
+
+    public LoadDataChange() {
+        super("loadData", "Load Data", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
+    protected LoadDataChange(String changeName, String changeDescription)
+    {
+        super(changeName,changeDescription,ChangeMetaData.PRIORITY_DEFAULT);
     }
 
-    @ChangeProperty(mustApplyTo ="table.schema")
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
+        this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "table")
     public String getTableName() {
         return tableName;
     }
@@ -59,7 +56,6 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         this.tableName = tableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
     public String getFile() {
         return file;
     }
@@ -120,7 +116,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 if (line.length == 0 || (line.length == 1 && StringUtils.trimToNull(line[0]) == null)) {
                     continue; //nothing on this line
                 }
-                InsertStatement insertStatement = this.createStatement(getCatalogName(), getSchemaName(), getTableName());
+                InsertStatement insertStatement = this.createStatement(getSchemaName(), getTableName());
                 for (int i=0; i<headers.length; i++) {
                     String columnName = null;
                     if( i >= line.length ) {
@@ -132,10 +128,6 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     ColumnConfig columnConfig = getColumnConfig(i, headers[i]);
                     if (columnConfig != null) {
                         columnName = columnConfig.getName();
-
-                        if (columnConfig.getType().equalsIgnoreCase("SKIP")) {
-                            continue;
-                        }
 
                         if (value.toString().equalsIgnoreCase("NULL")) {
                             value = "NULL";
@@ -152,7 +144,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                             } else if (columnConfig.getType().equalsIgnoreCase("COMPUTED")) {
                                 valueConfig.setValue(value.toString());
                             } else {
-                                throw new UnexpectedLiquibaseException("loadData type of "+columnConfig.getType()+" is not supported.  Please use BOOLEAN, NUMERIC, DATE, STRING, COMPUTED or SKIP");
+                                throw new UnexpectedLiquibaseException("loadData type of "+columnConfig.getType()+" is not supported.  Please use BOOLEAN, NUMERIC, DATE, STRING, or COMPUTED");
                             }
                             value = valueConfig.getValueObject();
                         }
@@ -219,8 +211,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         return reader;
     }
 
-    protected InsertStatement createStatement(String catalogName, String schemaName, String tableName){
-        return new InsertStatement(catalogName, schemaName,tableName);
+    protected InsertStatement createStatement(String schemaName, String tableName){
+        return new InsertStatement(schemaName,tableName);
     }
 
     protected ColumnConfig getColumnConfig(int index, String header) {

@@ -1,12 +1,5 @@
 package liquibase.change;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
@@ -17,9 +10,7 @@ import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * Standard superclass for Changes to implement. This is a <i>skeletal implementation</i>,
@@ -29,101 +20,33 @@ import java.lang.reflect.Method;
  */
 public abstract class AbstractChange implements Change {
 
-    @ChangeProperty(includeInSerialization = false, includeInMetaData = false)
+    @ChangeProperty(includeInSerialization = false)
     private ChangeMetaData changeMetaData;
 
-    @ChangeProperty(includeInSerialization = false, includeInMetaData = false)
+    @ChangeProperty(includeInSerialization = false)
     private ResourceAccessor resourceAccessor;
 
-    @ChangeProperty(includeInSerialization = false, includeInMetaData = false)
+    @ChangeProperty(includeInSerialization = false)
     private ChangeSet changeSet;
 
-    @ChangeProperty(includeInSerialization = false)
-    private ChangeLogParameters changeLogParameters;
-
-//    /**
-//     * Constructor with tag name and name
-//     *
-//     * @param changeName        the tag name for this change
-//     * @param changeDescription the name for this change
-//     */
-//    protected AbstractChange(String changeName, String changeDescription, int priority) {
-//        this.changeMetaData = new ChangeMetaData(changeName, changeDescription, priority);
-//    }
-
-    public AbstractChange() {
-        this.changeMetaData = createChangeMetaData();
-    }
-
     /**
-     * Generate the ChangeMetaData for this class. By default reads from the @ChangeClass annotation, but can return anything
-     * @return
+     * Constructor with tag name and name
+     *
+     * @param changeName        the tag name for this change
+     * @param changeDescription the name for this change
      */
-    protected ChangeMetaData createChangeMetaData() {
-        try {
-            ChangeClass changeClass = this.getClass().getAnnotation(ChangeClass.class);
-
-            if (changeClass == null) {
-                throw new UnexpectedLiquibaseException("No @ChangeClass annotation for "+getClass().getName());
-            }
-
-            Set<ChangeParameterMetaData> params = new HashSet<ChangeParameterMetaData>();
-            for (PropertyDescriptor property : Introspector.getBeanInfo(this.getClass()).getPropertyDescriptors()) {
-                Method readMethod = property.getReadMethod();
-                Method writeMethod = property.getWriteMethod();
-                if (readMethod != null && writeMethod != null) {
-                    ChangeProperty annotation = readMethod.getAnnotation(ChangeProperty.class);
-                    if (annotation == null || annotation.includeInMetaData()) {
-                        ChangeParameterMetaData param = createChangeParameterMetadata(property.getDisplayName());
-                        params.add(param);
-                    }
-                }
-
-            }
-
-
-            return new ChangeMetaData(changeClass.name(), changeClass.description(), changeClass.priority(), changeClass.appliesTo(), params);
-        } catch (Throwable e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-    }
-
-    private ChangeParameterMetaData createChangeParameterMetadata(String propertyName) throws Exception {
-
-        String displayName = propertyName.replaceAll("([A-Z])", " $1");
-        displayName = displayName.substring(0,1).toUpperCase()+displayName.substring(1);
-
-        PropertyDescriptor property = null;
-        for (PropertyDescriptor prop : Introspector.getBeanInfo(this.getClass()).getPropertyDescriptors()) {
-            if (prop.getDisplayName().equals(propertyName)) {
-                property = prop;
-                break;
-            }
-        }
-        if (property == null) {
-            throw new RuntimeException("Could not find property "+propertyName);
-        }
-
-        String type = property.getPropertyType().getSimpleName();
-        ChangeProperty changePropertyAnnotation = property.getReadMethod().getAnnotation(ChangeProperty.class);
-
-        String[] requiredForDatabase;
-        String mustApplyTo = null;
-        if (changePropertyAnnotation == null) {
-            requiredForDatabase = new String[] {"none"};
-        } else {
-            requiredForDatabase = changePropertyAnnotation.requiredForDatabase();
-            mustApplyTo = changePropertyAnnotation.mustApplyTo();
-        }
-
-        return new ChangeParameterMetaData(propertyName, displayName, type, requiredForDatabase, mustApplyTo);
+    protected AbstractChange(String changeName, String changeDescription, int priority) {
+        this.changeMetaData = new ChangeMetaData(changeName, changeDescription, priority);
     }
 
     public ChangeMetaData getChangeMetaData() {
         return changeMetaData;
     }
 
-    @ChangeProperty(includeInMetaData = false)
+    protected void setPriority(int newPriority) {
+        this.changeMetaData.setPriority(newPriority);
+    }
+
     public ChangeSet getChangeSet() {
         return changeSet;
     }
@@ -163,16 +86,6 @@ public abstract class AbstractChange implements Change {
 
     public ValidationErrors validate(Database database) {
         ValidationErrors changeValidationErrors = new ValidationErrors();
-
-        for (ChangeParameterMetaData param : getChangeMetaData().getParameters()) {
-            if (param.isRequiredFor(database) && param.getCurrentValue(this) == null) {
-                changeValidationErrors.addError(param.getParameterName()+" is required for "+getChangeMetaData().getName()+" on "+database.getTypeName());
-            }
-        }
-        if (changeValidationErrors.hasErrors()) {
-            return changeValidationErrors;
-        }
-
         for (SqlStatement statement : generateStatements(database)) {
             boolean supported = SqlGeneratorFactory.getInstance().supports(statement, database);
             if (!supported) {
@@ -265,7 +178,6 @@ public abstract class AbstractChange implements Change {
      *
      * @return The file opener
      */
-    @ChangeProperty(includeInMetaData = false)
     public ResourceAccessor getResourceAccessor() {
         return resourceAccessor;
     }
@@ -285,14 +197,6 @@ public abstract class AbstractChange implements Change {
         }
 
         return affectedObjects;
-    }
-
-    protected ChangeLogParameters getChangeLogParameters() {
-        return changeLogParameters;
-    }
-
-    public void setChangeLogParameters(ChangeLogParameters changeLogParameters) {
-        this.changeLogParameters = changeLogParameters;
     }
 
 }

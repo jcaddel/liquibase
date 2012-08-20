@@ -1,8 +1,10 @@
 package liquibase.sql.visitor;
 
 import liquibase.change.CheckSum;
+import liquibase.database.Database;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 
+import java.util.Collection;
 import java.util.Set;
 
 public abstract class AbstractSqlVisitor implements SqlVisitor {

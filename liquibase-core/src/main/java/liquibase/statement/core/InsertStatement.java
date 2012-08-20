@@ -7,19 +7,13 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class InsertStatement extends AbstractSqlStatement {
-    private String catalogName;
     private String schemaName;
     private String tableName;
     private SortedMap<String, Object> columnValues = new TreeMap<String, Object>();
 
-    public InsertStatement(String catalogName, String schemaName, String tableName) {
-        this.catalogName = catalogName;
+    public InsertStatement(String schemaName, String tableName) {
         this.schemaName = schemaName;
         this.tableName = tableName;
-    }
-
-    public String getCatalogName() {
-        return catalogName;
     }
 
     public String getSchemaName() {

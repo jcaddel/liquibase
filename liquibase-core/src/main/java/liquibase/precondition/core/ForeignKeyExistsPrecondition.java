@@ -3,33 +3,22 @@ package liquibase.precondition.core;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.database.structure.ForeignKey;
-import liquibase.database.structure.Schema;
 import liquibase.exception.*;
 import liquibase.precondition.Precondition;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.util.StringUtils;
 
 public class ForeignKeyExistsPrecondition implements Precondition {
-    private String catalogName;
     private String schemaName;
     private String foreignKeyTableName;
     private String foreignKeyName;
-
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
 
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
+        this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
     public String getForeignKeyTableName() {
@@ -57,13 +46,24 @@ public class ForeignKeyExistsPrecondition implements Precondition {
     }
 
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
-        try {
-            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasForeignKey(database.correctSchema(new Schema(getCatalogName(), getSchemaName())), getForeignKeyTableName(), getForeignKeyName(), database)) {
-                    throw new PreconditionFailedException("Foreign Key "+database.escapeIndexName(catalogName, schemaName, foreignKeyName)+" does not exist", changeLog, this);
+        String currentSchemaName;
+    	try {
+            currentSchemaName = getSchemaName() == null ? (database == null ? null: database.getDefaultSchemaName()) : getSchemaName();
+        	boolean checkPassed;
+            if (getForeignKeyTableName() == null) {
+                checkPassed = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, currentSchemaName, null).getForeignKey(getForeignKeyName()) != null;
+            } else { //much faster if we can limit to correct table
+                 checkPassed = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).getForeignKeyByForeignKeyTable(currentSchemaName, getForeignKeyTableName(), getForeignKeyName(), database) != null;
             }
-        } catch (PreconditionFailedException e) {
-            throw e;
-        } catch (Exception e) {
+            if (!checkPassed) {
+                String message = "Foreign Key " + database.escapeStringForDatabase(getForeignKeyName());
+                if (getForeignKeyTableName() != null) {
+                    message += " on table "+ getForeignKeyTableName();
+                }
+                message +=  " does not exist";
+                throw new PreconditionFailedException(message, changeLog, this);
+            }
+        } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
     }

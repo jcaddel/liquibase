@@ -35,23 +35,11 @@ public class ServiceLocator {
     private Logger logger = new DefaultLogger(); //cannot look up regular logger because you get a stackoverflow since we are in the servicelocator
     private PackageScanClassResolver classResolver;
 
-    protected ServiceLocator() {
-        this.classResolver = defaultClassLoader();
+    private ServiceLocator() {
         setResourceAccessor(new ClassLoaderResourceAccessor());
     }
 
-    protected ServiceLocator(ResourceAccessor accessor) {
-        this.classResolver = defaultClassLoader();
-        setResourceAccessor(accessor);
-    }
-
-    protected ServiceLocator(PackageScanClassResolver classResolver) {
-        this.classResolver = classResolver;
-        setResourceAccessor(new ClassLoaderResourceAccessor());
-    }
-
-    protected ServiceLocator(PackageScanClassResolver classResolver, ResourceAccessor accessor) {
-        this.classResolver = classResolver;
+    private ServiceLocator(ResourceAccessor accessor) {
         setResourceAccessor(accessor);
     }
 
@@ -59,23 +47,16 @@ public class ServiceLocator {
         return instance;
     }
 
-    public static void setInstance(ServiceLocator newInstance) {
-        instance = newInstance;
-    }
-
-    private PackageScanClassResolver defaultClassLoader(){
-        if (WebSpherePackageScanClassResolver.isWebSphereClassLoader(this.getClass().getClassLoader())) {
-            logger.debug("Using WebSphere Specific Class Resolver");
-            return new WebSpherePackageScanClassResolver("liquibase/parser/core/xml/dbchangelog-2.0.xsd");
-        } else {
-            return new DefaultPackageScanClassResolver();
-        }
-    }
-
     public void setResourceAccessor(ResourceAccessor resourceAccessor) {
         this.resourceAccessor = resourceAccessor;
         this.classesBySuperclass = new HashMap<Class, List<Class>>();
 
+        if (WebSpherePackageScanClassResolver.isWebSphereClassLoader(this.getClass().getClassLoader())) {
+            logger.debug("Using WebSphere Specific Class Resolver");
+            this.classResolver = new WebSpherePackageScanClassResolver("liquibase/parser/core/xml/dbchangelog-2.0.xsd");
+        } else {
+            this.classResolver = new DefaultPackageScanClassResolver();
+        }
         this.classResolver.setClassLoaders(new HashSet<ClassLoader>(Arrays.asList(new ClassLoader[] {resourceAccessor.toClassLoader()})));
 
         packagesToScan = new ArrayList<String>();

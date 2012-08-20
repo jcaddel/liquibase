@@ -11,4 +11,14 @@ public class HsqlDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator
     public int getPriority(Database database) {
         return PRIORITY_DATABASE;
     }
+
+    @Override
+    protected String convertTableNameToDatabaseTableName(String tableName) {
+        return tableName.toUpperCase();
+    }
+
+    @Override
+    protected String convertColumnNameToDatabaseTableName(String columnName) {
+        return columnName.toUpperCase();
+    }
 }

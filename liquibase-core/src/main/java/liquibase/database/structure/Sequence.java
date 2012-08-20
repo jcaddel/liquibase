@@ -2,7 +2,7 @@ package liquibase.database.structure;
 
 public class Sequence implements DatabaseObject, Comparable<Sequence> {
     private String name;
-    private Schema schema;
+    private String schema;
 
 
     public DatabaseObject[] getContainingObjects() {
@@ -48,14 +48,14 @@ public class Sequence implements DatabaseObject, Comparable<Sequence> {
 	/**
 	 * @return Returns the schema.
 	 */
-	public Schema getSchema () {
+	public String getSchema () {
 		return schema;
 	}
 
 	/**
 	 * @param schema The schema to set.
 	 */
-	public void setSchema (Schema schema) {
+	public void setSchema (String schema) {
 		this.schema = schema;
 	}
 }

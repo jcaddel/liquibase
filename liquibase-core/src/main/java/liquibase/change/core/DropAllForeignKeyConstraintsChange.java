@@ -1,7 +1,6 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
-import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeProperty;
 import liquibase.database.Database;
@@ -19,26 +18,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@ChangeClass(name="dropAllForeignKeyConstraints", description = "Drop All Foreign Key Constraints", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class DropAllForeignKeyConstraintsChange extends AbstractChange {
 
-    private String baseTableCatalogName;
     private String baseTableSchemaName;
     private String baseTableName;
 
     @ChangeProperty(includeInSerialization = false)
     private List<DropForeignKeyConstraintChange> childDropChanges;
 
-    @ChangeProperty(mustApplyTo ="table.catalog")
-    public String getBaseTableCatalogName() {
-        return baseTableCatalogName;
+
+    public DropAllForeignKeyConstraintsChange() {
+        super("dropAllForeignKeyConstraints", "Drop All Foreign Key Constraints", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
-    public void setBaseTableCatalogName(String baseTableCatalogName) {
-        this.baseTableCatalogName = baseTableCatalogName;
-    }
-
-    @ChangeProperty(mustApplyTo ="table.schema")
     public String getBaseTableSchemaName() {
         return baseTableSchemaName;
     }
@@ -47,7 +39,6 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         this.baseTableSchemaName = baseTableSchemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "table")
     public String getBaseTableName() {
         return baseTableName;
     }
@@ -82,7 +73,10 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
 
         Executor executor = ExecutorService.getInstance().getExecutor(database);
 
-        FindForeignKeyConstraintsStatement sql = new FindForeignKeyConstraintsStatement(getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableName());
+        FindForeignKeyConstraintsStatement sql = new FindForeignKeyConstraintsStatement(
+                getBaseTableSchemaName(),
+                getBaseTableName()
+        );
 
         try {
             List<Map> results = executor.queryForList(sql);
@@ -94,7 +88,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
                             (String) result.get(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME);
                     String constraintName =
                             (String) result.get(FindForeignKeyConstraintsStatement.RESULT_COLUMN_CONSTRAINT_NAME);
-                    if (database.objectNamesEqual(getBaseTableName(), baseTableName)) {
+                    if (getBaseTableName().equalsIgnoreCase(baseTableName)) {
                         if( !handledConstraints.contains(constraintName)) {
                             DropForeignKeyConstraintChange dropForeignKeyConstraintChange =
                                     new DropForeignKeyConstraintChange();

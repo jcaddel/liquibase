@@ -1,7 +1,6 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -20,20 +19,19 @@ public class GetViewDefinitionGenerator extends AbstractSqlGenerator<GetViewDefi
     }
 
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        Schema schema = database.correctSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
+        try {
+            String sql = "select view_definition from information_schema.views where upper(table_name)='" + statement.getViewName().toUpperCase() + "'";
+            if (database.convertRequestedSchemaToCatalog(statement.getSchemaName()) != null) {
+                sql += " and table_schema='" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'";
+            } else if (database.convertRequestedSchemaToCatalog(statement.getSchemaName()) != null) {
+                sql += " and table_catalog='" + database.convertRequestedSchemaToCatalog(statement.getSchemaName()) + "'";
+            }
 
-        String sql = "select view_definition from information_schema.views where upper(table_name)='" + statement.getViewName().toUpperCase() + "'";
-
-        if (statement.getSchemaName() != null) {
-            sql += " and table_schema='" + schema.getName() + "'";
+            return new Sql[] {
+                    new UnparsedSql(sql)
+            };
+        } catch (DatabaseException e) {
+            throw new UnexpectedLiquibaseException(e);
         }
-
-        if (statement.getCatalogName() != null) {
-            sql += " and table_catalog='" + schema.getCatalogName() + "'";
-        }
-
-        return new Sql[]{
-                new UnparsedSql(sql)
-        };
     }
 }

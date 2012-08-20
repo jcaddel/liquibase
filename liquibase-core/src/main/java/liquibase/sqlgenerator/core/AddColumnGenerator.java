@@ -1,8 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.structure.Schema;
-import liquibase.datatype.DataTypeFactory;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.core.*;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;
@@ -50,7 +49,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 
     public Sql[] generateSql(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
-        String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""));
+        String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(statement.getColumnType(), statement.isAutoIncrement());
 
         if (statement.isAutoIncrement() && database.supportsAutoIncrement()) {
             AutoIncrementConstraint autoIncrementConstraint = statement.getAutoIncrementConstraint();
@@ -77,7 +76,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 
         List<Sql> returnSql = new ArrayList<Sql>();
         returnSql.add(new UnparsedSql(alterTable, new Column()
-                .setRelation(new Table(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
+                .setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
                 .setName(statement.getColumnName())));
 
         addForeignKeyStatements(statement, database, returnSql);
@@ -100,9 +99,8 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
                     refTableName = refTableName.split("\\.")[1];
                 }
                 String refColName = referencesMatcher.group(2);
-                String refCatalogName = null;
 
-                AddForeignKeyConstraintStatement addForeignKeyConstraintStatement = new AddForeignKeyConstraintStatement(fkConstraint.getForeignKeyName(), statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName(), refCatalogName, refSchemaName, refTableName, refColName);
+                AddForeignKeyConstraintStatement addForeignKeyConstraintStatement = new AddForeignKeyConstraintStatement(fkConstraint.getForeignKeyName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName(), refSchemaName, refTableName, refColName);
                 returnSql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(addForeignKeyConstraintStatement, database)));
             }
         }
@@ -115,7 +113,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
             if (database instanceof MSSQLDatabase) {
                 clause += " CONSTRAINT " + ((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), statement.getColumnName());
             }
-            clause += " DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToString(defaultValue, database);
+            clause += " DEFAULT " + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue).convertObjectToString(defaultValue, database);
         }
         return clause;
     }

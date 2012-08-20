@@ -4,7 +4,6 @@ import liquibase.database.Database;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.structure.Column;
-import liquibase.database.structure.Schema;
 import liquibase.database.structure.Table;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -31,10 +30,9 @@ public class AddAutoIncrementGeneratorHsqlH2 extends AddAutoIncrementGenerator {
         return new Sql[]{
             new UnparsedSql(
             	"ALTER TABLE "
-            		+ database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
+            		+ database.escapeTableName(statement.getSchemaName(), statement.getTableName())
             		+ " ALTER COLUMN "
             		+ database.escapeColumnName(
-                        statement.getCatalogName(),
             			statement.getSchemaName(),
             			statement.getTableName(),
             			statement.getColumnName())
@@ -44,8 +42,8 @@ public class AddAutoIncrementGeneratorHsqlH2 extends AddAutoIncrementGenerator {
             		+ database.getAutoIncrementClause(
             			statement.getStartWith(), statement.getIncrementBy()),
                 new Column()
-                    .setRelation(
-                            new Table(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
+                    .setTable(
+                    	new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
                     .setName(statement.getColumnName()))
         };
     }

@@ -4,7 +4,6 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class AddUniqueConstraintStatement extends AbstractSqlStatement {
 
-    private String catalogName;
     private String schemaName;
     private String tableName;
     private String columnNames;
@@ -15,16 +14,11 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
     private boolean initiallyDeferred;
     private boolean disabled;
 
-    public AddUniqueConstraintStatement(String catalogName, String schemaName, String tableName, String columnNames, String constraintName) {
-        this.catalogName = catalogName;
+    public AddUniqueConstraintStatement(String schemaName, String tableName, String columnNames, String constraintName) {
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.columnNames = columnNames;
         this.constraintName = constraintName;
-    }
-
-    public String getCatalogName() {
-        return catalogName;
     }
 
     public String getSchemaName() {
