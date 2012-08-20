@@ -8,6 +8,7 @@ import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Schema;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.*;
 import liquibase.lockservice.DatabaseChangeLogLock;
@@ -30,6 +31,19 @@ public class MockDatabase implements Database {
 
     public int getPriority() {
         return PRIORITY_DEFAULT;
+    }
+
+    
+    public Schema getSchema() {
+        return null;
+    }
+
+    public String getName() {
+        return "Mock Database";
+    }
+
+    public Integer getDefaultPort() {
+        return null;
     }
 
     public DatabaseObject[] getContainingObjects() {
@@ -74,6 +88,15 @@ public class MockDatabase implements Database {
         return false;
     }
 
+
+    public boolean isCaseSensitive() {
+        return false;
+    }
+
+    public boolean objectNamesEqual(String name1, String name2) {
+        return name1.equalsIgnoreCase(name2);
+    }
+
     public void setAutoCommit(boolean b) throws DatabaseException {
 
     }
@@ -115,7 +138,7 @@ public class MockDatabase implements Database {
         return null;
     }
 
-    public String getDefaultCatalogName() throws DatabaseException {
+    public String getDefaultCatalogName() {
         return null;
     }
 
@@ -240,7 +263,7 @@ public class MockDatabase implements Database {
     public void checkDatabaseChangeLogLockTable(Liquibase liquibase) throws DatabaseException, IOException {
     }
 
-    public void dropDatabaseObjects(String schema) throws DatabaseException {
+    public void dropDatabaseObjects(Schema schema) throws DatabaseException {
     }
 
     public void tag(String tagString) throws DatabaseException {
@@ -250,12 +273,12 @@ public class MockDatabase implements Database {
         return false;
     }
 
-    public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
+    public boolean isSystemTable(Schema schema, String tableName) {
         return false;
     }
 
 
-    public boolean isSystemView(String catalogName, String schemaName, String name) {
+    public boolean isSystemView(Schema schema, String name) {
         return false;
     }
 
@@ -271,7 +294,7 @@ public class MockDatabase implements Database {
         return false;
     }
 
-    public String getViewDefinition(String schemaName, String name) throws DatabaseException {
+    public String getViewDefinition(Schema schema, String name) throws DatabaseException {
         return null;
     }
 
@@ -283,7 +306,7 @@ public class MockDatabase implements Database {
         return defaultDateValue.toString();
     }
 
-    public String escapeTableName(String schemaName, String tableName) {
+    public String escapeTableName(String catalogName, String schemaName, String tableName) {
         if (schemaName == null) {
             return tableName;
         } else {
@@ -291,11 +314,11 @@ public class MockDatabase implements Database {
         }
     }
 
-    public String escapeIndexName(String schemaName, String indexName) {
-        return escapeTableName(schemaName, indexName);
+    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
+        return escapeTableName(catalogName, schemaName, indexName);
     }
 
-    public String escapeColumnName(String schemaName, String tableName, String columnName) {
+    public String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName) {
         return columnName;
     }
 
@@ -303,7 +326,7 @@ public class MockDatabase implements Database {
         return columnNames;
     }
 
-    public String escapeSequenceName(String schemaName, String sequenceName) {
+    public String escapeSequenceName(String catalogName, String schemaName, String sequenceName) {
         if (sequenceName == null) {
             return sequenceName;
         } else {
@@ -323,12 +346,16 @@ public class MockDatabase implements Database {
         return true;
     }
 
+    public boolean supportsCatalogs() {
+        return true;
+    }
+
     public String generatePrimaryKeyName(String tableName) {
         return "PK_"+tableName;
     }
 
-    public String escapeViewName(String schemaName, String viewName) {
-        return escapeTableName(schemaName, viewName);
+    public String escapeViewName(String catalogName, String schemaName, String viewName) {
+        return escapeTableName(catalogName, schemaName, viewName);
     }
 
     public boolean acquireLock() throws LockException {
@@ -427,7 +454,11 @@ public class MockDatabase implements Database {
         ;
     }
 
-	public String getLiquibaseSchemaName(){
+    public String getLiquibaseCatalogName() {
+        return null;
+    }
+
+    public String getLiquibaseSchemaName(){
 		return null;
 	}
 
@@ -465,5 +496,33 @@ public class MockDatabase implements Database {
 
     public boolean isReservedWord(String string) {
         return false;
+    }
+
+    public Schema correctSchema(Schema schema) {
+        return schema;
+    }
+
+    public String correctTableName(String tableName) {
+        return tableName;
+    }
+
+    public String correctConstraintName(String constraintName) {
+        return constraintName;
+    }
+
+    public String correctColumnName(String columnName) {
+        return columnName;
+    }
+
+    public String correctPrimaryKeyName(String pkName) {
+        return pkName;
+    }
+
+    public String correctForeignKeyName(String fkName) {
+        return fkName;
+    }
+
+    public String correctIndexName(String indexName) {
+        return indexName;
     }
 }

@@ -36,12 +36,26 @@ public class HsqlDatabase extends AbstractDatabase {
     }
 
 
+    public Integer getDefaultPort() {
+        return 9001;
+    }
+
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return "HyperSQL";
+    }
+
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
 
     public String getTypeName() {
         return "hsqldb";
+    }
+
+    @Override
+    protected String correctObjectName(String objectName) {
+        return objectName.toUpperCase();
     }
 
     @Override
@@ -54,7 +68,7 @@ public class HsqlDatabase extends AbstractDatabase {
     }
 
     @Override
-    protected String getDefaultDatabaseSchemaName() throws DatabaseException {
+    public String getDefaultSchemaName() {
         return "PUBLIC";
     }
 
@@ -123,11 +137,6 @@ public class HsqlDatabase extends AbstractDatabase {
 
     public boolean supportsTablespaces() {
         return false;
-    }
-
-    @Override
-    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
-        return super.convertRequestedSchemaToSchema(requestedSchema).toUpperCase();
     }
 
     @Override

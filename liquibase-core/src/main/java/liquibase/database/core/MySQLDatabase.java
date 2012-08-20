@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import java.math.BigInteger;
+import java.sql.SQLException;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
@@ -24,6 +25,23 @@ public class MySQLDatabase extends AbstractDatabase {
 //        return super.getConnection().getConnectionUserName().replaceAll("\\@.*", "");
 //    }
 
+    @Override
+    public String correctPrimaryKeyName(String pkName)  {
+        if (pkName.equals("PRIMARY")) {
+            return null;
+        } else {
+            return pkName;
+        }
+    }
+
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return "MySQL";
+    }
+
+    public Integer getDefaultPort() {
+        return 3306;
+    }
 
     public int getPriority() {
         return PRIORITY_DEFAULT;
@@ -60,7 +78,7 @@ public class MySQLDatabase extends AbstractDatabase {
 
     @Override
     public String getLineComment() {
-        return "--";
+        return "-- ";
     }
 
     @Override
@@ -104,24 +122,9 @@ public class MySQLDatabase extends AbstractDatabase {
         return false;
     }
 
-
     @Override
-    protected String getDefaultDatabaseSchemaName() throws DatabaseException {
-//        return super.getDefaultDatabaseSchemaName().replaceFirst("\\@.*","");
-            return getConnection().getCatalog();
-    }
-
-    @Override
-    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
-        if (requestedSchema == null) {
-            return getDefaultDatabaseSchemaName();
-        }
-        return requestedSchema;
-    }
-
-    @Override
-    public String convertRequestedSchemaToCatalog(String requestedSchema) throws DatabaseException {
-        return requestedSchema;
+    public String getDefaultSchemaName() {
+        return null;
     }
 
     @Override
@@ -130,11 +133,36 @@ public class MySQLDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String escapeIndexName(String schemaName, String indexName) {
+    public boolean supportsSchemas() {
+        return false;
+    }
+
+    @Override
+    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
         return escapeDatabaseObject(indexName);
     }
 
-    
+
+    @Override
+    public String escapeTableName(String catalogName, String schemaName, String tableName) {
+        return getPrefix(catalogName, schemaName)+tableName;
+    }
+
+    private String getPrefix(String catalogName, String schemaName) {
+        String prefix = "";
+        if (catalogName != null) {
+            prefix = catalogName+".";
+        } else if (schemaName != null) {
+            prefix = schemaName + ".";
+        }
+        return prefix;
+    }
+
+    @Override
+    public String escapeViewName(String catalogName, String schemaName, String viewName) {
+        return getPrefix(catalogName, schemaName)+viewName;
+    }
+
     @Override
     public boolean supportsForeignKeyDisable() {
         return true;
